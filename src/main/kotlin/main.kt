@@ -21,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import kotlinx.coroutines.GlobalScope
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 @Preview
@@ -54,7 +57,7 @@ fun App() {
     MaterialTheme(colors = darkColors()) {
         Scaffold {
             var tabIndex by remember { mutableStateOf(0) }
-            val tabs = listOf("1", "2")
+            val tabs = listOf("1", "2", "3")
             Column(modifier = Modifier.fillMaxWidth()) {
                 TabRow(
                     selectedTabIndex = tabIndex
@@ -69,10 +72,38 @@ fun App() {
                 }
                 when (tabIndex) {
                     0 -> {
+                        var value1 by remember {
+                            mutableStateOf(0.15f)
+                        }
+                        var value2 by remember {
+                            mutableStateOf(0.85f)
+                        }
+                        Row {
+                            fader(
+                                value = value1,
+                                notches = 9,
+                                color = Color.Red,
+                                verticalText = "Red Fader",
+                            ) {
+                                value1 = it
+                            }
+
+                            fader(
+                                value = value2,
+                                notches = 19,
+                                color = Color.Green,
+                                verticalText = "Green Fader",
+                            ) {
+                                value2 = it
+                            }
+                        }
+
+                    }
+                    1 -> {
                         ButtonScreen()
                     }
 
-                    1 -> {
+                    2 -> {
                         SliderScreen(sliderMutableFlow)
                     }
                 }
@@ -237,5 +268,9 @@ fun FaderHorizontal(
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
         App()
+//        fader(
+//            notches = 9,
+//            color = Color.Red,
+//        )
     }
 }
