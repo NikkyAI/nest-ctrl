@@ -3,6 +3,8 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,6 +45,13 @@ fun fader(
                 .coerceIn(0.0f, 1.0f)
         )
     }
+    val scrollableState = rememberScrollableState { scrollInPixels ->
+        updateValue(
+            (value - (scrollInPixels / canvasSize.height / 2))
+                .coerceIn(0.0f, 1.0f)
+        )
+        scrollInPixels
+    }
 
     val textMeasurer = rememberTextMeasurer()
 
@@ -75,6 +84,11 @@ fun fader(
                         )
                     }
                 }
+                .scrollable(
+                    state = scrollableState,
+                    orientation = Orientation.Vertical,
+                    reverseDirection = false,
+                )
                 .draggable(
                     state = draggableState,
                     orientation = Orientation.Vertical,
@@ -131,7 +145,7 @@ fun fader(
 
             if (verticalText != "") {
                 rotate(degrees = 90f, center) {
-                    this.drawText(
+                    drawText(
                         textLayoutResult = textLayoutResult,
                         topLeft = Offset(
                             x = center.x - textLayoutResult.size.width / 2,
