@@ -1,0 +1,404 @@
+2024-06-16 18:59:02.047 WARN Main : WARN
+2024-06-16 18:59:02.058 ERROR Main : ERROR
+2024-06-16 18:59:02.059 FATAL Main : FATAL
+2024-06-16 18:59:02.070 WARN Main : waiting for link to connect
+2024-06-16 18:59:02.068 INFO osc.OscSynced : creating synced value for /linkConnected
+2024-06-16 18:59:02.070 INFO osc.OscSynced : creating synced value for /bpm
+2024-06-16 18:59:02.070 INFO osc.OscSynced : creating synced value for /peers
+2024-06-16 18:59:02.163 INFO Link : connecting to ableton link...
+2024-06-16 18:59:02.598 INFO osc.OscSynced : creating synced value for /sprite_FX/label/0
+2024-06-16 18:59:02.598 INFO osc.OscSynced : creating synced value for /sprite_FX/label/1
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/2
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/3
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/4
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/7
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/5
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/6
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/9
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/8
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/10
+2024-06-16 18:59:02.599 INFO osc.OscSynced : creating synced value for /sprite_FX/label/11
+2024-06-16 18:59:02.602 INFO osc.OscSynced : creating synced value for /sprite_FX/label/12
+2024-06-16 18:59:02.603 INFO osc.OscSynced : creating synced value for /sprite_FX/label/13
+2024-06-16 18:59:02.603 INFO osc.OscSynced : creating synced value for /sprite_FX/label/14
+2024-06-16 18:59:02.603 INFO osc.OscSynced : creating synced value for /sprite_FX/label/15
+2024-06-16 18:59:02.603 INFO osc.OscSynced : creating synced value for /sprite_FX/label/16
+2024-06-16 18:59:02.603 INFO osc.OscSynced : creating synced value for /sprite_FX/label/17
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/18
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/19
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/20
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/21
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/22
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/24
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/23
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/25
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/26
+2024-06-16 18:59:02.604 INFO osc.OscSynced : creating synced value for /sprite_FX/label/27
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/28
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/29
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/30
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/31
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/32
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/34
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/33
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/35
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/36
+2024-06-16 18:59:02.610 INFO osc.OscSynced : creating synced value for /sprite_FX/label/37
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/38
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/39
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/41
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/40
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/43
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/42
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/44
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/46
+2024-06-16 18:59:02.611 INFO osc.OscSynced : creating synced value for /sprite_FX/label/45
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/47
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/49
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/48
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/51
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/50
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/52
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/53
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/54
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/55
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/56
+2024-06-16 18:59:02.612 INFO osc.OscSynced : creating synced value for /sprite_FX/label/57
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/58
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/59
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/60
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/61
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/62
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/63
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/64
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/65
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/66
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/67
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/68
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/69
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/70
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/71
+2024-06-16 18:59:02.613 INFO osc.OscSynced : creating synced value for /sprite_FX/label/72
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/73
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/74
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/76
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/75
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/77
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/78
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/79
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/80
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/81
+2024-06-16 18:59:02.614 INFO osc.OscSynced : creating synced value for /sprite_FX/label/82
+2024-06-16 18:59:02.615 INFO osc.OscSynced : creating synced value for /sprite_FX/label/83
+2024-06-16 18:59:02.615 INFO osc.OscSynced : creating synced value for /sprite_FX/label/84
+2024-06-16 18:59:02.615 INFO osc.OscSynced : creating synced value for /sprite_FX/label/85
+2024-06-16 18:59:02.615 INFO osc.OscSynced : creating synced value for /sprite_FX/label/86
+2024-06-16 18:59:02.615 INFO osc.OscSynced : creating synced value for /sprite_FX/label/87
+2024-06-16 18:59:02.616 INFO osc.OscSynced : creating synced value for /sprite_FX/label/89
+2024-06-16 18:59:02.615 INFO osc.OscSynced : creating synced value for /sprite_FX/label/88
+2024-06-16 18:59:02.616 INFO osc.OscSynced : creating synced value for /sprite_FX/label/90
+2024-06-16 18:59:02.616 INFO osc.OscSynced : creating synced value for /sprite_FX/label/91
+2024-06-16 18:59:02.616 INFO osc.OscSynced : creating synced value for /sprite_FX/label/92
+2024-06-16 18:59:02.616 INFO osc.OscSynced : creating synced value for /sprite_FX/label/93
+2024-06-16 18:59:02.618 INFO osc.OscSynced : creating synced value for /sprite_FX/label/94
+2024-06-16 18:59:02.618 INFO osc.OscSynced : creating synced value for /sprite_FX/label/96
+2024-06-16 18:59:02.618 INFO osc.OscSynced : creating synced value for /sprite_FX/label/95
+2024-06-16 18:59:02.619 INFO osc.OscSynced : creating synced value for /sprite_FX/label/97
+2024-06-16 18:59:02.620 INFO osc.OscSynced : creating synced value for /sprite_FX/label/99
+2024-06-16 18:59:02.619 INFO osc.OscSynced : creating synced value for /sprite_FX/label/98
+2024-06-16 18:59:02.681 INFO osc.OscSynced : creating synced value for /composition/groups/1/video/effects/motionextraction/bypassed
+2024-06-16 18:59:02.681 INFO osc.OscSynced : creating synced value for /composition/groups/1/video/effects/motionextraction/effect/delay
+2024-06-16 18:59:02.682 INFO osc.OscSynced : creating synced value for /composition/groups/1/video/effects/automask/bypassed
+2024-06-16 18:59:02.682 INFO osc.OscSynced : creating synced value for /resolume/1/motion_extraction/enabled
+2024-06-16 18:59:02.684 DEBUG moe.nikky.nestcontrol.osc.OSCUtil : constructed OSC port
+2024-06-16 18:59:02.684 DEBUG moe.nikky.nestcontrol.osc.OSCUtil : constructed OSC port
+2024-06-16 18:59:02.684 DEBUG moe.nikky.nestcontrol.osc.OSCUtil : constructed OSC port
+2024-06-16 18:59:02.689 INFO osc.OscSynced : creating synced value for /resolume/1/motion_extraction/delay
+2024-06-16 18:59:02.693 INFO osc.OscSynced : creating synced value for /resolume/1/auto_mask
+2024-06-16 18:59:02.699 INFO osc.OscSynced : creating synced value for /composition/groups/2/video/effects/motionextraction/bypassed
+2024-06-16 18:59:02.699 INFO osc.OscSynced : creating synced value for /composition/groups/2/video/effects/motionextraction/effect/delay
+2024-06-16 18:59:02.699 INFO osc.OscSynced : creating synced value for /composition/groups/2/video/effects/automask/bypassed
+2024-06-16 18:59:02.699 INFO osc.OscSynced : creating synced value for /resolume/2/motion_extraction/enabled
+2024-06-16 18:59:02.699 INFO osc.OscSynced : creating synced value for /resolume/2/motion_extraction/delay
+2024-06-16 18:59:02.699 INFO osc.OscSynced : creating synced value for /resolume/2/auto_mask
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /composition/groups/3/video/effects/motionextraction/bypassed
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /composition/groups/3/video/effects/motionextraction/effect/delay
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /composition/groups/3/video/effects/automask/bypassed
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /resolume/3/motion_extraction/enabled
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /resolume/3/auto_mask
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /resolume/3/motion_extraction/delay
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /composition/groups/4/video/effects/motionextraction/bypassed
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /composition/groups/4/video/effects/motionextraction/effect/delay
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /composition/groups/4/video/effects/automask/bypassed
+2024-06-16 18:59:02.700 INFO osc.OscSynced : creating synced value for /resolume/4/motion_extraction/enabled
+2024-06-16 18:59:02.701 INFO osc.OscSynced : creating synced value for /resolume/4/motion_extraction/delay
+2024-06-16 18:59:02.701 INFO osc.OscSynced : creating synced value for /resolume/4/auto_mask
+2024-06-16 18:59:02.761 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 1 layer 1 (1)
+2024-06-16 18:59:02.762 INFO osc.OscSynced : creating synced value for /composition/layers/1/connectspecificclip
+2024-06-16 18:59:02.763 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 1 layer 2 (2)
+2024-06-16 18:59:02.763 INFO osc.OscSynced : creating synced value for /composition/layers/2/connectspecificclip
+2024-06-16 18:59:02.764 INFO osc.OscSynced : creating synced value for /composition/layers/3/connectspecificclip
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 1 layer 3 (3)
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 2 layer 1 (4)
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 1 layer 2 connectSpecificClip index -1
+2024-06-16 18:59:02.764 INFO osc.OscSynced : creating synced value for /composition/layers/5/connectspecificclip
+2024-06-16 18:59:02.764 INFO osc.OscSynced : creating synced value for /composition/layers/4/connectspecificclip
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 2 layer 3 (6)
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 1 layer 3 connectSpecificClip index -1
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 2 layer 2 (5)
+2024-06-16 18:59:02.764 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 2 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 3 layer 1 (7)
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 2 layer 3 connectSpecificClip index -1
+2024-06-16 18:59:02.765 INFO osc.OscSynced : creating synced value for /composition/layers/7/connectspecificclip
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 1 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 3 layer 2 (8)
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 2 layer 2 connectSpecificClip index -1
+2024-06-16 18:59:02.765 INFO osc.OscSynced : creating synced value for /composition/layers/8/connectspecificclip
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 3 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.764 INFO osc.OscSynced : creating synced value for /composition/layers/6/connectspecificclip
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 3 layer 3 (9)
+2024-06-16 18:59:02.765 INFO osc.OscSynced : creating synced value for /composition/layers/9/connectspecificclip
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 4 layer 2 (11)
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 3 layer 2 connectSpecificClip index -1
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 4 layer 1 (10)
+2024-06-16 18:59:02.765 INFO osc.OscSynced : creating synced value for /composition/layers/10/connectspecificclip
+2024-06-16 18:59:02.765 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 3 layer 3 connectSpecificClip index -1
+2024-06-16 18:59:02.766 INFO osc.OscSynced : creating synced value for /composition/layers/11/connectspecificclip
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 4 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 4 layer 3 (12)
+2024-06-16 18:59:02.766 INFO osc.OscSynced : creating synced value for /composition/layers/12/connectspecificclip
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 5 layer 1 (13)
+2024-06-16 18:59:02.766 INFO osc.OscSynced : creating synced value for /composition/layers/13/connectspecificclip
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 5 layer 2 (14)
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 4 layer 2 connectSpecificClip index -1
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 5 layer 3 (15)
+2024-06-16 18:59:02.766 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 4 layer 3 connectSpecificClip index -1
+2024-06-16 18:59:02.766 INFO osc.OscSynced : creating synced value for /composition/layers/14/connectspecificclip
+2024-06-16 18:59:02.766 INFO osc.OscSynced : creating synced value for /composition/layers/15/connectspecificclip
+2024-06-16 18:59:02.767 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 5 layer 4 (16)
+2024-06-16 18:59:02.767 INFO osc.OscSynced : creating synced value for /composition/layers/16/connectspecificclip
+2024-06-16 18:59:02.767 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 5 layer 5 (17)
+2024-06-16 18:59:02.767 INFO osc.OscSynced : creating synced value for /composition/layers/17/connectspecificclip
+2024-06-16 18:59:02.767 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 1 (18)
+2024-06-16 18:59:02.767 INFO osc.OscSynced : creating synced value for /composition/layers/18/connectspecificclip
+2024-06-16 18:59:02.768 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 2 (19)
+2024-06-16 18:59:02.768 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.768 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 2 connectSpecificClip index -1
+2024-06-16 18:59:02.768 INFO osc.OscSynced : creating synced value for /composition/layers/19/connectspecificclip
+2024-06-16 18:59:02.768 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 3 (20)
+2024-06-16 18:59:02.768 INFO osc.OscSynced : creating synced value for /composition/layers/20/connectspecificclip
+2024-06-16 18:59:02.768 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 4 (21)
+2024-06-16 18:59:02.768 INFO osc.OscSynced : creating synced value for /composition/layers/21/connectspecificclip
+2024-06-16 18:59:02.768 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 5 (22)
+2024-06-16 18:59:02.768 INFO osc.OscSynced : creating synced value for /composition/layers/22/connectspecificclip
+2024-06-16 18:59:02.769 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 6 (23)
+2024-06-16 18:59:02.769 INFO osc.OscSynced : creating synced value for /composition/layers/23/connectspecificclip
+2024-06-16 18:59:02.769 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 7 (24)
+2024-06-16 18:59:02.769 INFO osc.OscSynced : creating synced value for /composition/layers/24/connectspecificclip
+2024-06-16 18:59:02.769 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 3 connectSpecificClip index -1
+2024-06-16 18:59:02.769 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 8 (25)
+2024-06-16 18:59:02.769 INFO osc.OscSynced : creating synced value for /composition/layers/25/connectspecificclip
+2024-06-16 18:59:02.769 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 6 layer 9 (26)
+2024-06-16 18:59:02.769 INFO osc.OscSynced : creating synced value for /composition/layers/26/connectspecificclip
+2024-06-16 18:59:02.769 INFO moe.nikky.nestcontrol.osc.OSCUtil : creating buttons for group 7 layer 1 (27)
+2024-06-16 18:59:02.769 INFO osc.OscSynced : creating synced value for /composition/layers/27/connectspecificclip
+2024-06-16 18:59:02.785 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 2 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 4 layer 2 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 2 layer 3 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 4 layer 1 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 4 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 5 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 3 layer 2 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 4 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 1 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 5 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 2 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 2 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 3 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 3 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 4 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 4 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 5 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 5 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 1 layer 3 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 6 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 6 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 7 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 7 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 9 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 9 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 8 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 1 layer 1 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 6 layer 8 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 7 layer 1 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 3 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 7 layer 1 connectSpecificClip index -1
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 3 layer 3 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 1 layer 2 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 2 layer 2 changed to null
+2024-06-16 18:59:02.789 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 3 layer 1 changed to null
+2024-06-16 18:59:02.786 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 2 layer 1 changed to null
+2024-06-16 18:59:02.791 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 4 layer 3 changed to null
+2024-06-16 18:59:02.791 INFO moe.nikky.nestcontrol.osc.OSCUtil : resolume group 5 layer 1 changed to null
+2024-06-16 18:59:02.809 INFO moe.nikky.nestcontrol.osc.OSCUtil : {}
+2024-06-16 18:59:03.772 INFO osc.OscSynced : creating synced value for /beats
+2024-06-16 18:59:03.772 INFO osc.OscSynced : creating synced value for /bpmRounded
+2024-06-16 18:59:03.772 INFO osc.OscSynced : creating synced value for /beatProgress
+2024-06-16 18:59:03.790 INFO nestdrop.loadQueuesKt : loading queues from C:\Users\nikky\VJ\NestDropProV2\DefaultUserProfile.xml
+2024-06-16 18:59:05.540 INFO moe.nikky.nestcontrol.Config : loaded Config(beats=64, deck1=DeckConfig(triggerTime=0.75, transitionTime=5.0, presetQueue=PresetQueue(index=-1, name=null, autoChange=false, toggles=[]), preset=Preset(autoChange=false), sprite=Sprite(autoChange=false, index=-1, name=null, toggles=[]), spriteQueue=SpriteQueue(index=-1, name=null), spoutQueue=SpoutQueue(index=-1, name=null), spout=Spout(index=-1, label=null), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=-1, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)), deck2=DeckConfig(triggerTime=0.25, transitionTime=5.0, presetQueue=PresetQueue(index=-1, name=null, autoChange=false, toggles=[]), preset=Preset(autoChange=false), sprite=Sprite(autoChange=false, index=-1, name=null, toggles=[]), spriteQueue=SpriteQueue(index=-1, name=null), spoutQueue=SpoutQueue(index=-1, name=null), spout=Spout(index=-1, label=null), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=-1, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)))
+2024-06-16 18:59:05.551 DEBUG moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : [Queue(index=4, name=sprites_fg, type=Sprite, open=true, deck=1, presets=[Preset(index=0, name=transpower.png, effects=84, overlay=false), Preset(index=1, name=estrogen.png, effects=52, overlay=false), Preset(index=2, name=lsd.jpg, effects=52, overlay=false), Preset(index=3, name=psilocybin.jpg, effects=52, overlay=false), Preset(index=4, name=NEST LOGO_4K.jpg, effects=54, overlay=false), Preset(index=5, name=impossible-161955.png, effects=56, overlay=false), Preset(index=6, name=glowing cat.jpg, effects=94, overlay=false), Preset(index=7, name=red eyes.jpg, effects=52, overlay=false), Preset(index=8, name=Recursion Hexagon - Jason Fletcher.png, effects=84, overlay=false), Preset(index=9, name=radiation-646212.png, effects=54, overlay=false), Preset(index=10, name=biohazard-148696.png, effects=52, overlay=false), Preset(index=11, name=under-construction-2408062.png, effects=52, overlay=false), Preset(index=12, name=warning-44458.png, effects=52, overlay=false), Preset(index=13, name=nezulie-icon.png, effects=54, overlay=false), Preset(index=14, name=nezulie-N.png, effects=50, overlay=false), Preset(index=15, name=nezulie-E.png, effects=52, overlay=false), Preset(index=16, name=nezulie-Z.png, effects=94, overlay=false), Preset(index=17, name=nezulie-U.png, effects=52, overlay=false), Preset(index=18, name=nezulie-L.png, effects=95, overlay=false), Preset(index=19, name=chaosdorf_green.png, effects=96, overlay=false), Preset(index=20, name=chaosdorf_monochrome.png, effects=0, overlay=false), Preset(index=21, name=nik_the_dusky.png, effects=56, overlay=false), Preset(index=22, name=tinybrainplayzX4.png, effects=50, overlay=true)]), Queue(index=5, name=spout_fg, type=Sprite, open=true, deck=1, presets=[Preset(index=0, name=NestDrop Deck 2, effects=0, overlay=false), Preset(index=1, name=Group1, effects=0, overlay=false), Preset(index=2, name=Group2, effects=0, overlay=false), Preset(index=3, name=Group3, effects=0, overlay=false), Preset(index=4, name=Group4, effects=0, overlay=false), Preset(index=5, name=Group1, effects=51, overlay=false), Preset(index=6, name=Group2, effects=51, overlay=false), Preset(index=7, name=Group3, effects=51, overlay=false), Preset(index=8, name=Group4, effects=51, overlay=false), Preset(index=9, name=Arena - 1, effects=0, overlay=false), Preset(index=10, name=Arena - 2, effects=0, overlay=false), Preset(index=11, name=Arena - 3, effects=0, overlay=false), Preset(index=12, name=Arena - 4, effects=0, overlay=false), Preset(index=13, name=Arena - 1, effects=51, overlay=false), Preset(index=14, name=Arena - 2, effects=51, overlay=false), Preset(index=15, name=Arena - 3, effects=51, overlay=false), Preset(index=16, name=Arena - 4, effects=51, overlay=false)])]
+2024-06-16 18:59:05.553 INFO moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loading presets from queue
+2024-06-16 18:59:05.555 INFO moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loaded deck1 []
+2024-06-16 18:59:05.555 DEBUG moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loading spout queue null from [Queue(index=4, name=sprites_fg, type=Sprite, open=true, deck=1, presets=[Preset(index=0, name=transpower.png, effects=84, overlay=false), Preset(index=1, name=estrogen.png, effects=52, overlay=false), Preset(index=2, name=lsd.jpg, effects=52, overlay=false), Preset(index=3, name=psilocybin.jpg, effects=52, overlay=false), Preset(index=4, name=NEST LOGO_4K.jpg, effects=54, overlay=false), Preset(index=5, name=impossible-161955.png, effects=56, overlay=false), Preset(index=6, name=glowing cat.jpg, effects=94, overlay=false), Preset(index=7, name=red eyes.jpg, effects=52, overlay=false), Preset(index=8, name=Recursion Hexagon - Jason Fletcher.png, effects=84, overlay=false), Preset(index=9, name=radiation-646212.png, effects=54, overlay=false), Preset(index=10, name=biohazard-148696.png, effects=52, overlay=false), Preset(index=11, name=under-construction-2408062.png, effects=52, overlay=false), Preset(index=12, name=warning-44458.png, effects=52, overlay=false), Preset(index=13, name=nezulie-icon.png, effects=54, overlay=false), Preset(index=14, name=nezulie-N.png, effects=50, overlay=false), Preset(index=15, name=nezulie-E.png, effects=52, overlay=false), Preset(index=16, name=nezulie-Z.png, effects=94, overlay=false), Preset(index=17, name=nezulie-U.png, effects=52, overlay=false), Preset(index=18, name=nezulie-L.png, effects=95, overlay=false), Preset(index=19, name=chaosdorf_green.png, effects=96, overlay=false), Preset(index=20, name=chaosdorf_monochrome.png, effects=0, overlay=false), Preset(index=21, name=nik_the_dusky.png, effects=56, overlay=false), Preset(index=22, name=tinybrainplayzX4.png, effects=50, overlay=true)]), Queue(index=5, name=spout_fg, type=Sprite, open=true, deck=1, presets=[Preset(index=0, name=NestDrop Deck 2, effects=0, overlay=false), Preset(index=1, name=Group1, effects=0, overlay=false), Preset(index=2, name=Group2, effects=0, overlay=false), Preset(index=3, name=Group3, effects=0, overlay=false), Preset(index=4, name=Group4, effects=0, overlay=false), Preset(index=5, name=Group1, effects=51, overlay=false), Preset(index=6, name=Group2, effects=51, overlay=false), Preset(index=7, name=Group3, effects=51, overlay=false), Preset(index=8, name=Group4, effects=51, overlay=false), Preset(index=9, name=Arena - 1, effects=0, overlay=false), Preset(index=10, name=Arena - 2, effects=0, overlay=false), Preset(index=11, name=Arena - 3, effects=0, overlay=false), Preset(index=12, name=Arena - 4, effects=0, overlay=false), Preset(index=13, name=Arena - 1, effects=51, overlay=false), Preset(index=14, name=Arena - 2, effects=51, overlay=false), Preset(index=15, name=Arena - 3, effects=51, overlay=false), Preset(index=16, name=Arena - 4, effects=51, overlay=false)])]
+2024-06-16 18:59:05.556 INFO moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loading presets from queue
+2024-06-16 18:59:05.557 DEBUG moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : [Queue(index=6, name=sprites_bg, type=Sprite, open=true, deck=2, presets=[Preset(index=0, name=transpower.png, effects=94, overlay=false), Preset(index=1, name=estrogen.png, effects=50, overlay=false), Preset(index=2, name=lsd.jpg, effects=50, overlay=false), Preset(index=3, name=psilocybin.jpg, effects=52, overlay=false), Preset(index=4, name=NEST LOGO_4K.jpg, effects=50, overlay=false), Preset(index=5, name=impossible-161955.png, effects=54, overlay=false), Preset(index=6, name=glowing cat.jpg, effects=54, overlay=false), Preset(index=7, name=red eyes.jpg, effects=52, overlay=false), Preset(index=8, name=Recursion Hexagon - Jason Fletcher.png, effects=32, overlay=false), Preset(index=9, name=radiation-646212.png, effects=94, overlay=false), Preset(index=10, name=biohazard-148696.png, effects=94, overlay=false), Preset(index=11, name=under-construction-2408062.png, effects=52, overlay=false), Preset(index=12, name=warning-44458.png, effects=50, overlay=false), Preset(index=13, name=nezulie-icon.png, effects=56, overlay=false), Preset(index=14, name=nezulie-N.png, effects=95, overlay=false), Preset(index=15, name=nezulie-E.png, effects=95, overlay=false), Preset(index=16, name=nezulie-Z.png, effects=52, overlay=false), Preset(index=17, name=nezulie-U.png, effects=95, overlay=false), Preset(index=18, name=nezulie-L.png, effects=52, overlay=false), Preset(index=19, name=chaosdorf_green.png, effects=50, overlay=false), Preset(index=20, name=chaosdorf_monochrome.png, effects=0, overlay=false), Preset(index=21, name=nik_the_dusky.png, effects=50, overlay=false), Preset(index=22, name=tinybrainplayzX4.png, effects=54, overlay=false)]), Queue(index=7, name=spout_bg, type=Sprite, open=true, deck=2, presets=[Preset(index=0, name=NestDrop Deck 1, effects=0, overlay=false), Preset(index=1, name=Group1, effects=0, overlay=false), Preset(index=2, name=Group2, effects=0, overlay=false), Preset(index=3, name=Group3, effects=0, overlay=false), Preset(index=4, name=Group4, effects=0, overlay=false), Preset(index=5, name=Group1, effects=51, overlay=false), Preset(index=6, name=Group2, effects=51, overlay=false), Preset(index=7, name=Group3, effects=51, overlay=false), Preset(index=8, name=Group4, effects=51, overlay=false), Preset(index=9, name=Arena - 1, effects=0, overlay=false), Preset(index=10, name=Arena - 2, effects=0, overlay=false), Preset(index=11, name=Arena - 3, effects=0, overlay=false), Preset(index=12, name=Arena - 4, effects=0, overlay=false), Preset(index=13, name=Arena - 1, effects=51, overlay=false), Preset(index=14, name=Arena - 2, effects=51, overlay=false), Preset(index=15, name=Arena - 3, effects=51, overlay=false), Preset(index=16, name=Arena - 4, effects=51, overlay=false)])]
+2024-06-16 18:59:05.557 INFO moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loaded deck2 []
+2024-06-16 18:59:05.557 INFO moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loading presets from queue
+2024-06-16 18:59:05.558 DEBUG moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loading spout queue null from [Queue(index=6, name=sprites_bg, type=Sprite, open=true, deck=2, presets=[Preset(index=0, name=transpower.png, effects=94, overlay=false), Preset(index=1, name=estrogen.png, effects=50, overlay=false), Preset(index=2, name=lsd.jpg, effects=50, overlay=false), Preset(index=3, name=psilocybin.jpg, effects=52, overlay=false), Preset(index=4, name=NEST LOGO_4K.jpg, effects=50, overlay=false), Preset(index=5, name=impossible-161955.png, effects=54, overlay=false), Preset(index=6, name=glowing cat.jpg, effects=54, overlay=false), Preset(index=7, name=red eyes.jpg, effects=52, overlay=false), Preset(index=8, name=Recursion Hexagon - Jason Fletcher.png, effects=32, overlay=false), Preset(index=9, name=radiation-646212.png, effects=94, overlay=false), Preset(index=10, name=biohazard-148696.png, effects=94, overlay=false), Preset(index=11, name=under-construction-2408062.png, effects=52, overlay=false), Preset(index=12, name=warning-44458.png, effects=50, overlay=false), Preset(index=13, name=nezulie-icon.png, effects=56, overlay=false), Preset(index=14, name=nezulie-N.png, effects=95, overlay=false), Preset(index=15, name=nezulie-E.png, effects=95, overlay=false), Preset(index=16, name=nezulie-Z.png, effects=52, overlay=false), Preset(index=17, name=nezulie-U.png, effects=95, overlay=false), Preset(index=18, name=nezulie-L.png, effects=52, overlay=false), Preset(index=19, name=chaosdorf_green.png, effects=50, overlay=false), Preset(index=20, name=chaosdorf_monochrome.png, effects=0, overlay=false), Preset(index=21, name=nik_the_dusky.png, effects=50, overlay=false), Preset(index=22, name=tinybrainplayzX4.png, effects=54, overlay=false)]), Queue(index=7, name=spout_bg, type=Sprite, open=true, deck=2, presets=[Preset(index=0, name=NestDrop Deck 1, effects=0, overlay=false), Preset(index=1, name=Group1, effects=0, overlay=false), Preset(index=2, name=Group2, effects=0, overlay=false), Preset(index=3, name=Group3, effects=0, overlay=false), Preset(index=4, name=Group4, effects=0, overlay=false), Preset(index=5, name=Group1, effects=51, overlay=false), Preset(index=6, name=Group2, effects=51, overlay=false), Preset(index=7, name=Group3, effects=51, overlay=false), Preset(index=8, name=Group4, effects=51, overlay=false), Preset(index=9, name=Arena - 1, effects=0, overlay=false), Preset(index=10, name=Arena - 2, effects=0, overlay=false), Preset(index=11, name=Arena - 3, effects=0, overlay=false), Preset(index=12, name=Arena - 4, effects=0, overlay=false), Preset(index=13, name=Arena - 1, effects=51, overlay=false), Preset(index=14, name=Arena - 2, effects=51, overlay=false), Preset(index=15, name=Arena - 3, effects=51, overlay=false), Preset(index=16, name=Arena - 4, effects=51, overlay=false)])]
+2024-06-16 18:59:05.558 INFO moe.nikky.nestcontrol.moe.nikky.nestcontrol.deck.DeckConfig : loading presets from queue
+2024-06-16 18:59:06.059 INFO nestdrop.deck.PresetQueues : initializing preset queues
+2024-06-16 18:59:06.060 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.066 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.066 INFO nestdrop.deck.Deck : initializing deck1
+2024-06-16 18:59:06.068 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.068 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.068 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.068 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.068 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.069 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.069 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.069 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.070 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.069 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.070 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.069 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-16 18:59:06.069 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-16 18:59:06.095 INFO nestdrop.deck.Deck : initializing deck1 preset queue
+2024-06-16 18:59:06.102 INFO nestdrop.deck.Deck : initializing deck1 preset
+2024-06-16 18:59:06.103 INFO nestdrop.deck.Deck : deck1 queue: null
+2024-06-16 18:59:06.107 INFO nestdrop.deck.Deck : initializing deck1 sprite queues
+2024-06-16 18:59:06.111 INFO nestdrop.deck.Deck : initializing deck1 sprite queue
+2024-06-16 18:59:06.120 INFO nestdrop.deck.Deck : initializing deck1 sprite
+2024-06-16 18:59:06.127 INFO nestdrop.deck.Deck : initializing deck1 sprite fx
+2024-06-16 18:59:06.133 INFO nestdrop.deck.Deck : initializing deck1 spout queue
+2024-06-16 18:59:06.133 INFO nestdrop.deck.Deck : setting deck1 FX to 0
+2024-06-16 18:59:06.137 INFO nestdrop.deck.Deck : initializing deck1 spout
+2024-06-16 18:59:06.140 INFO nestdrop.deck.Deck : deck1 spout name null
+2024-06-16 18:59:06.140 INFO nestdrop.deck.Deck : initializing deck2
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 preset queue
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 sprite
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : deck2 queue: null
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 spout
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 sprite fx
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 preset
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 sprite queues
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 sprite queue
+2024-06-16 18:59:06.141 INFO nestdrop.deck.Deck : initializing deck2 spout queue
+2024-06-16 18:59:06.142 INFO nestdrop.deck.Deck : setting deck2 FX to 0
+2024-06-16 18:59:06.142 INFO nestdrop.deck.Deck : deck2 spout name null
+2024-06-16 18:59:06.143 INFO nestdrop.deck.Deck : spout sync triggered
+2024-06-16 18:59:06.143 INFO nestdrop.deck.Deck : spout sync triggered
+2024-06-16 18:59:06.143 INFO nestdrop.deck.Deck : deck2 spout index changed: -1
+2024-06-16 18:59:06.143 INFO nestdrop.deck.Deck : deck2 spout queue changed: null
+2024-06-16 18:59:06.143 INFO nestdrop.deck.Deck : deck1 spout index changed: -1
+2024-06-16 18:59:06.144 INFO nestdrop.deck.Deck : deck1 spout queue changed: null
+2024-06-16 18:59:06.145 INFO nestdrop.deck.loadDeckSettingsKt : loading settings from deck1
+2024-06-16 18:59:06.178 DEBUG moe.nikky.nestcontrol.nestdrop.NestdropSpriteQueue : not switching after initializing program
+2024-06-16 18:59:06.192 DEBUG moe.nikky.nestcontrol.nestdrop.NestdropSpriteQueue : not switching after initializing program
+2024-06-16 18:59:06.223 INFO nestdrop.deck.loadDeckSettingsKt : DeckSettings(deckPanelsIsOpen=StringValue(value=0,0,0,0,0,0), transitTime=FloatValue(value=3.6), fps=IntValue(value=30), animationSpeed=FloatValue(value=0.5217391), zoomSpeed=FloatValue(value=0.9), ZoomExp=FloatValue(value=1.0), rotationSpeed=FloatValue(value=0.9), wrapSpeed=FloatValue(value=0.8), horizontalMotion=FloatValue(value=0.0), verticalMotion=FloatValue(value=0.0), stretchSpeed=FloatValue(value=1.0), waveMode=FloatValue(value=1.0), negative=FloatValue(value=0.0), red=FloatValue(value=1.0), green=FloatValue(value=1.0), blue=FloatValue(value=1.0), brightness=FloatValue(value=1.0), contrast=FloatValue(value=1.160816), gamma=FloatValue(value=1.210332), hue=FloatValue(value=0.0), saturation=FloatValue(value=1.0), lumaKey=RangeValue(min=0.0, max=1.0), alpha=FloatValue(value=1.0), strobe=Strobe(effectIndex=14, color=4294967295, effectSpanMin=0.0, effectSpanMax=1.0, triggerIndex=0, speed=0.26, pulseWidth=1.0, waveFormIndex=2), audio=Audio(channel=3, bass=1.0, mid=1.0, treble=1.0), spout=Spout(width=1920, height=1080), videoDeck=VideoDeck(preview=4, topMost=false), outputMonitor=IntValue(value=0), ndi=BooleanValue(value=false))
+2024-06-16 18:59:06.224 INFO nestdrop.deck.loadDeckSettingsKt : loading settings from deck2
+2024-06-16 18:59:06.245 INFO nestdrop.deck.Deck : deck2 spout change: -1 in null
+2024-06-16 18:59:06.245 INFO nestdrop.deck.Deck : deck1 spout change: -1 in null
+2024-06-16 18:59:06.245 DEBUG moe.nikky.nestcontrol.nestdrop.NestdropSpriteQueue : not switching after initializing program
+2024-06-16 18:59:06.245 DEBUG moe.nikky.nestcontrol.nestdrop.NestdropSpriteQueue : not switching after initializing program
+2024-06-16 18:59:06.273 INFO nestdrop.deck.loadDeckSettingsKt : DeckSettings(deckPanelsIsOpen=StringValue(value=0,0,0,0,0,0), transitTime=FloatValue(value=3.2), fps=IntValue(value=30), animationSpeed=FloatValue(value=0.5217391), zoomSpeed=FloatValue(value=1.0), ZoomExp=FloatValue(value=1.0), rotationSpeed=FloatValue(value=1.0), wrapSpeed=FloatValue(value=1.0), horizontalMotion=FloatValue(value=0.0), verticalMotion=FloatValue(value=0.0), stretchSpeed=FloatValue(value=1.0), waveMode=FloatValue(value=0.0), negative=FloatValue(value=0.0), red=FloatValue(value=1.0), green=FloatValue(value=1.0), blue=FloatValue(value=1.0), brightness=FloatValue(value=1.0), contrast=FloatValue(value=1.236419), gamma=FloatValue(value=1.085513), hue=FloatValue(value=0.0), saturation=FloatValue(value=1.0), lumaKey=RangeValue(min=0.0, max=1.0), alpha=FloatValue(value=1.0), strobe=Strobe(effectIndex=14, color=4294967295, effectSpanMin=0.0, effectSpanMax=1.0, triggerIndex=0, speed=0.26, pulseWidth=1.0, waveFormIndex=2), audio=Audio(channel=3, bass=1.0, mid=1.0, treble=1.0), spout=Spout(width=1920, height=1080), videoDeck=VideoDeck(preview=4, topMost=false), outputMonitor=IntValue(value=0), ndi=BooleanValue(value=false))
+2024-06-16 18:59:06.273 INFO Main : initializing OSC
+2024-06-16 18:59:06.507 DEBUG moe.nikky.nestcontrol.Config : saving config Config(beats=64, deck1=DeckConfig(triggerTime=0.75, transitionTime=5.0, presetQueue=PresetQueue(index=-1, name=null, autoChange=false, toggles=[]), preset=Preset(autoChange=false), sprite=Sprite(autoChange=false, index=-1, name=null, toggles=[]), spriteQueue=SpriteQueue(index=-1, name=null), spoutQueue=SpoutQueue(index=-1, name=null), spout=Spout(index=-1, label=null), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=-1, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)), deck2=DeckConfig(triggerTime=0.25, transitionTime=5.0, presetQueue=PresetQueue(index=-1, name=null, autoChange=false, toggles=[]), preset=Preset(autoChange=false), sprite=Sprite(autoChange=false, index=-1, name=null, toggles=[]), spriteQueue=SpriteQueue(index=-1, name=null), spoutQueue=SpoutQueue(index=-1, name=null), spout=Spout(index=-1, label=null), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=-1, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)))
+2024-06-16 18:59:06.801 INFO Main : re-emitting all values
+2024-06-16 18:59:06.804 INFO Main : await application
+2024-06-16 18:59:13.391 INFO nestdrop.deck.Deck : triggered at 16.11999999999998, 16.0
+2024-06-16 18:59:29.487 INFO nestdrop.deck.Deck : triggered at 48.16200000000015, 48.0
+2024-06-16 18:59:45.494 INFO nestdrop.deck.Deck : triggered at 16.024000000000257, 16.0
+2024-06-16 19:00:01.594 INFO nestdrop.deck.Deck : triggered at 48.06200000000039, 48.0
+2024-06-16 19:00:17.694 INFO nestdrop.deck.Deck : triggered at 16.112000000000535, 16.0
+2024-06-16 19:00:33.790 INFO nestdrop.deck.Deck : triggered at 48.146000000000704, 48.0
+2024-06-16 19:00:49.882 INFO nestdrop.deck.Deck : triggered at 16.190000000000857, 16.0
+2024-06-16 19:01:05.873 INFO nestdrop.deck.Deck : triggered at 48.024000000001024, 48.0
+2024-06-16 19:01:21.974 INFO nestdrop.deck.Deck : triggered at 16.072000000001164, 16.0
+2024-06-16 19:01:38.078 INFO nestdrop.deck.Deck : triggered at 48.1340000000013, 48.0
+2024-06-16 19:01:54.174 INFO nestdrop.deck.Deck : triggered at 16.184000000001415, 16.0
+2024-06-16 19:02:10.171 INFO nestdrop.deck.Deck : triggered at 48.01800000000155, 48.0
+2024-06-16 19:02:26.274 INFO nestdrop.deck.Deck : triggered at 16.072000000001694, 16.0
+2024-06-16 19:02:42.371 INFO nestdrop.deck.Deck : triggered at 48.11400000000183, 48.0
+2024-06-16 19:02:58.477 INFO nestdrop.deck.Deck : triggered at 16.17000000000197, 16.0
+2024-06-16 19:03:14.476 INFO nestdrop.deck.Deck : triggered at 48.030000000002126, 48.0
+2024-06-16 19:03:30.570 INFO nestdrop.deck.Deck : triggered at 16.062000000002275, 16.0
+2024-06-16 19:03:46.667 INFO nestdrop.deck.Deck : triggered at 48.106000000002425, 48.0
+2024-06-16 19:04:02.763 INFO nestdrop.deck.Deck : triggered at 16.15000000000258, 16.0
+2024-06-16 19:04:18.859 INFO nestdrop.deck.Deck : triggered at 48.178000000002726, 48.0
+2024-06-16 19:04:34.863 INFO nestdrop.deck.Deck : triggered at 16.02400000000287, 16.0
+2024-06-16 19:04:50.965 INFO nestdrop.deck.Deck : triggered at 48.07000000000303, 48.0
+2024-06-16 19:05:07.068 INFO nestdrop.deck.Deck : triggered at 16.118000000003175, 16.0
+2024-06-16 19:05:23.158 INFO nestdrop.deck.Deck : triggered at 48.146000000003326, 48.0
+2024-06-16 19:05:39.260 INFO nestdrop.deck.Deck : triggered at 16.174000000003517, 16.0
+2024-06-16 19:05:55.256 INFO nestdrop.deck.Deck : triggered at 48.00600000000367, 48.0
+2024-06-16 19:06:11.361 INFO nestdrop.deck.Deck : triggered at 16.058000000003823, 16.0
+2024-06-16 19:06:27.464 INFO nestdrop.deck.Deck : triggered at 48.11600000000397, 48.0
+2024-06-16 19:06:43.558 INFO nestdrop.deck.Deck : triggered at 16.1660000000041, 16.0
+2024-06-16 19:06:59.566 INFO nestdrop.deck.Deck : triggered at 48.02000000000423, 48.0
+2024-06-16 19:07:15.666 INFO nestdrop.deck.Deck : triggered at 16.074000000004393, 16.0
+2024-06-16 19:07:31.765 INFO nestdrop.deck.Deck : triggered at 48.118000000004514, 48.0
+2024-06-16 19:07:47.863 INFO nestdrop.deck.Deck : triggered at 16.158000000004673, 16.0
+2024-06-16 19:08:03.863 INFO nestdrop.deck.Deck : triggered at 48.0060000000048, 48.0
+2024-06-16 19:08:19.966 INFO nestdrop.deck.Deck : triggered at 16.05400000000497, 16.0
+2024-06-16 19:08:36.058 INFO nestdrop.deck.Deck : triggered at 48.086000000005136, 48.0
+2024-06-16 19:08:52.152 INFO nestdrop.deck.Deck : triggered at 16.120000000005305, 16.0
+2024-06-16 19:09:08.251 INFO nestdrop.deck.Deck : triggered at 48.16200000000547, 48.0
+2024-06-16 19:09:24.255 INFO nestdrop.deck.Deck : triggered at 16.01400000000562, 16.0
+2024-06-16 19:09:40.354 INFO nestdrop.deck.Deck : triggered at 48.05200000000578, 48.0
+2024-06-16 19:09:56.454 INFO nestdrop.deck.Deck : triggered at 16.092000000005932, 16.0
+2024-06-16 19:10:12.551 INFO nestdrop.deck.Deck : triggered at 48.13800000000609, 48.0
+2024-06-16 19:10:28.641 INFO nestdrop.deck.Deck : triggered at 16.168000000006263, 16.0
+2024-06-16 19:10:44.639 INFO nestdrop.deck.Deck : triggered at 48.01000000000642, 48.0
+2024-06-16 19:11:00.738 INFO nestdrop.deck.Deck : triggered at 16.050000000006563, 16.0
+2024-06-16 19:11:16.837 INFO nestdrop.deck.Deck : triggered at 48.098000000006714, 48.0
+2024-06-16 19:11:32.939 INFO nestdrop.deck.Deck : triggered at 16.154000000006867, 16.0
+2024-06-16 19:11:49.040 INFO nestdrop.deck.Deck : triggered at 48.194000000007016, 48.0
+2024-06-16 19:12:05.037 INFO nestdrop.deck.Deck : triggered at 16.044000000007152, 16.0
+2024-06-16 19:12:21.135 INFO nestdrop.deck.Deck : triggered at 48.0820000000073, 48.0
+2024-06-16 19:12:37.243 INFO nestdrop.deck.Deck : triggered at 16.14000000000745, 16.0
+2024-06-16 19:12:53.340 INFO nestdrop.deck.Deck : triggered at 48.17200000000761, 48.0
+2024-06-16 19:13:09.338 INFO nestdrop.deck.Deck : triggered at 16.008000000007748, 16.0
+2024-06-16 19:13:25.464 INFO nestdrop.deck.Deck : triggered at 48.102000000007905, 48.0
+2024-06-16 19:13:41.552 INFO nestdrop.deck.Deck : triggered at 16.142000000008075, 16.0
+2024-06-16 19:13:57.652 INFO nestdrop.deck.Deck : triggered at 48.188000000008216, 48.0
+2024-06-16 19:14:13.647 INFO nestdrop.deck.Deck : triggered at 16.02400000000837, 16.0
+2024-06-16 19:14:29.748 INFO nestdrop.deck.Deck : triggered at 48.07000000000852, 48.0
+2024-06-16 19:14:45.847 INFO nestdrop.deck.Deck : triggered at 16.11600000000869, 16.0
+2024-06-16 19:15:01.944 INFO nestdrop.deck.Deck : triggered at 48.15800000000882, 48.0
+2024-06-16 19:15:18.043 INFO nestdrop.deck.Deck : triggered at 16.196000000008993, 16.0
+2024-06-16 19:15:34.046 INFO nestdrop.deck.Deck : triggered at 48.04000000000913, 48.0
+2024-06-16 19:15:50.141 INFO nestdrop.deck.Deck : triggered at 16.074000000009303, 16.0
+2024-06-16 19:16:06.241 INFO nestdrop.deck.Deck : triggered at 48.114000000009455, 48.0
+2024-06-16 19:16:22.342 INFO nestdrop.deck.Deck : triggered at 16.162000000009627, 16.0
+2024-06-16 19:16:38.341 INFO nestdrop.deck.Deck : triggered at 48.00600000000975, 48.0
+2024-06-16 19:16:54.438 INFO nestdrop.deck.Deck : triggered at 16.040000000009925, 16.0
+2024-06-16 19:17:10.543 INFO nestdrop.deck.Deck : triggered at 48.08800000001008, 48.0
+2024-06-16 19:17:26.639 INFO nestdrop.deck.Deck : triggered at 16.128000000010232, 16.0
+2024-06-16 19:17:42.739 INFO nestdrop.deck.Deck : triggered at 48.17400000001038, 48.0
+2024-06-16 19:17:58.731 INFO nestdrop.deck.Deck : triggered at 16.010000000010557, 16.0
+2024-06-16 19:18:14.828 INFO nestdrop.deck.Deck : triggered at 48.04800000001071, 48.0
+2024-06-16 19:18:30.925 INFO nestdrop.deck.Deck : triggered at 16.094000000010865, 16.0
+2024-06-16 19:18:47.023 INFO nestdrop.deck.Deck : triggered at 48.14600000001098, 48.0
+2024-06-16 19:19:03.125 INFO nestdrop.deck.Deck : triggered at 16.194000000011137, 16.0
+2024-06-16 19:19:19.122 INFO nestdrop.deck.Deck : triggered at 48.02600000001129, 48.0
+2024-06-16 19:19:35.215 INFO nestdrop.deck.Deck : triggered at 16.058000000011454, 16.0
+2024-06-16 19:19:51.312 INFO nestdrop.deck.Deck : triggered at 48.106000000011605, 48.0
+2024-06-16 19:20:07.406 INFO nestdrop.deck.Deck : triggered at 16.15200000001176, 16.0
+2024-06-16 19:20:23.499 INFO nestdrop.deck.Deck : triggered at 48.18800000001189, 48.0
+2024-06-16 19:20:39.501 INFO nestdrop.deck.Deck : triggered at 16.02800000001205, 16.0
+2024-06-16 19:20:55.598 INFO nestdrop.deck.Deck : triggered at 48.08800000001216, 48.0
+2024-06-16 19:21:11.695 INFO nestdrop.deck.Deck : triggered at 16.124000000012323, 16.0
+2024-06-16 19:21:27.793 INFO nestdrop.deck.Deck : triggered at 48.162000000012476, 48.0
+2024-06-16 19:21:43.796 INFO nestdrop.deck.Deck : triggered at 16.00000000001263, 16.0

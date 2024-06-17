@@ -1,0 +1,91 @@
+{
+    beats: 64,
+    deck1: {
+        triggerTime: 0.75,
+        transitionTime: 1.0,
+        presetQueue: {
+            index: 12,
+            name: "better_nested",
+            autoChange: true,
+            toggles: []
+        },
+        preset: {
+            autoChange: true
+        },
+        sprite: {
+            autoChange: false,
+            index: -1,
+            name: "unset",
+            toggles: []
+        },
+        spriteQueue: {
+            index: 0,
+            name: "sprites_fg"
+        },
+        spoutQueue: {
+            index: 1,
+            name: "spout_fg"
+        },
+        spout: {
+            index: -1,
+            label: "unset"
+        },
+        spriteFX: {
+            autoChange: false,
+            blendMode: false,
+            index: 0,
+            toggles: []
+        },
+        bpmSync: {
+            enabled: false,
+            multiplier: 4
+        },
+        strobe: {
+            enabled: false
+        }
+    },
+    deck2: {
+        triggerTime: 0.25,
+        transitionTime: 1.0,
+        presetQueue: {
+            index: 6,
+            name: "fill_color_calm",
+            autoChange: true,
+            toggles: []
+        },
+        preset: {
+            autoChange: true
+        },
+        sprite: {
+            autoChange: false,
+            index: 0,
+            name: "transpower.png",
+            toggles: []
+        },
+        spriteQueue: {
+            index: 0,
+            name: "sprites_bg"
+        },
+        spoutQueue: {
+            index: 1,
+            name: "spout_bg"
+        },
+        spout: {
+            index: -1,
+            label: "unset"
+        },
+        spriteFX: {
+            autoChange: false,
+            blendMode: false,
+            index: 0,
+            toggles: []
+        },
+        bpmSync: {
+            enabled: false,
+            multiplier: 4
+        },
+        strobe: {
+            enabled: false
+        }
+    }
+}

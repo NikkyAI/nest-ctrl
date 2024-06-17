@@ -1,0 +1,345 @@
+2024-06-17 02:00:35.143 WARN Main : WARN
+2024-06-17 02:00:35.151 ERROR Main : ERROR
+2024-06-17 02:00:35.152 FATAL Main : FATAL
+2024-06-17 02:00:35.156 INFO osc.OscSynced : creating synced value for /linkConnected
+2024-06-17 02:00:35.159 INFO osc.OscSynced : creating synced value for /peers
+2024-06-17 02:00:35.159 INFO osc.OscSynced : creating synced value for /bpm
+2024-06-17 02:00:35.165 WARN Main : waiting for link to connect
+2024-06-17 02:00:35.263 INFO Link : connecting to ableton link...
+2024-06-17 02:00:35.719 INFO osc.OscSynced : creating synced value for /composition/groups/1/video/effects/motionextraction/bypassed
+2024-06-17 02:00:35.720 INFO osc.OscSynced : creating synced value for /composition/groups/1/video/effects/automask/bypassed
+2024-06-17 02:00:35.720 INFO osc.OscSynced : creating synced value for /composition/groups/1/video/effects/motionextraction/effect/delay
+2024-06-17 02:00:35.720 INFO osc.OscSynced : creating synced value for /resolume/1/motion_extraction/enabled
+2024-06-17 02:00:35.725 INFO osc.OscSynced : creating synced value for /resolume/1/motion_extraction/delay
+2024-06-17 02:00:35.729 INFO osc.OscSynced : creating synced value for /resolume/1/auto_mask
+2024-06-17 02:00:35.737 INFO osc.OscSynced : creating synced value for /composition/groups/2/video/effects/motionextraction/bypassed
+2024-06-17 02:00:35.737 INFO osc.OscSynced : creating synced value for /composition/groups/2/video/effects/motionextraction/effect/delay
+2024-06-17 02:00:35.737 INFO osc.OscSynced : creating synced value for /composition/groups/2/video/effects/automask/bypassed
+2024-06-17 02:00:35.737 INFO osc.OscSynced : creating synced value for /resolume/2/motion_extraction/enabled
+2024-06-17 02:00:35.737 INFO osc.OscSynced : creating synced value for /resolume/2/motion_extraction/delay
+2024-06-17 02:00:35.738 INFO osc.OscSynced : creating synced value for /resolume/2/auto_mask
+2024-06-17 02:00:35.738 INFO osc.OscSynced : creating synced value for /composition/groups/3/video/effects/motionextraction/bypassed
+2024-06-17 02:00:35.738 INFO osc.OscSynced : creating synced value for /composition/groups/3/video/effects/automask/bypassed
+2024-06-17 02:00:35.738 INFO osc.OscSynced : creating synced value for /resolume/3/motion_extraction/enabled
+2024-06-17 02:00:35.738 INFO osc.OscSynced : creating synced value for /composition/groups/3/video/effects/motionextraction/effect/delay
+2024-06-17 02:00:35.739 INFO osc.OscSynced : creating synced value for /resolume/3/motion_extraction/delay
+2024-06-17 02:00:35.739 INFO osc.OscSynced : creating synced value for /resolume/3/auto_mask
+2024-06-17 02:00:35.739 INFO osc.OscSynced : creating synced value for /composition/groups/4/video/effects/motionextraction/bypassed
+2024-06-17 02:00:35.739 INFO osc.OscSynced : creating synced value for /composition/groups/4/video/effects/motionextraction/effect/delay
+2024-06-17 02:00:35.739 INFO osc.OscSynced : creating synced value for /composition/groups/4/video/effects/automask/bypassed
+2024-06-17 02:00:35.740 INFO osc.OscSynced : creating synced value for /resolume/4/motion_extraction/enabled
+2024-06-17 02:00:35.740 INFO osc.OscSynced : creating synced value for /resolume/4/motion_extraction/delay
+2024-06-17 02:00:35.740 INFO osc.OscSynced : creating synced value for /resolume/4/auto_mask
+2024-06-17 02:00:35.791 INFO osc.OSCUtil : creating buttons for group 1 layer 1 (1)
+2024-06-17 02:00:35.791 INFO osc.OscSynced : creating synced value for /composition/layers/1/connectspecificclip
+2024-06-17 02:00:35.794 INFO osc.OSCUtil : creating buttons for group 1 layer 2 (2)
+2024-06-17 02:00:35.794 INFO osc.OscSynced : creating synced value for /composition/layers/2/connectspecificclip
+2024-06-17 02:00:35.794 INFO osc.OSCUtil : creating buttons for group 1 layer 3 (3)
+2024-06-17 02:00:35.795 INFO osc.OscSynced : creating synced value for /composition/layers/3/connectspecificclip
+2024-06-17 02:00:35.795 INFO osc.OSCUtil : resolume group 1 layer 2 connectSpecificClip index -1
+2024-06-17 02:00:35.795 INFO osc.OSCUtil : creating buttons for group 2 layer 1 (4)
+2024-06-17 02:00:35.795 INFO osc.OSCUtil : resolume group 1 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.795 INFO osc.OSCUtil : resolume group 2 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.796 INFO osc.OSCUtil : creating buttons for group 2 layer 3 (6)
+2024-06-17 02:00:35.795 INFO osc.OSCUtil : resolume group 1 layer 3 connectSpecificClip index -1
+2024-06-17 02:00:35.795 INFO osc.OscSynced : creating synced value for /composition/layers/4/connectspecificclip
+2024-06-17 02:00:35.795 INFO osc.OSCUtil : creating buttons for group 2 layer 2 (5)
+2024-06-17 02:00:35.796 INFO osc.OscSynced : creating synced value for /composition/layers/5/connectspecificclip
+2024-06-17 02:00:35.796 INFO osc.OSCUtil : resolume group 2 layer 2 connectSpecificClip index -1
+2024-06-17 02:00:35.796 INFO osc.OscSynced : creating synced value for /composition/layers/6/connectspecificclip
+2024-06-17 02:00:35.796 INFO osc.OSCUtil : creating buttons for group 3 layer 1 (7)
+2024-06-17 02:00:35.797 INFO osc.OscSynced : creating synced value for /composition/layers/7/connectspecificclip
+2024-06-17 02:00:35.797 INFO osc.OscSynced : creating synced value for /composition/layers/8/connectspecificclip
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : creating buttons for group 3 layer 3 (9)
+2024-06-17 02:00:35.797 INFO osc.OscSynced : creating synced value for /composition/layers/9/connectspecificclip
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : resolume group 2 layer 3 connectSpecificClip index -1
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : creating buttons for group 3 layer 2 (8)
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : resolume group 3 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : resolume group 3 layer 2 connectSpecificClip index -1
+2024-06-17 02:00:35.798 INFO osc.OSCUtil : resolume group 4 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.798 INFO osc.OSCUtil : resolume group 4 layer 2 connectSpecificClip index -1
+2024-06-17 02:00:35.798 INFO osc.OscSynced : creating synced value for /composition/layers/11/connectspecificclip
+2024-06-17 02:00:35.798 INFO osc.OSCUtil : creating buttons for group 4 layer 3 (12)
+2024-06-17 02:00:35.798 INFO osc.OscSynced : creating synced value for /composition/layers/12/connectspecificclip
+2024-06-17 02:00:35.798 INFO osc.OSCUtil : creating buttons for group 5 layer 1 (13)
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : creating buttons for group 4 layer 1 (10)
+2024-06-17 02:00:35.798 INFO osc.OscSynced : creating synced value for /composition/layers/13/connectspecificclip
+2024-06-17 02:00:35.797 INFO osc.OscSynced : creating synced value for /composition/layers/10/connectspecificclip
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : creating buttons for group 4 layer 2 (11)
+2024-06-17 02:00:35.797 INFO osc.OSCUtil : resolume group 3 layer 3 connectSpecificClip index -1
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : resolume group 5 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : resolume group 4 layer 3 connectSpecificClip index -1
+2024-06-17 02:00:35.798 INFO osc.OscSynced : creating synced value for /composition/layers/14/connectspecificclip
+2024-06-17 02:00:35.798 INFO osc.OSCUtil : creating buttons for group 5 layer 2 (14)
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : creating buttons for group 5 layer 4 (16)
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : resolume group 5 layer 2 connectSpecificClip index -1
+2024-06-17 02:00:35.799 INFO osc.OscSynced : creating synced value for /composition/layers/16/connectspecificclip
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : creating buttons for group 5 layer 3 (15)
+2024-06-17 02:00:35.799 INFO osc.OscSynced : creating synced value for /composition/layers/15/connectspecificclip
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : creating buttons for group 5 layer 5 (17)
+2024-06-17 02:00:35.799 INFO osc.OscSynced : creating synced value for /composition/layers/17/connectspecificclip
+2024-06-17 02:00:35.799 INFO osc.OSCUtil : creating buttons for group 6 layer 1 (18)
+2024-06-17 02:00:35.799 INFO osc.OscSynced : creating synced value for /composition/layers/18/connectspecificclip
+2024-06-17 02:00:35.800 INFO osc.OSCUtil : creating buttons for group 6 layer 2 (19)
+2024-06-17 02:00:35.800 INFO osc.OSCUtil : resolume group 5 layer 3 connectSpecificClip index -1
+2024-06-17 02:00:35.800 INFO osc.OscSynced : creating synced value for /composition/layers/20/connectspecificclip
+2024-06-17 02:00:35.800 INFO osc.OscSynced : creating synced value for /composition/layers/19/connectspecificclip
+2024-06-17 02:00:35.800 INFO osc.OSCUtil : creating buttons for group 6 layer 3 (20)
+2024-06-17 02:00:35.800 INFO osc.OSCUtil : creating buttons for group 6 layer 4 (21)
+2024-06-17 02:00:35.800 INFO osc.OscSynced : creating synced value for /composition/layers/21/connectspecificclip
+2024-06-17 02:00:35.800 INFO osc.OSCUtil : creating buttons for group 6 layer 5 (22)
+2024-06-17 02:00:35.800 INFO osc.OscSynced : creating synced value for /composition/layers/22/connectspecificclip
+2024-06-17 02:00:35.800 INFO osc.OSCUtil : creating buttons for group 6 layer 6 (23)
+2024-06-17 02:00:35.800 INFO osc.OscSynced : creating synced value for /composition/layers/23/connectspecificclip
+2024-06-17 02:00:35.801 INFO osc.OSCUtil : creating buttons for group 6 layer 7 (24)
+2024-06-17 02:00:35.801 INFO osc.OscSynced : creating synced value for /composition/layers/24/connectspecificclip
+2024-06-17 02:00:35.801 INFO osc.OscSynced : creating synced value for /composition/layers/25/connectspecificclip
+2024-06-17 02:00:35.801 INFO osc.OSCUtil : creating buttons for group 6 layer 8 (25)
+2024-06-17 02:00:35.801 INFO osc.OSCUtil : creating buttons for group 6 layer 9 (26)
+2024-06-17 02:00:35.801 INFO osc.OscSynced : creating synced value for /composition/layers/26/connectspecificclip
+2024-06-17 02:00:35.801 INFO osc.OSCUtil : creating buttons for group 7 layer 1 (27)
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 3 layer 2 changed to null
+2024-06-17 02:00:35.801 INFO osc.OscSynced : creating synced value for /composition/layers/27/connectspecificclip
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 5 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 4 layer 3 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 2 layer 2 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 1 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 3 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 3 layer 3 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 4 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 2 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 4 layer 1 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 3 layer 1 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 1 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 5 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 2 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 2 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 3 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 6 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 2 layer 3 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 6 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 7 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 7 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 3 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 4 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 4 layer 2 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 4 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 5 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 5 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 5 layer 4 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 8 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 9 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 9 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 6 layer 8 connectSpecificClip index -1
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 7 layer 1 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 7 layer 1 connectSpecificClip index -1
+2024-06-17 02:00:35.815 INFO osc.OSCUtil : resolume group 1 layer 3 changed to null
+2024-06-17 02:00:35.813 INFO osc.OSCUtil : resolume group 1 layer 2 changed to null
+2024-06-17 02:00:35.814 INFO osc.OSCUtil : resolume group 1 layer 1 changed to null
+2024-06-17 02:00:35.815 INFO osc.OSCUtil : resolume group 2 layer 1 changed to null
+2024-06-17 02:00:35.839 INFO osc.OSCUtil : {}
+2024-06-17 02:00:36.803 INFO osc.OscSynced : creating synced value for /beats
+2024-06-17 02:00:36.804 INFO osc.OscSynced : creating synced value for /beatProgress
+2024-06-17 02:00:36.804 INFO osc.OscSynced : creating synced value for /bpmRounded
+2024-06-17 02:00:36.819 INFO nestdrop.loadQueuesKt : loading queues from C:\Users\nikky\VJ\NestDropProV2\DefaultUserProfile.xml
+2024-06-17 02:00:38.341 INFO Config : loaded Config(beats=64, deck1=DeckConfig(triggerTime=0.75, transitionTime=1.0, presetQueue=PresetQueue(index=12, name=better_nested, autoChange=true, toggles=[]), preset=Preset(autoChange=true), sprite=Sprite(autoChange=false, index=-1, name=unset, toggles=[]), spriteQueue=SpriteQueue(index=0, name=sprites_fg), spoutQueue=SpoutQueue(index=1, name=spout_fg), spout=Spout(index=-1, label=unset), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=0, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)), deck2=DeckConfig(triggerTime=0.25, transitionTime=1.0, presetQueue=PresetQueue(index=6, name=fill_color_calm, autoChange=true, toggles=[]), preset=Preset(autoChange=true), sprite=Sprite(autoChange=false, index=0, name=transpower.png, toggles=[]), spriteQueue=SpriteQueue(index=0, name=sprites_bg), spoutQueue=SpoutQueue(index=1, name=spout_bg), spout=Spout(index=-1, label=unset), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=0, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)))
+2024-06-17 02:00:38.345 INFO nestcontrol.deck.DeckConfigKt : loading presets from queue
+2024-06-17 02:00:38.349 INFO nestcontrol.deck.DeckConfigKt : loaded deck1 [Preset(index=0, name=transpower.png, effects=84, overlay=false), Preset(index=1, name=estrogen.png, effects=52, overlay=false), Preset(index=2, name=lsd.jpg, effects=52, overlay=false), Preset(index=3, name=psilocybin.jpg, effects=52, overlay=false), Preset(index=4, name=NEST LOGO_4K.jpg, effects=54, overlay=false), Preset(index=5, name=impossible-161955.png, effects=56, overlay=false), Preset(index=6, name=glowing cat.jpg, effects=94, overlay=false), Preset(index=7, name=red eyes.jpg, effects=52, overlay=false), Preset(index=8, name=Recursion Hexagon - Jason Fletcher.png, effects=84, overlay=false), Preset(index=9, name=radiation-646212.png, effects=54, overlay=false), Preset(index=10, name=biohazard-148696.png, effects=52, overlay=false), Preset(index=11, name=under-construction-2408062.png, effects=52, overlay=false), Preset(index=12, name=warning-44458.png, effects=52, overlay=false), Preset(index=13, name=nezulie-icon.png, effects=54, overlay=false), Preset(index=14, name=nezulie-N.png, effects=50, overlay=false), Preset(index=15, name=nezulie-E.png, effects=52, overlay=false), Preset(index=16, name=nezulie-Z.png, effects=94, overlay=false), Preset(index=17, name=nezulie-U.png, effects=52, overlay=false), Preset(index=18, name=nezulie-L.png, effects=95, overlay=false), Preset(index=19, name=chaosdorf_green.png, effects=96, overlay=false), Preset(index=20, name=chaosdorf_monochrome.png, effects=0, overlay=false), Preset(index=21, name=nik_the_dusky.png, effects=56, overlay=false), Preset(index=22, name=tinybrainplayzX4.png, effects=50, overlay=true)]
+2024-06-17 02:00:38.351 INFO nestcontrol.deck.DeckConfigKt : loading presets from queue
+2024-06-17 02:00:38.353 INFO nestcontrol.deck.DeckConfigKt : loaded deck2 [Preset(index=0, name=transpower.png, effects=94, overlay=false), Preset(index=1, name=estrogen.png, effects=50, overlay=false), Preset(index=2, name=lsd.jpg, effects=50, overlay=false), Preset(index=3, name=psilocybin.jpg, effects=52, overlay=false), Preset(index=4, name=NEST LOGO_4K.jpg, effects=50, overlay=false), Preset(index=5, name=impossible-161955.png, effects=54, overlay=false), Preset(index=6, name=glowing cat.jpg, effects=54, overlay=false), Preset(index=7, name=red eyes.jpg, effects=52, overlay=false), Preset(index=8, name=Recursion Hexagon - Jason Fletcher.png, effects=32, overlay=false), Preset(index=9, name=radiation-646212.png, effects=94, overlay=false), Preset(index=10, name=biohazard-148696.png, effects=94, overlay=false), Preset(index=11, name=under-construction-2408062.png, effects=52, overlay=false), Preset(index=12, name=warning-44458.png, effects=50, overlay=false), Preset(index=13, name=nezulie-icon.png, effects=56, overlay=false), Preset(index=14, name=nezulie-N.png, effects=95, overlay=false), Preset(index=15, name=nezulie-E.png, effects=95, overlay=false), Preset(index=16, name=nezulie-Z.png, effects=52, overlay=false), Preset(index=17, name=nezulie-U.png, effects=95, overlay=false), Preset(index=18, name=nezulie-L.png, effects=52, overlay=false), Preset(index=19, name=chaosdorf_green.png, effects=50, overlay=false), Preset(index=20, name=chaosdorf_monochrome.png, effects=0, overlay=false), Preset(index=21, name=nik_the_dusky.png, effects=50, overlay=false), Preset(index=22, name=tinybrainplayzX4.png, effects=54, overlay=false)]
+2024-06-17 02:00:38.352 INFO nestcontrol.deck.DeckConfigKt : loading presets from queue
+2024-06-17 02:00:38.353 INFO nestcontrol.deck.DeckConfigKt : loading presets from queue
+2024-06-17 02:00:38.855 INFO nestdrop.deck.PresetQueues : initializing preset queues
+2024-06-17 02:00:38.856 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-17 02:00:38.858 INFO nestdrop.deck.Deck : initializing deck1
+2024-06-17 02:00:38.858 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-17 02:00:38.858 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-17 02:00:38.859 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-17 02:00:38.859 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-17 02:00:38.861 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-17 02:00:38.861 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-17 02:00:38.861 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-17 02:00:38.861 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-17 02:00:38.861 INFO nestdrop.deck.PresetQueues : queues updated
+2024-06-17 02:00:38.861 INFO nestdrop.deck.PresetQueues : combining queues with deck switches
+2024-06-17 02:00:38.871 INFO nestdrop.deck.Deck : initializing deck1 preset queue
+2024-06-17 02:00:38.873 INFO nestdrop.deck.Deck : initializing deck1 preset
+2024-06-17 02:00:38.874 INFO nestdrop.deck.Deck : deck1 queue: better_nested
+2024-06-17 02:00:38.874 INFO nestdrop.deck.Deck : initializing deck1 sprite queues
+2024-06-17 02:00:38.878 INFO nestdrop.deck.Deck : initializing deck1 sprite queue
+2024-06-17 02:00:38.884 INFO nestdrop.deck.Deck : initializing deck1 sprite
+2024-06-17 02:00:38.894 INFO nestdrop.deck.Deck : initializing deck1 sprite fx
+2024-06-17 02:00:38.899 INFO nestdrop.deck.Deck : setting deck1 FX to 0
+2024-06-17 02:00:38.899 INFO nestdrop.deck.Deck : initializing deck1 spout queue
+2024-06-17 02:00:38.900 INFO nestdrop.deck.Deck : initializing deck1 spout
+2024-06-17 02:00:38.901 INFO nestdrop.deck.Deck : deck1 spout name null
+2024-06-17 02:00:38.903 INFO nestdrop.deck.Deck : initializing deck2
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 preset queue
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 preset
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 sprite
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 sprite fx
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : deck2 queue: null
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 sprite queues
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 sprite queue
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : deck2 queue: fill_color_calm
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 spout
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : initializing deck2 spout queue
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : setting deck2 FX to 0
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : deck2 spout name null
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : spout sync triggered
+2024-06-17 02:00:38.904 INFO nestdrop.deck.Deck : spout sync triggered
+2024-06-17 02:00:38.906 INFO nestdrop.deck.Deck : deck2 spout queue changed: spout_bg
+2024-06-17 02:00:38.907 INFO nestdrop.deck.Deck : deck1 spout queue changed: spout_fg
+2024-06-17 02:00:38.907 INFO nestdrop.deck.Deck : deck2 spout index changed: -1
+2024-06-17 02:00:38.907 INFO nestdrop.deck.Deck : deck1 spout index changed: -1
+2024-06-17 02:00:38.908 INFO nestdrop.deck.loadDeckSettingsKt : loading settings from deck1
+2024-06-17 02:00:38.985 INFO nestdrop.deck.loadDeckSettingsKt : loading settings from deck2
+2024-06-17 02:00:38.985 INFO nestdrop.deck.loadDeckSettingsKt : DeckSettings(deckPanelsIsOpen=StringValue(value=1,1,0,0,0,1), transitTime=FloatValue(value=3.6), fps=IntValue(value=30), animationSpeed=FloatValue(value=0.5431015), zoomSpeed=FloatValue(value=0.9), ZoomExp=FloatValue(value=1.0), rotationSpeed=FloatValue(value=0.9), wrapSpeed=FloatValue(value=0.8), horizontalMotion=FloatValue(value=0.0), verticalMotion=FloatValue(value=0.0), stretchSpeed=FloatValue(value=1.0), waveMode=FloatValue(value=1.0), negative=FloatValue(value=0.0), red=FloatValue(value=1.0), green=FloatValue(value=1.0), blue=FloatValue(value=1.0), brightness=FloatValue(value=1.0), contrast=FloatValue(value=1.0), gamma=FloatValue(value=1.0), hue=FloatValue(value=0.0), saturation=FloatValue(value=1.0), lumaKey=RangeValue(min=0.0, max=1.0), alpha=FloatValue(value=1.0), strobe=Strobe(effectIndex=14, color=4294967295, effectSpanMin=0.0, effectSpanMax=1.0, triggerIndex=0, speed=0.3, pulseWidth=1.0, waveFormIndex=2), audio=Audio(channel=3, bass=1.0, mid=1.0, treble=1.0), spout=Spout(width=1920, height=1080), videoDeck=VideoDeck(preview=4, topMost=false), outputMonitor=IntValue(value=0), ndi=BooleanValue(value=false))
+2024-06-17 02:00:39.007 INFO nestdrop.deck.Deck : deck1 spout change: -1 in spout_fg
+2024-06-17 02:00:39.007 INFO nestdrop.deck.Deck : deck2 spout change: -1 in spout_bg
+2024-06-17 02:00:39.036 INFO nestdrop.deck.loadDeckSettingsKt : DeckSettings(deckPanelsIsOpen=StringValue(value=1,1,0,0,0,0), transitTime=FloatValue(value=3.2), fps=IntValue(value=30), animationSpeed=FloatValue(value=0.5431015), zoomSpeed=FloatValue(value=1.0), ZoomExp=FloatValue(value=1.0), rotationSpeed=FloatValue(value=1.0), wrapSpeed=FloatValue(value=1.0), horizontalMotion=FloatValue(value=0.0), verticalMotion=FloatValue(value=0.0), stretchSpeed=FloatValue(value=1.0), waveMode=FloatValue(value=0.0), negative=FloatValue(value=0.0), red=FloatValue(value=1.0), green=FloatValue(value=1.0), blue=FloatValue(value=1.0), brightness=FloatValue(value=1.0), contrast=FloatValue(value=1.0), gamma=FloatValue(value=1.0), hue=FloatValue(value=0.0), saturation=FloatValue(value=1.0), lumaKey=RangeValue(min=0.0, max=1.0), alpha=FloatValue(value=1.0), strobe=Strobe(effectIndex=14, color=4294967295, effectSpanMin=0.0, effectSpanMax=1.0, triggerIndex=0, speed=0.3, pulseWidth=1.0, waveFormIndex=2), audio=Audio(channel=3, bass=1.0, mid=1.0, treble=1.0), spout=Spout(width=1920, height=1080), videoDeck=VideoDeck(preview=4, topMost=false), outputMonitor=IntValue(value=0), ndi=BooleanValue(value=false))
+2024-06-17 02:00:39.037 INFO Main : initializing OSC
+2024-06-17 02:00:39.298 INFO Config : saving config Config(beats=64, deck1=DeckConfig(triggerTime=0.75, transitionTime=1.0, presetQueue=PresetQueue(index=12, name=better_nested, autoChange=true, toggles=[]), preset=Preset(autoChange=true), sprite=Sprite(autoChange=false, index=-1, name=unset, toggles=[]), spriteQueue=SpriteQueue(index=0, name=sprites_fg), spoutQueue=SpoutQueue(index=1, name=spout_fg), spout=Spout(index=-1, label=unset), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=0, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)), deck2=DeckConfig(triggerTime=0.25, transitionTime=1.0, presetQueue=PresetQueue(index=6, name=fill_color_calm, autoChange=true, toggles=[]), preset=Preset(autoChange=true), sprite=Sprite(autoChange=false, index=0, name=transpower.png, toggles=[]), spriteQueue=SpriteQueue(index=0, name=sprites_bg), spoutQueue=SpoutQueue(index=1, name=spout_bg), spout=Spout(index=-1, label=unset), spriteFX=SpriteFX(autoChange=false, blendMode=false, index=0, toggles=[]), bpmSync=BpmSync(enabled=false, multiplier=4), strobe=Strobe(enabled=false)))
+2024-06-17 02:00:39.569 INFO Main : re-emitting all values
+2024-06-17 02:00:39.573 INFO Main : await application
+2024-06-17 02:00:44.662 INFO nestdrop.deck.Deck : triggered at 16.169400334676112, 16.0
+2024-06-17 02:00:44.663 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:00:44.663 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:00:44.664 INFO nestdrop.deck.Deck : switching fill_color_calm to 9 'Preset(index=9, name=$$$ Royal - Mashup (367).milk, effects=0, overlay=null)'
+2024-06-17 02:01:00.190 INFO nestdrop.deck.Deck : triggered at 48.167073862457286, 48.0
+2024-06-17 02:01:00.190 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:01:00.190 INFO nestdrop.deck.Deck : switching better_nested to 89 'Preset(index=89, name=suksma - negative infinity for not flinching - gat.milk, effects=0, overlay=null)'
+2024-06-17 02:01:00.190 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:01:15.730 INFO nestdrop.deck.Deck : triggered at 16.19784714215602, 16.0
+2024-06-17 02:01:15.730 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:01:15.730 INFO nestdrop.deck.Deck : switching fill_color_calm to 11 'Preset(index=11, name=ORB - Stahl - Liquid Eyeball.milk, effects=0, overlay=null)'
+2024-06-17 02:01:15.730 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:01:31.202 INFO nestdrop.deck.Deck : triggered at 48.06671233927418, 48.0
+2024-06-17 02:01:31.202 INFO nestdrop.deck.Deck : switching better_nested to 45 'Preset(index=45, name=Rovastar - Harlequin's Fractal Encounter - more blood oaths nz.milk, effects=0, overlay=null)'
+2024-06-17 02:01:31.202 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:01:31.202 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:01:46.736 INFO nestdrop.deck.Deck : triggered at 16.078981604639736, 16.0
+2024-06-17 02:01:46.736 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:01:46.736 INFO nestdrop.deck.Deck : switching fill_color_calm to 9 'Preset(index=9, name=$$$ Royal - Mashup (367).milk, effects=0, overlay=null)'
+2024-06-17 02:01:46.736 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:02:02.268 INFO nestdrop.deck.Deck : triggered at 48.074731478754664, 48.0
+2024-06-17 02:02:02.268 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:02:02.268 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:02:02.268 INFO nestdrop.deck.Deck : switching better_nested to 52 'Preset(index=52, name=shifter - escape (sigur ros).milk, effects=0, overlay=null)'
+2024-06-17 02:02:17.799 INFO nestdrop.deck.Deck : triggered at 16.05139986050922, 16.0
+2024-06-17 02:02:17.799 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:02:17.799 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:02:17.799 INFO nestdrop.deck.Deck : switching fill_color_calm to 5 'Preset(index=5, name=Cope - domains.milk, effects=0, overlay=null)'
+2024-06-17 02:02:33.327 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:02:33.327 INFO nestdrop.deck.Deck : switching better_nested to 33 'Preset(index=33, name=suksma - chernobyl pie for dessert - semi-autoplasmitic copulateshow.milk, effects=0, overlay=null)'
+2024-06-17 02:02:33.327 INFO nestdrop.deck.Deck : triggered at 48.01181431096398, 48.0
+2024-06-17 02:02:33.327 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:02:48.957 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:02:48.957 INFO nestdrop.deck.Deck : triggered at 16.197519528579743, 16.0
+2024-06-17 02:02:48.957 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:02:48.957 INFO nestdrop.deck.Deck : switching fill_color_calm to 10 'Preset(index=10, name=Flexi + geiss - the deep diver's manifesto [metaphorfree].milk, effects=0, overlay=null)'
+2024-06-17 02:03:04.490 INFO nestdrop.deck.Deck : triggered at 48.19695798403424, 48.0
+2024-06-17 02:03:04.490 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:03:04.490 INFO nestdrop.deck.Deck : switching better_nested to 34 'Preset(index=34, name=drugsincombat - reactive molecule v-05a.milk, effects=0, overlay=null)'
+2024-06-17 02:03:04.490 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:03:20.029 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:03:20.029 INFO nestdrop.deck.Deck : triggered at 16.20263615608218, 16.0
+2024-06-17 02:03:20.029 INFO nestdrop.deck.Deck : switching fill_color_calm to 4 'Preset(index=4, name=suksma - Bmelgren - Penultimate Neural Slipstream 2 - smash the innocent as a peaceful wholesome holy joke.milk, effects=0, overlay=null)'
+2024-06-17 02:03:20.029 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:03:35.566 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:03:35.566 INFO nestdrop.deck.Deck : switching better_nested to 104 'Preset(index=104, name=stahlregen + flexi + goody + martin + others - frosted mosaik.milk, effects=0, overlay=null)'
+2024-06-17 02:03:35.566 INFO nestdrop.deck.Deck : triggered at 48.20829565773013, 48.0
+2024-06-17 02:03:35.566 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:03:51.091 INFO nestdrop.deck.Deck : triggered at 16.185272247187353, 16.0
+2024-06-17 02:03:51.091 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:03:51.091 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:03:51.091 INFO nestdrop.deck.Deck : switching fill_color_calm to 0 'Preset(index=0, name=LuxXx - Makes Me Cry (five) (Makes Me Cry, So Lick My Tears, And Get Real High) --- Isosceles edit.milk, effects=0, overlay=null)'
+2024-06-17 02:04:06.616 INFO nestdrop.deck.Deck : triggered at 48.168085048675614, 48.0
+2024-06-17 02:04:06.616 INFO nestdrop.deck.Deck : switching better_nested to 75 'Preset(index=75, name=Mig_036_version3.milk, effects=0, overlay=null)'
+2024-06-17 02:04:06.616 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:04:06.616 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:04:22.154 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:04:22.154 INFO nestdrop.deck.Deck : switching fill_color_calm to 1 'Preset(index=1, name=Tripgnosis - Dark Matter Glowstix - cattle mutilator - 25 years of selectricitai nz+.milk, effects=0, overlay=null)'
+2024-06-17 02:04:22.154 INFO nestdrop.deck.Deck : triggered at 16.190829061253943, 16.0
+2024-06-17 02:04:22.154 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:04:37.648 INFO nestdrop.deck.Deck : triggered at 48.09701576601673, 48.0
+2024-06-17 02:04:37.648 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:04:37.648 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:04:37.648 INFO nestdrop.deck.Deck : switching better_nested to 5 'Preset(index=5, name=suksma - satanic teleprompter - feeling filthy.milk, effects=0, overlay=null)'
+2024-06-17 02:04:53.178 INFO nestdrop.deck.Deck : triggered at 16.06967063128164, 16.0
+2024-06-17 02:04:53.178 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:04:53.179 INFO nestdrop.deck.Deck : switching fill_color_calm to 4 'Preset(index=4, name=suksma - Bmelgren - Penultimate Neural Slipstream 2 - smash the innocent as a peaceful wholesome holy joke.milk, effects=0, overlay=null)'
+2024-06-17 02:04:53.178 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:05:08.728 INFO nestdrop.deck.Deck : switching better_nested to 21 'Preset(index=21, name=Cope - The Red.milk, effects=0, overlay=null)'
+2024-06-17 02:05:08.728 INFO nestdrop.deck.Deck : triggered at 48.094289601008214, 48.0
+2024-06-17 02:05:08.728 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:05:08.728 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:05:24.267 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:05:24.267 INFO nestdrop.deck.Deck : triggered at 16.108138006973416, 16.0
+2024-06-17 02:05:24.267 INFO nestdrop.deck.Deck : switching fill_color_calm to 3 'Preset(index=3, name=$$$ Royal - Mashup (149).milk, effects=0, overlay=null)'
+2024-06-17 02:05:24.267 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:05:39.803 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:05:39.803 INFO nestdrop.deck.Deck : triggered at 48.093260440445086, 48.0
+2024-06-17 02:05:39.803 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:05:39.803 INFO nestdrop.deck.Deck : switching better_nested to 97 'Preset(index=97, name=$$$ Royal - Mashup (38).milk, effects=0, overlay=null)'
+2024-06-17 02:05:55.343 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:05:55.343 INFO nestdrop.deck.Deck : triggered at 16.09702418047604, 16.0
+2024-06-17 02:05:55.343 INFO nestdrop.deck.Deck : switching fill_color_calm to 5 'Preset(index=5, name=Cope - domains.milk, effects=0, overlay=null)'
+2024-06-17 02:05:55.343 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:06:10.871 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:06:10.871 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:06:10.871 INFO nestdrop.deck.Deck : triggered at 48.0718961814882, 48.0
+2024-06-17 02:06:10.872 INFO nestdrop.deck.Deck : switching better_nested to 67 'Preset(index=67, name=307.milk, effects=0, overlay=null)'
+2024-06-17 02:06:26.430 INFO nestdrop.deck.Deck : triggered at 16.09241208089209, 16.0
+2024-06-17 02:06:26.431 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:06:26.431 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:06:26.431 INFO nestdrop.deck.Deck : switching fill_color_calm to 10 'Preset(index=10, name=Flexi + geiss - the deep diver's manifesto [metaphorfree].milk, effects=0, overlay=null)'
+2024-06-17 02:06:41.961 INFO nestdrop.deck.Deck : triggered at 48.07709464352939, 48.0
+2024-06-17 02:06:41.961 INFO nestdrop.deck.Deck : switching better_nested to 51 'Preset(index=51, name=suksma - chemosynthetic nosferatu - illegally feeding off a trillion unborn minds.milk, effects=0, overlay=null)'
+2024-06-17 02:06:41.961 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:06:41.961 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:06:57.533 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:06:57.533 INFO nestdrop.deck.Deck : switching fill_color_calm to 7 'Preset(index=7, name=va ultramix - 381.milk, effects=0, overlay=null)'
+2024-06-17 02:06:57.533 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:06:57.533 INFO nestdrop.deck.Deck : triggered at 16.155621894200785, 16.0
+2024-06-17 02:07:13.063 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:07:13.063 INFO nestdrop.deck.Deck : switching better_nested to 70 'Preset(index=70, name=Cope - Cartune (extrusion machine) [fixed].milk, effects=0, overlay=null)'
+2024-06-17 02:07:13.063 INFO nestdrop.deck.Deck : triggered at 48.14266247393303, 48.0
+2024-06-17 02:07:13.063 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:07:28.535 INFO nestdrop.deck.Deck : triggered at 16.02652924118056, 16.0
+2024-06-17 02:07:28.535 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:07:28.535 INFO nestdrop.deck.Deck : switching fill_color_calm to 7 'Preset(index=7, name=va ultramix - 381.milk, effects=0, overlay=null)'
+2024-06-17 02:07:28.535 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:07:44.068 INFO nestdrop.deck.Deck : triggered at 48.00309444834405, 48.0
+2024-06-17 02:07:44.068 INFO nestdrop.deck.Deck : switching better_nested to 81 'Preset(index=81, name=EoS - glowsticks v2 02.milk, effects=0, overlay=null)'
+2024-06-17 02:07:44.068 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:07:44.068 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:07:59.702 INFO nestdrop.deck.Deck : triggered at 16.205545514043354, 16.0
+2024-06-17 02:07:59.702 INFO nestdrop.deck.Deck : switching fill_color_calm to 6 'Preset(index=6, name=va ultramix2 - 58_1.milk, effects=0, overlay=null)'
+2024-06-17 02:07:59.702 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:07:59.702 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:08:15.230 INFO nestdrop.deck.Deck : switching better_nested to 82 'Preset(index=82, name=eye disease ngornggniq.milk, effects=0, overlay=null)'
+2024-06-17 02:08:15.230 INFO nestdrop.deck.Deck : triggered at 48.182752047983975, 48.0
+2024-06-17 02:08:15.230 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:08:15.230 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:08:30.759 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:08:30.759 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:08:30.759 INFO nestdrop.deck.Deck : triggered at 16.192329167302606, 16.0
+2024-06-17 02:08:30.759 INFO nestdrop.deck.Deck : switching fill_color_calm to 0 'Preset(index=0, name=LuxXx - Makes Me Cry (five) (Makes Me Cry, So Lick My Tears, And Get Real High) --- Isosceles edit.milk, effects=0, overlay=null)'
+2024-06-17 02:08:46.246 INFO nestdrop.deck.Deck : triggered at 48.09094140383417, 48.0
+2024-06-17 02:08:46.246 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:08:46.247 INFO nestdrop.deck.Deck : switching better_nested to 22 'Preset(index=22, name=269.milk, effects=0, overlay=null)'
+2024-06-17 02:08:46.246 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:09:01.818 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:09:01.818 INFO nestdrop.deck.Deck : triggered at 16.175323611958948, 16.0
+2024-06-17 02:09:01.818 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:09:01.818 INFO nestdrop.deck.Deck : switching fill_color_calm to 4 'Preset(index=4, name=suksma - Bmelgren - Penultimate Neural Slipstream 2 - smash the innocent as a peaceful wholesome holy joke.milk, effects=0, overlay=null)'
+2024-06-17 02:09:17.343 INFO nestdrop.deck.Deck : switching better_nested to 60 'Preset(index=60, name=Geiss - Motion Blur 2 (Neon Jelly 2).milk, effects=0, overlay=null)'
+2024-06-17 02:09:17.343 INFO nestdrop.deck.Deck : triggered at 48.14974477411915, 48.0
+2024-06-17 02:09:17.343 INFO nestdrop.deck.Deck : deck1.presetQueue.next()
+2024-06-17 02:09:17.343 INFO nestdrop.deck.Deck : deck1.preset.next()
+2024-06-17 02:09:32.807 INFO nestdrop.deck.Deck : triggered at 16.021177739842866, 16.0
+2024-06-17 02:09:32.807 INFO nestdrop.deck.Deck : deck2.presetQueue.next()
+2024-06-17 02:09:32.807 INFO nestdrop.deck.Deck : deck2.preset.next()
+2024-06-17 02:09:32.807 INFO nestdrop.deck.Deck : switching fill_color_calm to 2 'Preset(index=2, name=$$$ Royal - Mashup (220).milk, effects=0, overlay=null)'
