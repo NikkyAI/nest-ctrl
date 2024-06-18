@@ -17,3 +17,9 @@ build/
 history/
 
 logs/
+
+config.json5
+
+resolume_state.json
+
+resolume_layers.json
