@@ -26,7 +26,7 @@ fun presetScreen(vararg decks: Deck) {
         decks.forEach { deck ->
             Column(
                 modifier = Modifier
-                    .width(300.dp)
+                    .width(400.dp)
                     .height(150.dp)
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

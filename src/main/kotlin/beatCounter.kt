@@ -25,6 +25,7 @@ val beatProgress = OscSynced.Value("/beatProgress", 0.0f, receive = false, targe
 val bpmRounded = OscSynced.Value("/bpmRounded", 120.0f).apply {
     logSending = false
 }
+val bpmRoundedInt = MutableStateFlow(120)
 
 private val logger = logger("beatCounter")
 
@@ -39,6 +40,7 @@ suspend fun startBeatCounter(
         }
         .onEach {
             bpmRounded.value = it
+            bpmRoundedInt.value = it.roundToInt()
         }
         .launchIn(flowScope)
     beatProgress
@@ -132,7 +134,7 @@ suspend fun startBeatCounter(
 //            var deck1Switched = false
 //            var deck2Switched = false
             while (true) {
-                delay(100)
+                delay(10)
                 val now = Clock.System.now()
                 val timeDelta = now - lastLoop
                 lastLoop = Clock.System.now()

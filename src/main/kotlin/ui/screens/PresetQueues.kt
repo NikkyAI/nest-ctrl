@@ -3,6 +3,10 @@ package ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Switch
@@ -28,8 +32,6 @@ fun presetQueues(vararg decks: Deck) {
         }
         Row {
             decks.forEach { deck ->
-                val color = Color(deck.hexColor)
-                val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
 
                 val activeIndex by deck.presetQueue.index.collectAsState()
 
@@ -42,27 +44,34 @@ fun presetQueues(vararg decks: Deck) {
                             modifier = Modifier
                                 .height(36.dp)
                         ) {
-//                        if (deckNumber == deck.N) {
-                            RadioButton(
-                                selected = (activeIndex == i),
-                                onClick = {
-                                    deck.presetQueue.index.value = i
-                                },
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = color,
-                                    unselectedColor = dimmedColor
+//                            RadioButton(
+//                                selected = (activeIndex == i),
+//                                onClick = {
+//                                    deck.presetQueue.index.value = i
+//                                },
+//                                colors = RadioButtonDefaults.colors(
+//                                    selectedColor = deck.color,
+//                                    unselectedColor = deck.dimmedColor
+//                                ),
+//                                enabled = (deckNumber == deck.N)
+//                            )
+
+                            Button(onClick = {
+                                deck.presetQueue.index.value = i
+                            },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = if(activeIndex == i) deck.color else deck.dimmedColor,
+
                                 ),
                                 enabled = (deckNumber == deck.N)
-                            )
-//                        }
+                            ) {
+
+                            }
                         }
                     }
                 }
             }
             decks.forEach { deck ->
-                val color = Color(deck.hexColor)
-                val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
-
                 Column {
                     queues.forEachIndexed { i, queue ->
                         val deckSwitch = presetQueues.deckSwitches.getOrNull(i) ?: return@forEachIndexed
@@ -74,20 +83,32 @@ fun presetQueues(vararg decks: Deck) {
                             modifier = Modifier
                                 .height(36.dp)
                         ) {
-//                        if (deckNumber == deck.N) {
-                            Switch(
-                                checked = toggled, onCheckedChange = {
+//                            Switch(
+//                                checked = toggled, onCheckedChange = {
+//                                    toggledStateflow.value = it
+//                                },
+//                                colors = SwitchDefaults.colors(
+//                                    checkedThumbColor = deck.color,
+//                                    checkedTrackColor = deck.color,
+//                                    uncheckedThumbColor = deck.dimmedColor,
+////                                    uncheckedTrackColor = dimmedColor
+//                                ),
+//                                enabled = (deckNumber == deck.N)
+//                            )
+
+                            Checkbox(
+                                checked = toggled,
+                                onCheckedChange = {
                                     toggledStateflow.value = it
                                 },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = color,
-                                    checkedTrackColor = color,
-                                    uncheckedThumbColor = dimmedColor,
-//                                    uncheckedTrackColor = dimmedColor
+                                colors = CheckboxDefaults.colors(
+                                    checkmarkColor = deck.dimmedColor,
+                                    uncheckedColor = deck.color,
+                                    checkedColor = deck.color,
+                                    disabledColor = Color.DarkGray
                                 ),
                                 enabled = (deckNumber == deck.N)
                             )
-//                        }
                         }
                     }
                 }
@@ -105,7 +126,7 @@ fun presetQueues(vararg decks: Deck) {
                 }
             }
 
-
+            //TODO: make "connected" horizontal slider toggle with multiple colors
             Column {
                 queues.forEachIndexed { i, queue ->
                     val deckSwitch = presetQueues.deckSwitches.getOrNull(i) ?: return@forEachIndexed
@@ -116,16 +137,14 @@ fun presetQueues(vararg decks: Deck) {
                             .height(36.dp)
                     ) {
                         decks.forEach { deck ->
-                            val color = Color(deck.hexColor)
-                            val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
                             RadioButton(
                                 selected = (deckNumber == deck.N),
                                 onClick = {
                                     deckSwitch.value = deck.N
                                 },
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = color,
-                                    unselectedColor = dimmedColor
+                                    selectedColor = deck.color,
+                                    unselectedColor = deck.dimmedColor
                                 )
                             )
                         }

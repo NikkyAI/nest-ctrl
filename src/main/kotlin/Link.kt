@@ -20,12 +20,14 @@ object Link {
     val isConnected = OscSynced.Value("/linkConnected", false, target = Target.TouchOSC).apply {
         logSending = false
     }
-    val bpm = OscSynced.Value("/bpm", 120.0f, target = Target.TouchOSC).apply {
-        logSending = false
-    }
-    val peers = OscSynced.Value("/peers", 0, target = Target.TouchOSC).apply {
-        logSending = false
-    }
+    val bpm = MutableStateFlow(120f)
+//    OscSynced.Value("/bpm", 120.0f, target = Target.TouchOSC).apply {
+//        logSending = false
+//    }
+    val peers = MutableStateFlow(0)
+//    OscSynced.Value("/peers", 0, target = Target.TouchOSC).apply {
+//        logSending = false
+//    }
     val beat = MutableStateFlow<Double>(0.0)
     suspend fun openConnection(): Boolean {
         return withContext(Dispatchers.IO) {

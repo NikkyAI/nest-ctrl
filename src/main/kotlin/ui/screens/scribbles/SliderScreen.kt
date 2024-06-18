@@ -1,4 +1,4 @@
-package ui.screens
+package ui.screens.scribbles
 
 import VerticalSlider
 import androidx.compose.foundation.layout.Column

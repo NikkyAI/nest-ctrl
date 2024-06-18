@@ -17,14 +17,16 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         this@applyConfig.ndStrobe.enabled.value = strobe.enabled
 
         this@applyConfig.triggerTime.value = triggerTime
-        val presetQueuesV = this@applyConfig.presetQueues.value
+        val presetQueuesV = this@applyConfig.presetQueues.queues.value
 
         run {
             this@applyConfig.presetQueue.autoChange.value = presetQueue.autoChange
+//            logger.infoF { "presetQueues toggleNames: ${presetQueue.toggles}" }
+//            logger.infoF { "presetQueues: ${presetQueuesV.map { it.name }}" }
             val presetQueuesToggleIndices = presetQueue.toggles.map { queue ->
                 presetQueuesV.indexOfFirst { it.name == queue }
             }.filterNot { it == -1 }.toSet()
-//            logger.debugF { "presetQueuesToggleIndices: $presetQueuesToggleIndices" }
+            logger.infoF { "presetQueues toggleIndices: $presetQueuesToggleIndices" }
             this@applyConfig.presetQueue.toggles.forEachIndexed { index, toggle ->
                 toggle.value = index in presetQueuesToggleIndices
             }

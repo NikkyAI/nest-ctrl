@@ -1,9 +1,10 @@
 package ui
 
-import ui.screens.ButtonScreen
+import ui.screens.scribbles.ButtonScreen
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -17,16 +18,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import ui.components.fader
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import ui.screens.ColorControl
-import ui.screens.SliderScreen
+import ui.screens.scribbles.SliderScreen
 import ui.screens.autoChangeScreen
+import ui.screens.beatProgressScreen
+import ui.screens.imgSpritesScreen
 import ui.screens.presetQueues
 import ui.screens.presetScreen
 
@@ -39,18 +41,65 @@ fun App(
     MaterialTheme(colors = darkColors()) {
         Scaffold {
             Row {
-                Column {
-                    autoChangeScreen(*decks)
-                    presetQueues(*decks)
-                    presetScreen(*decks)
-                }
-                Column {
+                Column(
+//                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    beatProgressScreen(*decks)
                     decks.forEach {
                         ColorControl(it)
                     }
                 }
+                Column {
+                    autoChangeScreen(*decks)
+                    tabScreen(*decks)
+                    presetScreen(*decks)
+                }
             }
 
+        }
+    }
+}
+
+@Composable
+fun tabScreen(
+    vararg decks: Deck,
+) {
+    var tabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf(
+        "Preset Queues",
+        "IMG Sprites",
+        "TODO: IMG FX",
+        "TODO: Spout",
+        "TODO: Spout FX",
+        "TODO: Text FX",
+        "TODO: Resolume Arena"
+    )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TabRow(
+            selectedTabIndex = tabIndex
+        ) {
+            tabs.forEachIndexed { index, tabTitle ->
+                Tab(
+                    text = { Text(tabTitle) },
+                    selected = tabIndex == index,
+                    onClick = { tabIndex = index }
+                )
+            }
+        }
+        when (tabIndex) {
+            0 -> {
+                presetQueues(*decks)
+            }
+
+            1 -> {
+                Row {
+                    decks.forEach {
+                        imgSpritesScreen(it)
+                    }
+
+                }
+
+            }
         }
     }
 }

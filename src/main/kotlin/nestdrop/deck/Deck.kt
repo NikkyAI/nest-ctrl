@@ -19,6 +19,7 @@ import nestdrop.PresetIdState
 import nestdrop.NestdropControl
 import nestdrop.PerformanceLogRow
 import nestdrop.Queue
+import nestdrop.QueueType
 import nestdrop.spriteFXMap
 import osc.OSCMessage
 import osc.OscSynced
@@ -261,9 +262,10 @@ class Deck(
 //            }
 //        }
         val toggles = List(20) {
-            OscSynced.Value("/deck$N/preset_queue/toggle/${it}", false).apply {
-//            logSending = false
-            }
+            MutableStateFlow(false)
+//            OscSynced.Value("/deck$N/preset_queue/toggle/${it}", false).apply {
+////            logSending = false
+//            }
         }
         val autoChange = OscSynced.Value("/deck$N/preset_queue/autoChange", false)
 
