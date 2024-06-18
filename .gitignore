@@ -13,3 +13,7 @@ build/
 /captures
 .externalNativeBuild
 .cxx
+
+history/
+
+logs/
