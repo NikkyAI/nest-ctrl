@@ -15,7 +15,7 @@ val nestdropFolder = dotenv["NESTDROP"]?.let {
     ?.replace("/", File.separator)
     ?.replace("\\", File.separator)
     ?.let {
-        System.err.println(it)
+//        System.err.println(it)
         File(it)
     }
     ?: userHome.resolve("VJ").resolve("NestDropProV2") // File("C:\\Users\\nikky\\VJ\\NestDropProV2")
