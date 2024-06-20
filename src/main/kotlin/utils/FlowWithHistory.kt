@@ -1,6 +1,10 @@
 package utils
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.runningFold
 
 data class History<T>(val current: T, val previous: T?)
 data class HistoryNotNull<T>(val current: T, val previous: T)

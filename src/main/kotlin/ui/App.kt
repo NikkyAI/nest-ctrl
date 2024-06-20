@@ -1,6 +1,5 @@
 package ui
 
-import ui.screens.scribbles.ButtonScreen
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,10 +33,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
-import ui.components.lazyList
 import ui.components.verticalScroll
 import ui.screens.ColorControl
-import ui.screens.scribbles.SliderScreen
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
 import ui.screens.debugScreen
@@ -45,6 +42,8 @@ import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreen
 import ui.screens.presetQueues
 import ui.screens.presetScreen
+import ui.screens.scribbles.ButtonScreen
+import ui.screens.scribbles.SliderScreen
 import ui.screens.spoutScreen
 
 @Composable

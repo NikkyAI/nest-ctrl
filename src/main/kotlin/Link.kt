@@ -10,8 +10,6 @@ import logging.infoF
 import logging.traceF
 import logging.warnF
 import org.deepsymmetry.libcarabiner.Message
-import osc.OscSynced
-import osc.OscSynced.Target
 import java.net.ConnectException
 import java.net.SocketException
 

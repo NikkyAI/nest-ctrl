@@ -1,5 +1,5 @@
-import java.io.File
 import io.github.cdimascio.dotenv.dotenv
+import java.io.File
 
 val dotenv = dotenv()
 

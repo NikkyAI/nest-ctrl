@@ -4,10 +4,6 @@ import io.klogging.Level
 import io.klogging.config.LoggingConfig
 import io.klogging.config.loggingConfiguration
 import io.klogging.sending.STDOUT
-import logging.CUSTOM_RENDERER
-import logging.CUSTOM_RENDERER_ANSI
-import logging.DOCKER_RENDERER
-import logging.LogFile
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
