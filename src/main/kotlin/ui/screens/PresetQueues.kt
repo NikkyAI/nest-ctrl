@@ -7,29 +7,27 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import nestdrop.deck.Deck
+import ui.components.HorizontalRadioButton
+import ui.components.VerticalRadioButton
 
 @Composable
 fun presetQueues(vararg decks: Deck) {
     val presetQueues = decks[0].presetQueues
     val queues by presetQueues.collectAsState()
 
-    Column {
-        Row {
-            Text("Preset Queues")
-        }
+//    Column {
+//        Row {
+//            Text("Preset Queues")
+//        }
         Row {
             decks.forEach { deck ->
 
@@ -44,29 +42,32 @@ fun presetQueues(vararg decks: Deck) {
                             modifier = Modifier
                                 .height(36.dp)
                         ) {
-//                            RadioButton(
-//                                selected = (activeIndex == i),
-//                                onClick = {
-//                                    deck.presetQueue.index.value = i
-//                                },
-//                                colors = RadioButtonDefaults.colors(
-//                                    selectedColor = deck.color,
-//                                    unselectedColor = deck.dimmedColor
+                            VerticalRadioButton(
+                                selected = (activeIndex == i),
+                                onClick = {
+                                    deck.presetQueue.index.value = i
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = deck.color,
+                                    unselectedColor = deck.dimmedColor
+                                ),
+                                enabled = (deckNumber == deck.N),
+                                height = 36.dp,
+                                connectTop = i > 0,
+                                connectBottom = i < queues.size - 1
+                            )
+
+//                            Button(onClick = {
+//                                deck.presetQueue.index.value = i
+//                            },
+//                                colors = ButtonDefaults.buttonColors(
+//                                    backgroundColor = if(activeIndex == i) deck.color else deck.dimmedColor,
+//
 //                                ),
 //                                enabled = (deckNumber == deck.N)
-//                            )
-
-                            Button(onClick = {
-                                deck.presetQueue.index.value = i
-                            },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = if(activeIndex == i) deck.color else deck.dimmedColor,
-
-                                ),
-                                enabled = (deckNumber == deck.N)
-                            ) {
-
-                            }
+//                            ) {
+//
+//                            }
                         }
                     }
                 }
@@ -137,7 +138,7 @@ fun presetQueues(vararg decks: Deck) {
                             .height(36.dp)
                     ) {
                         decks.forEach { deck ->
-                            RadioButton(
+                            HorizontalRadioButton(
                                 selected = (deckNumber == deck.N),
                                 onClick = {
                                     deckSwitch.value = deck.N
@@ -145,12 +146,16 @@ fun presetQueues(vararg decks: Deck) {
                                 colors = RadioButtonDefaults.colors(
                                     selectedColor = deck.color,
                                     unselectedColor = deck.dimmedColor
-                                )
+                                ),
+
+                                connectStart = !deck.first,
+                                connectEnd = !deck.last,
+//                                width = 16.dp
                             )
                         }
                     }
                 }
             }
         }
-    }
+//    }
 }

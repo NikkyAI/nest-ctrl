@@ -38,10 +38,13 @@ suspend fun loadDeckSettings(deck1: Deck, deck2: Deck) {
         deck.ndColor.lumaKey.value = deckSettings.lumaKey.min to deckSettings.lumaKey.max
         deck.ndColor.alpha.value = deckSettings.alpha.value
 
-        deck.ndStrobe.enabled.value = false
+        deck.ndStrobe.effect.value = Effect.entries[deckSettings.strobe.effectIndex]
         deck.ndStrobe.effectSpan.value = deckSettings.strobe.effectSpanMin to deckSettings.strobe.effectSpanMax
-        deck.ndStrobe.pulseWidth.value = deckSettings.strobe.pulseWidth
+        deck.ndStrobe.trigger.value = Trigger.entries[deckSettings.strobe.triggerIndex]
         deck.ndStrobe.effectSpeed.value = deckSettings.strobe.speed
+        deck.ndStrobe.pulseWidth.value = deckSettings.strobe.pulseWidth
+        deck.ndStrobe.waveForm.value = Waveform.entries[deckSettings.strobe.waveFormIndex]
+        deck.ndStrobe.enabled.value = false
 
         deck.ndAudio.bass.value = deckSettings.audio.bass
         deck.ndAudio.mid.value = deckSettings.audio.bass

@@ -5,16 +5,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import nestdropImgModes
-import osc.OscSynced
 import utils.parseINI
 import utils.splitIntoLines
 
-val spriteFXMap = MutableStateFlow(
+val imgFxMap = MutableStateFlow(
 //    emptyMap<Int, String>()
     parseINI(nestdropImgModes).toMap()
 )
 
-val spriteFXLabels = List(100) {
+val imgFxLabels = List(100) {
     MutableStateFlow("")
 //    OscSynced.Value("/sprite_FX/label/${it}", "", target = OscSynced.Target.TouchOSC).apply {
 //        logSending = false
@@ -23,10 +22,10 @@ val spriteFXLabels = List(100) {
 
 
 suspend fun setupSpriteFX() {
-    spriteFXMap.value = parseINI(nestdropImgModes).toMap()
+    imgFxMap.value = parseINI(nestdropImgModes).toMap()
 
 
-    spriteFXMap.onEach { map ->
+    imgFxMap.onEach { map ->
         fun hasBurnEffect(id: Int): Boolean {
             return map[id]?.contains(", include burn effect") ?: false
         }
@@ -45,7 +44,7 @@ suspend fun setupSpriteFX() {
                 .replace(", include burn effect", "")
                 .replace(", no burn effect", "")
 
-            spriteFXLabels.getOrNull(id)?.value = when (id) {
+            imgFxLabels.getOrNull(id)?.value = when (id) {
                 in (0..33 step 2), in (50..50 + 33 step 2) -> {
                     val (line1, line2) = splitIntoLines(2, commentStripped, splitter = " ")
                         .map {

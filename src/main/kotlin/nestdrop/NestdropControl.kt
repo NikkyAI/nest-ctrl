@@ -282,4 +282,42 @@ sealed interface NestdropControl {
                 .launchIn(flowScope)
         }
     }
+
+    class Dropdown <T: Any>(
+        override val deck: Int,
+        override val propertyName: String,
+//        private val range: ClosedFloatingPointRange<Float>,
+        private val enumToValue: (T) -> Int,
+        private val initialValue: T,
+        private val stateFlow: MutableStateFlow<T> = MutableStateFlow(initialValue),
+    ) : MutableStateFlow<T> by stateFlow, NestdropControl {
+        private val dropdownAddress: String get() = "/Controls/Deck$deck/cb$propertyName"
+
+        private suspend fun onValueChanged(value: Int) {
+            nestdropSendChannel.send(
+                OSCMessage(
+                    dropdownAddress,
+                    value
+                )
+            )
+        }
+
+
+        suspend fun doReset() {
+            stateFlow.value = initialValue
+        }
+
+        override suspend fun startFlows() {
+            stateFlow
+                .map {
+                    enumToValue(it)
+                }
+                .onEach {
+//                    valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
+                    onValueChanged(it)
+//                    fader.value = valueToSlider(range, it)
+                }
+                .launchIn(flowScope)
+        }
+    }
 }

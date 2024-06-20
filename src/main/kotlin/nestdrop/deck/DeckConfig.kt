@@ -63,14 +63,14 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                     spriteQueueValue?.presets.orEmpty()
                 }.orEmpty()
                 logger.infoF { "loaded $deckName $sprites" }
-                this@applyConfig.sprite.autoChange.value = sprite.autoChange
+                this@applyConfig.imgSprite.autoChange.value = sprite.autoChange
                 val spriteToggleIndices = sprite.toggles.map { name ->
                     sprites.indexOfFirst { it.name == name }
                 }.toSet()
-                this@applyConfig.sprite.toggles.forEachIndexed { index, toggle ->
+                this@applyConfig.imgSprite.toggles.forEachIndexed { index, toggle ->
                     toggle.value = index in spriteToggleIndices
                 }
-                this@applyConfig.sprite.index.value = sprites.indexOfFirst { it.name == sprite.name }
+                this@applyConfig.imgSprite.index.value = sprites.indexOfFirst { it.name == sprite.name }
                     .takeUnless { it == -1 } ?: sprite.index
             }
             run {
@@ -87,9 +87,9 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             }
         }
         run {
-            this@applyConfig.spriteFX.autoChange.value = spriteFX.autoChange
-            this@applyConfig.spriteFX.blendMode.value = spriteFX.blendMode
-            this@applyConfig.spriteFX.toggles.forEachIndexed { index, toggle ->
+            this@applyConfig.imgSpriteFx.autoChange.value = spriteFX.autoChange
+            this@applyConfig.imgSpriteFx.blendMode.value = spriteFX.blendMode
+            this@applyConfig.imgSpriteFx.toggles.forEachIndexed { index, toggle ->
                 toggle.value = index in spriteFX.toggles
             }
         }
@@ -130,10 +130,10 @@ private val Deck.presetQueueFlow
 
 private val Deck.spriteFlow
     get() = combine(
-        sprite.name,
-        sprite.index,
-        sprite.autoChange,
-        combine(sprite.toggles) {
+        imgSprite.name,
+        imgSprite.index,
+        imgSprite.autoChange,
+        combine(imgSprite.toggles) {
             it.mapIndexed { i, b ->
                 i to b
             }.toMap()
@@ -157,10 +157,10 @@ private val Deck.spriteFlow
 
 private val Deck.spriteFxFlow
     get() = combine(
-        spriteFX.index,
-        spriteFX.autoChange,
-        spriteFX.blendMode,
-        combine(spriteFX.toggles) {
+        imgSpriteFx.index,
+        imgSpriteFx.autoChange,
+        imgSpriteFx.blendMode,
+        combine(imgSpriteFx.toggles) {
             it.mapIndexed { i, b ->
                 i to b
             }.toMap()

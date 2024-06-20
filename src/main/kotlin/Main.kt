@@ -1,4 +1,3 @@
-import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,7 +5,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
@@ -17,10 +15,10 @@ import androidx.compose.ui.window.rememberWindowState
 import io.klogging.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -30,6 +28,10 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
@@ -39,15 +41,14 @@ import logging.errorF
 import logging.fatalF
 import logging.infoF
 import logging.setupLogging
-import logging.traceF
 import logging.warnF
+import nestdrop.PerformanceLogRow
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdrop.deck.loadDeckSettings
 import nestdrop.loadQueues
 import nestdrop.parsePerformanceLog
-import nestdrop.performanceLogs
-import nestdrop.performanceLogsMap
+import nestdrop.performanceLogsFlow
 import nestdrop.setupSpriteFX
 import osc.OscSynced
 import osc.initializeSyncedValues
@@ -60,6 +61,7 @@ import osc.runNestDropSend
 import osc.runResolumeSend
 import osc.startResolumeListener
 import ui.App
+import ui.screens.scanPresets
 import ui.splashScreen
 import utils.KWatchChannel
 import utils.KWatchEvent
@@ -294,11 +296,26 @@ object Main {
         startBeatCounter(deck1, deck2)
 
         flowScope.launch(Dispatchers.IO) {
-            performanceLogsMap.value = nestdropPerformanceLog.listFiles().orEmpty().mapNotNull { file ->
-                parsePerformanceLog(file)?.let {
-                    file.nameWithoutExtension to it
+//            performanceLogsMap.value = nestdropPerformanceLog.listFiles().orEmpty().mapNotNull { file ->
+//                parsePerformanceLog(file)?.let {
+//                    file.nameWithoutExtension to it
+//                }
+//            }.toMap()
+
+            val performanceLogRows = mutableSetOf<PerformanceLogRow>()
+
+            nestdropPerformanceLog
+                .listFiles()
+                .orEmpty()
+                .mapNotNull { file ->
+                    parsePerformanceLog(file)
                 }
-            }.toMap()
+                .flatten()
+                .sortedBy { it.dateTime }
+                .forEach {
+                    performanceLogsFlow.emit(it)
+                    performanceLogRows.add(it)
+                }
 
             nestdropPerformanceLog
                 .asWatchChannel(KWatchChannel.Mode.SingleDirectory)
@@ -306,42 +323,75 @@ object Main {
 
 //                logger.debugF { "watch-event: ${event.kind} ${event.file}" }
                     event.tag?.also {
-                        logger.debugF { "watch-event.tag: $it" }
+                        logger.infoF { "watch-event.tag: $it" }
                     }
                     when (event.kind) {
                         KWatchEvent.Kind.Initialized -> {}
                         KWatchEvent.Kind.Created, KWatchEvent.Kind.Modified -> {
-                            parsePerformanceLog(event.file)?.let {
-                                performanceLogsMap.value += event.file.nameWithoutExtension to it
+                            parsePerformanceLog(event.file)?.let { rows ->
+//                                logger.infoF { "received ${rows.size} rows" }
+                                val lastTimestamp = performanceLogRows.maxOfOrNull { it.dateTime }
+                                    ?: Instant.DISTANT_PAST.toLocalDateTime(TimeZone.currentSystemDefault())
+                                val newRows = rows.toSet() - performanceLogRows
+//                                logger.infoF { "received ${newRows.size} new rows" }
+                                newRows
+//                                    .filter { it.dateTime > lastTimestamp }
+                                    .sortedBy { it.dateTime }
+                                    .forEach {
+//                                        logger.infoF { "emitting $it" }
+                                        performanceLogsFlow.emit(it)
+                                        performanceLogRows.add(it)
+                                    }
+//                                performanceLogsMap.value += event.file.nameWithoutExtension to rows
                             }
                         }
 
                         KWatchEvent.Kind.Deleted -> {
-                            performanceLogsMap.value -= event.file.nameWithoutExtension
+//                            performanceLogsMap.value -= event.file.nameWithoutExtension
                         }
                     }
 
                 }
         }
 
-        performanceLogsMap
-            .map {
-                it.values.flatten().sortedBy { it.dateTime }
-            }.onEach {
-                performanceLogs.value = it
-            }.onEach {
-                logger.traceF { "history rows: ${it.size}" }
-                val reversed = it.reversed()
-                deck1.currentPreset.value = reversed.firstOrNull { it.deck == 1 }
-//                .also {
-//                logger.debugF { "$it" }
-//            }
-                deck2.currentPreset.value = reversed.firstOrNull { it.deck == 2 }
-//                .also {
-//                logger.debugF { "$it" }
-//            }
+        performanceLogsFlow
+            .sample(500.milliseconds)
+            .filter {
+                it.deck == deck1.N
+            }
+            .onEach {
+                deck1.currentPreset.value = it
             }
             .launchIn(flowScope)
+
+        performanceLogsFlow
+            .sample(500.milliseconds)
+            .filter {
+                it.deck == deck2.N
+            }
+            .onEach {
+                deck2.currentPreset.value = it
+            }
+            .launchIn(flowScope)
+
+//        performanceLogsMap
+//            .map {
+//                it.values.flatten().sortedBy { it.dateTime }
+//            }.onEach {
+//                performanceLogs.value = it
+//            }.onEach {
+//                logger.traceF { "history rows: ${it.size}" }
+//                val reversed = it.reversed()
+//                deck1.currentPreset.value = reversed.firstOrNull { it.deck == 1 }
+////                .also {
+////                logger.debugF { "$it" }
+////            }
+//                deck2.currentPreset.value = reversed.firstOrNull { it.deck == 2 }
+////                .also {
+////                logger.debugF { "$it" }
+////            }
+//            }
+//            .launchIn(flowScope)
 
 
         flowScope.launch(Dispatchers.IO) {
@@ -354,7 +404,7 @@ object Main {
 
         loadQueues(presetQueues, deck1, deck2)
 
-        while(presetQueues.queues.value.isEmpty()) {
+        while (presetQueues.queues.value.isEmpty()) {
             delay(500)
         }
 //        while(deck1.spriteQueues.value.isEmpty()) {
@@ -374,23 +424,25 @@ object Main {
         loadDeckSettings(deck1, deck2)
 
         // TODO ensure that sprites are set AGAIN correctly
-        deck1.sprite.index.value++
-        deck1.sprite.index.value--
-        deck2.sprite.index.value++
-        deck2.sprite.index.value--
+        deck1.imgSprite.index.value++
+        deck1.imgSprite.index.value--
+        deck2.imgSprite.index.value++
+        deck2.imgSprite.index.value--
 
         logger.infoF { "initializing OSC" }
         initializeSyncedValues()
         delay(500)
         logger.infoF { "re-emitting all values" }
         resyncToTouchOSC.value++
+
+        scanPresets()
     }
 
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
         val presetQueues = PresetQueues()
-        val deck1 = Deck(1, 0xFFBB0000, presetQueues)
-        val deck2 = Deck(2, 0xFF00BB00, presetQueues)
+        val deck1 = Deck(1, first = true, last = false, 0xFFBB0000, presetQueues)
+        val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
 
         awaitApplication {
 
@@ -405,8 +457,9 @@ object Main {
                     onCloseRequest = ::exitApplication,
                     title = "Splash",
                     state = rememberWindowState(
-                        position = WindowPosition(BiasAlignment(0f,0f)),
-                        width = 300.dp, height = 200.dp),
+                        position = WindowPosition(BiasAlignment(0f, 0f)),
+                        width = 300.dp, height = 200.dp
+                    ),
                     undecorated = true,
 //                    transparent = true,
                     focusable = false,
@@ -429,7 +482,7 @@ object Main {
                     App(
                         deck1, deck2
                     )
-            }
+                }
 
 
 //        fader(

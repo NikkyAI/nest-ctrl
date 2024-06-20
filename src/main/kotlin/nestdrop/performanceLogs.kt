@@ -5,6 +5,7 @@ import com.github.doyaaaaaken.kotlincsv.dsl.context.ExcessFieldsRowBehaviour
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.util.CSVParseFormatException
 import io.klogging.logger
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -12,8 +13,9 @@ import kotlinx.datetime.LocalTime
 import logging.errorF
 import java.io.File
 
-val performanceLogsMap = MutableStateFlow<Map<String, List<PerformanceLogRow>>>(emptyMap())
-val performanceLogs = MutableStateFlow<List<PerformanceLogRow>>(emptyList())
+val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = Int.MAX_VALUE, )
+//val performanceLogsMap = MutableStateFlow<Map<String, List<PerformanceLogRow>>>(emptyMap())
+//val performanceLogs = MutableStateFlow<List<PerformanceLogRow>>(emptyList())
 
 private val logger = logger("nestcontrol.performanceLogKt")
 
@@ -112,4 +114,8 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
         return null
     }
     return rows
+}
+
+suspend fun startWatchingFile() {
+
 }
