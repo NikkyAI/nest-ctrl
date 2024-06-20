@@ -65,9 +65,9 @@ fun App(
                     }
                 }
                 Column {
-                    autoChangeScreen(*decks)
-                    tabScreen(*decks)
                     presetScreen(*decks)
+                    tabScreen(*decks)
+                    autoChangeScreen(*decks)
                 }
             }
 
