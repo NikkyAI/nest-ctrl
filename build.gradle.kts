@@ -40,6 +40,8 @@ dependencies {
 
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:_")
 
+    implementation("io.github.cdimascio:dotenv-kotlin:_")
+
     implementation("io.github.oshai:kotlin-logging:_")
     implementation("io.klogging:klogging-jvm:_")
     implementation("io.klogging:slf4j-klogging:_")
