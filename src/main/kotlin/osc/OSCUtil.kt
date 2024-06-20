@@ -47,52 +47,8 @@ import kotlin.time.Duration.Companion.seconds
 
 private val logger = logger("osc.OSCUtil")
 
-
-val controlSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 val nestdropSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 val arenaSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
-
-@Deprecated("stop using touch osc")
-suspend fun runControlSend() {
-    coroutineScope {
-        val controlPortSender = OSCPortOutBuilder()
-            .setRemoteSocketAddress(
-                InetSocketAddress(
-//                    InetAddress.getByName("127.0.0.1"),
-                    InetAddress.getLocalHost(),
-                    8003
-                )
-            )
-            .build()
-        controlPortSender.connect()
-        logger.debugF { "constructed OSC port" }
-        val job = launch {
-            while (true) {
-                delay(50)
-                val oscMessages = controlSendChannel.receiveAvailable(32)
-                if (oscMessages.isNotEmpty()) {
-//                            oscMessages.forEach {
-//                                logger.debugF { "TOOSC OUT: ${it.stringify()}" }
-//                            }
-//                logger.debugF { "sending ${packets.size} packets" }
-                    val oscPacket = if (oscMessages.size == 1) {
-                        oscMessages.first()
-                    } else {
-                        OSCBundle(oscMessages)
-                    }
-                    try {
-                        controlPortSender.send(oscPacket)
-                    } catch (e: Exception) {
-                        logger.errorF(e) { "failed to send messages: ${oscMessages.joinToString { it.stringify() }} " }
-                    }
-                }
-            }
-        }
-        job.join()
-        logger.error { "port closed" }
-        controlPortSender.close()
-    }
-}
 
 suspend fun runNestDropSend() {
     coroutineScope {
@@ -160,14 +116,6 @@ suspend fun runResolumeSend() {
         logger.error { "port closed" }
         arenaPort.close()
     }
-}
-
-suspend fun controlPortSend(packet: OSCMessage) {
-    controlSendChannel.send(packet)
-}
-
-suspend fun controlPortSend(packet: OSCPacket) {
-    controlSendChannel.send(packet)
 }
 
 suspend fun nestdropPortSend(packet: OSCMessage) {

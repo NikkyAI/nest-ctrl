@@ -27,6 +27,7 @@ import nestdrop.deck.Deck
 import nestdropFolder
 import osc.OSCMessage
 import osc.nestdropPortSend
+import tagMap
 import ui.components.lazyList
 import java.io.File
 import kotlin.time.Duration
@@ -69,6 +70,7 @@ fun debugScreen(
         }
 
         val presetsMap by presetsMap.collectAsState()
+        val tagMap by tagMap.collectAsState()
 
         lazyList {
             val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
@@ -92,6 +94,14 @@ fun debugScreen(
                                 ) {
                                     Text(presetEntry.id.toString())
                                 }
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.width(150.dp)
+                        ) {
+                            val tags = tagMap[name] ?: emptySet()
+                            tags.forEach {
+                                Text(it)
                             }
                         }
 //                        Text("${presetEntry.id}")
@@ -136,6 +146,8 @@ data class PresetLocation(
     val id: Int,
     val path: String,
     val previewPath: String,
+    val category: String,
+    val subCategory: String? = null,
 )
 
 fun scanPresets() {
@@ -143,8 +155,8 @@ fun scanPresets() {
 
     var id: Int = 0
     val categories = presetsFolder.listFiles().filter { it.isDirectory }
-    val map = categories.flatMap { folder ->
-        val categoryFiles = folder.listFiles().filter { it.isFile }.filter { it.extension == "milk" }
+    val map = categories.flatMap { categoryFolder ->
+        val categoryFiles = categoryFolder.listFiles().filter { it.isFile }.filter { it.extension == "milk" }
         val categoryPresets = categoryFiles.filterNotNull().map { file ->
             val name = file.nameWithoutExtension
             val path = file.toRelativeString(presetsFolder)
@@ -154,13 +166,14 @@ fun scanPresets() {
                 name = name,
                 id = id++,
                 path = path,
-                previewPath = previewPath
+                previewPath = previewPath,
+                category = categoryFolder.name,
             )
         }
-        val subCategories = folder.listFiles().filter { it.isDirectory }
+        val subCategories = categoryFolder.listFiles().filter { it.isDirectory }
 
-        val subCategoryEntries = subCategories.flatMapIndexed() { index, folder ->
-            val subCategoryFiles = folder.listFiles().filter { it.isFile }.filter { it.extension == "milk" }
+        val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
+            val subCategoryFiles = subCategoryFolder.listFiles().filter { it.isFile }.filter { it.extension == "milk" }
             if (subCategoryFiles.isNotEmpty()) {
                 if (index == 0) {
                     if (categoryPresets.isNotEmpty()) {
@@ -180,7 +193,9 @@ fun scanPresets() {
                     name = name,
                     id = id++,
                     path = path,
-                    previewPath = previewPath
+                    previewPath = previewPath,
+                    category = categoryFolder.name,
+                    subCategory = subCategoryFolder.name,
                 )
             }
         }

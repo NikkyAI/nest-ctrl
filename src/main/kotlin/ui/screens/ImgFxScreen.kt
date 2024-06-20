@@ -44,7 +44,7 @@ fun imgFxScreen(vararg decks: Deck) {
                     .fillMaxWidth()
                 ,
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+//                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
 
@@ -54,10 +54,14 @@ fun imgFxScreen(vararg decks: Deck) {
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+
+                        modifier = Modifier
+                            .weight(0.2f)
                     ) {
                         Text(
                             text = "FX: $currentIndex",
-                            modifier = Modifier.background(deck.dimmedColor)
+                            modifier = Modifier
+                                .background(deck.dimmedColor)
                                 .padding(8.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
@@ -105,38 +109,42 @@ fun imgFxScreen(vararg decks: Deck) {
                     val toggleState = deck.imgSpriteFx.toggles.getOrNull(fxIndex) ?: return@loop
                     val toggled by toggleState.collectAsState()
 
+                    Row(
+                        modifier = Modifier
+                            .weight(0.2f)
+                    ) {
 
 
+                        VerticalRadioButton(
+                            selected = (selectedIndex == fxIndex),
+                            onClick = {
+                                selectedIndexState.value = fxIndex
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = deck.color,
+                                unselectedColor = deck.dimmedColor
+                            ),
+                            height = heightDp,
+                            connectTop = fxIndex > 0,
+                            connectBottom = fxIndex < 49,
+                        )
 
-                    VerticalRadioButton(
-                        selected = (selectedIndex == fxIndex),
-                        onClick = {
-                            selectedIndexState.value = fxIndex
-                        },
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = deck.color,
-                            unselectedColor = deck.dimmedColor
-                        ),
-                        height = heightDp,
-                        connectTop = fxIndex > 0,
-                        connectBottom = fxIndex < 49,
-                    )
+                        Checkbox(
+                            checked = toggled,
+                            onCheckedChange = {
+                                toggleState.value = it
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkmarkColor = deck.dimmedColor,
+                                uncheckedColor = deck.color,
+                                checkedColor = deck.color,
+                                disabledColor = Color.DarkGray
+                            ),
+                        )
 
-                    Checkbox(
-                        checked = toggled,
-                        onCheckedChange = {
-                            toggleState.value = it
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkmarkColor = deck.dimmedColor,
-                            uncheckedColor = deck.color,
-                            checkedColor = deck.color,
-                            disabledColor = Color.DarkGray
-                        ),
-                    )
+                        Text(fx, modifier = Modifier.padding(vertical = 4.dp).weight(0.1f))
 
-                    Text(fx, modifier = Modifier.padding(vertical = 4.dp).weight(0.1f))
-
+                    }
                 }
 
             }

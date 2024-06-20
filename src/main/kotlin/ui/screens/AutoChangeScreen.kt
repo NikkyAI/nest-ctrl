@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -81,15 +87,23 @@ private fun autoChangeRow(
 
         Spacer(modifier = Modifier.width(10.dp))
         val scope = rememberCoroutineScope()
-        Button(
+        IconButton(
             onClick = {
                 scope.launch { onNext() }
             },
-            colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
-            contentPadding = PaddingValues(horizontal = 4.dp),
         ) {
-            Text(nextLabel)
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = deck.color, modifier = Modifier.padding(8.dp))
         }
+
+//        Button(
+//            onClick = {
+//                scope.launch { onNext() }
+//            },
+//            colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
+//            contentPadding = PaddingValues(horizontal = 4.dp),
+//        ) {
+//            Text(nextLabel)
+//        }
     }
 }
 

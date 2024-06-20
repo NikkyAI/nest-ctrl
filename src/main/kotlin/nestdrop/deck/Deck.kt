@@ -639,7 +639,7 @@ class Deck(
 
     val spoutQueue = SpoutQueue()
 
-    inner class Spout {
+    inner class Spout : MutableStateFlow<nestdrop.Preset?> by MutableStateFlow(null) {
 //        val toggles = List(20) {
 //            MutableStateFlow(false)
 //        }
@@ -664,6 +664,7 @@ class Deck(
                 .combine(spoutQueue) { index, queue ->
                     queue?.presets?.getOrNull(index)
                 }.onEach { spoutPreset ->
+                    this.value = spoutPreset
                     logger.infoF { "$deckName spout name $spoutPreset" }
                     fx.value = spoutPreset?.effects ?: 0
                     name.value = spoutPreset?.label ?: "-"

@@ -42,9 +42,11 @@ import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreen
 import ui.screens.presetQueues
 import ui.screens.presetScreen
+import ui.screens.presetScreenSingle
 import ui.screens.scribbles.ButtonScreen
 import ui.screens.scribbles.SliderScreen
 import ui.screens.spoutScreen
+import ui.screens.tagEditScreen
 
 @Composable
 @Preview
@@ -63,6 +65,11 @@ fun App(
                         ColorControl(it)
                     }
                 }
+//                Column {
+//                    decks.forEach {
+//                        presetScreenSingle(it)
+//                    }
+//                }
                 Column {
                     presetScreen(*decks)
                     tabScreen(*decks)
@@ -102,6 +109,7 @@ enum class Tabs(
             it.spout.name
         }
     ),
+    TagEdit("Edit Tags"),
     Debug("Debug"),
     ;
 }
@@ -128,11 +136,6 @@ fun ColumnScope.tabScreen(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(tab.label)
-                                Spacer(modifier = Modifier.height(10.dp))
-
-//                            tab.additionalHeaderContent(decks)
-
                                 decks.forEach { deck ->
                                     val nameMutableStateFlow = getName(deck)
                                     val name by nameMutableStateFlow.collectAsState()
@@ -151,6 +154,8 @@ fun ColumnScope.tabScreen(
                                         )
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(tab.label)
                             }
                         } else {
                             Text(tab.label)
@@ -190,14 +195,17 @@ fun ColumnScope.tabScreen(
             }
 
             Tabs.SpoutSprites -> {
-                verticalScroll {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        decks.forEach {
-                            spoutScreen(it)
-                        }
-                    }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    spoutScreen(*decks)
                 }
             }
+
+            Tabs.TagEdit -> {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    tagEditScreen(*decks)
+                }
+            }
+
             Tabs.Debug -> {
                 debugScreen(*decks)
             }

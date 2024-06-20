@@ -45,7 +45,7 @@ fun imgSpritesScreen(vararg decks: Deck) {
                     .background(MaterialTheme.colors.background)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+//                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
 
@@ -53,6 +53,8 @@ fun imgSpritesScreen(vararg decks: Deck) {
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .weight(0.2f)
                     ) {
                         Text(
                             text = "SPRITE: $current",
@@ -98,7 +100,8 @@ fun imgSpritesScreen(vararg decks: Deck) {
 
                     Row(
                         modifier = Modifier
-                            .width(400.dp)
+                            .weight(0.2f)
+//                            .width(400.dp)
                     ) {
                         VerticalRadioButton(
                             selected = (activeIndex == i),

@@ -14,9 +14,11 @@ import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberWindowState
 import io.klogging.logger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -35,6 +37,7 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import logging.debugF
 import logging.errorF
 import logging.fatalF
 import logging.infoF
@@ -54,11 +57,11 @@ import osc.resolumeClipConnect
 import osc.resolumeLayerClear
 import osc.resolumeLayerStates
 import osc.resyncToTouchOSC
-import osc.runControlSend
 import osc.runNestDropSend
 import osc.runResolumeSend
 import osc.startResolumeListener
 import ui.App
+import ui.screens.presetsMap
 import ui.screens.scanPresets
 import ui.splashScreen
 import utils.KWatchChannel
@@ -76,6 +79,7 @@ private val logger = logger(Main::class.qualifiedName!!)
 
 object Main {
 
+    @OptIn(FlowPreview::class)
     suspend fun initApplication(
         presetQueues: PresetQueues,
         deck1: Deck,
@@ -118,12 +122,12 @@ object Main {
                 delay(100)
             }
         }
-        flowScope.launch(Dispatchers.IO) {
-            while (true) {
-                runControlSend()
-                delay(100)
-            }
-        }
+//        flowScope.launch(Dispatchers.IO) {
+//            while (true) {
+//                runControlSend()
+//                delay(100)
+//            }
+//        }
         flowScope.launch(Dispatchers.IO) {
             while (true) {
                 runResolumeSend()
@@ -131,6 +135,7 @@ object Main {
             }
         }
 
+        startTagsFileWatcher(presetQueues)
 
         run {
             val json = Json {
@@ -321,7 +326,7 @@ object Main {
 
 //                logger.debugF { "watch-event: ${event.kind} ${event.file}" }
                     event.tag?.also {
-                        logger.infoF { "watch-event.tag: $it" }
+                        logger.debugF { "watch-event.tag: $it" }
                     }
                     when (event.kind) {
                         KWatchEvent.Kind.Initialized -> {}
@@ -472,7 +477,7 @@ object Main {
                 Window(
                     onCloseRequest = ::exitApplication,
                     title = "Nest Ctrl",
-                    state = rememberWindowState(width = 1200.dp, height = 1200.dp),
+                    state = rememberWindowState(width = 1600.dp, height = 1200.dp),
                     icon = BitmapPainter(
                         useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
                     )
