@@ -16,15 +16,15 @@ import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
-val beatFrame = OscSynced.Value("/beats", 64, target = OscSynced.Target.TouchOSC)
-val beatFrameAdjust =
-    OscSynced.TriggerWithValue<Int>("/beats/adjust", 0, 100.milliseconds, target = OscSynced.Target.TouchOSC)
-val beatProgress = OscSynced.Value("/beatProgress", 0.0f, receive = false, target = OscSynced.Target.TouchOSC).apply {
-    logSending = false
-}
-val bpmRounded = OscSynced.Value("/bpmRounded", 120.0f).apply {
-    logSending = false
-}
+val beatFrame = MutableStateFlow(64) // OscSynced.Value("/beats", 64, target = OscSynced.Target.TouchOSC)
+val beatProgress = MutableStateFlow(0f)
+// OscSynced.Value("/beatProgress", 0.0f, receive = false, target = OscSynced.Target.TouchOSC).apply {
+//    logSending = false
+//}
+val bpmRounded = MutableStateFlow(120f)
+//    OscSynced.Value("/bpmRounded", 120.0f).apply {
+//    logSending = false
+//}
 val bpmRoundedInt = MutableStateFlow(120)
 
 private val logger = logger("beatCounter")
@@ -46,11 +46,6 @@ suspend fun startBeatCounter(
     beatProgress
         .onEach { beatProgress ->
             logger.traceF { "beat progress: $beatProgress" }
-        }
-        .launchIn(flowScope)
-    beatFrameAdjust
-        .onEach { (_, value) ->
-            beatFrame.value += value
         }
         .launchIn(flowScope)
     beatFrame

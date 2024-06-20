@@ -195,7 +195,7 @@ fun connectSpecificClip(
         OscSynced.Value(
             "/composition/layers/$layerIndex/connectspecificclip",
             -1,
-            target = OscSynced.Target.Arena
+            target = OscSynced.Target.ResolumeArena
         ) { address, value ->
 //            updateResolumeLayerState(resolumeLayerIndex(group, layer), -1, false)
             if(value < 0) {
@@ -294,7 +294,7 @@ suspend fun startResolumeListener() {
         .setPacketListener(OSCPortIn.defaultPacketListener())
         .let { inBuilder ->
             OscSynced.syncedValues.filter {
-                it.receive && it.target == OscSynced.Target.Arena
+                it.receive && it.target == OscSynced.Target.ResolumeArena
             }.fold(inBuilder) { builder, syncedValue ->
                 builder.addMessageListener(
                     syncedValue.messageSelector
@@ -448,7 +448,7 @@ suspend fun startResolumeListener() {
             logger.infoF { "creating buttons for group ${groupIndex+1} layer ${layer} ($resolumeLayerIndex)" }
             val connectSpecificClip = connectSpecificClip(groupIndex + 1, layer)
 
-            val exclusiveSwitch = OscSynced.ExclusiveSwitch("/resolume/group${groupIndex+1}/layer${layer}", 6, -1)
+            val exclusiveSwitch = MutableStateFlow(-1) // OscSynced.ExclusiveSwitch("/resolume/group${groupIndex+1}/layer${layer}", 6, -1)
 
             exclusiveSwitch
                 .drop(1)

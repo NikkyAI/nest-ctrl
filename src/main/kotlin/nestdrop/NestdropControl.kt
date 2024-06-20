@@ -38,14 +38,7 @@ sealed interface NestdropControl {
     ) : MutableStateFlow<Float> by stateFlow, NestdropControl {
         private val sliderAddress: String get() = "/Controls/Deck$deck/s$propertyName"
 
-        private val fader =
-            OscSynced.Value("/nd/controls/Deck$deck/$propertyName", valueToSlider(range, initialValue))
-        private val reset = OscSynced.Trigger("/nd/controls/reset/Deck$deck/$propertyName")
-        private val propertyLabel =
-            OscSynced.Value("/nd/controls/property/Deck$deck/$propertyName", propertyName, receive = false)
-        private val valueLabel =
-            OscSynced.Value("/nd/controls/value/Deck$deck/$propertyName", "", receive = false)
-
+        private val valueLabel = MutableStateFlow("")
         private suspend fun onSliderValueChanged(value: Float) {
             nestdropSendChannel.send(
                 OSCMessage(
@@ -65,20 +58,6 @@ sealed interface NestdropControl {
         }
 
         override suspend fun startFlows() {
-            propertyLabel.value = propertyName
-
-            fader
-                .onEach {
-                    stateFlow.value = sliderToValue(range, it)
-                }
-                .launchIn(flowScope)
-
-            reset
-                .onEach {
-                    doReset()
-                }
-                .launchIn(flowScope)
-
             stateFlow
                 .map {
                     it.coerceIn(range.start, range.endInclusive)
@@ -86,7 +65,6 @@ sealed interface NestdropControl {
                 .onEach {
                     valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
                     onSliderValueChanged(it)
-                    fader.value = valueToSlider(range, it)
                 }
                 .launchIn(flowScope)
         }
@@ -104,18 +82,7 @@ sealed interface NestdropControl {
         private val buttonAddress: String get() = "/Controls/Deck$deck/bt$propertyName"
         private val sliderAddress: String get() = "/Controls/Deck$deck/s$propertyName"
 
-//        @Deprecated("stop using touch osc")
-//        private val fader =
-//            OscSynced.Value("/nd/controls/Deck$deck/$propertyName", valueToSlider(range, initialValue))
-//
-//        @Deprecated("stop using touch osc")
-//        private val reset = OscSynced.Trigger("/nd/controls/reset/Deck$deck/$propertyName")
-//        @Deprecated("stop using touch osc")
-//        private val propertyLabel =
-//            OscSynced.Value("/nd/controls/property/Deck$deck/$propertyName", propertyName, receive = false)
-//        @Deprecated("stop using touch osc")
-//        private val valueLabel =
-//            OscSynced.Value("/nd/controls/value/Deck$deck/$propertyName", "", receive = false)
+        private val valueLabel = MutableStateFlow("")
 
         suspend fun doReset() {
             stateFlow.value = defaultValue
@@ -139,28 +106,13 @@ sealed interface NestdropControl {
         }
 
         override suspend fun startFlows() {
-//            propertyLabel.value = propertyName
-
-//            fader
-//                .onEach {
-//                    stateFlow.value = sliderToValue(range, it)
-//                }
-//                .launchIn(flowScope)
-//
-//            reset
-//                .onEach {
-//                    doReset()
-//                }
-//                .launchIn(flowScope)
-
             stateFlow
                 .map {
                     it.coerceIn(range.start, range.endInclusive)
                 }
                 .onEach {
-//                    valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
+                    valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
                     onSliderValueChanged(it)
-//                    fader.value = valueToSlider(range, it)
                 }
                 .launchIn(flowScope)
         }
@@ -174,8 +126,6 @@ sealed interface NestdropControl {
     ) : MutableStateFlow<Boolean> by stateFlow, NestdropControl {
         private val buttonAddress: String get() = "/Controls/Deck$deck/bt$propertyName"
 
-        private val button = OscSynced.Value("/nd/controls/Deck$deck/$propertyName", initialValue)
-
         private suspend fun doClick(value: Boolean) {
             nestdropSendChannel.send(
                 OSCMessage(
@@ -186,17 +136,9 @@ sealed interface NestdropControl {
         }
 
         override suspend fun startFlows() {
-            button
-                .onEach {
-                    logger.debugF { "received deck $deck $propertyName << $it" }
-                    stateFlow.value = it
-                }
-                .launchIn(flowScope)
-
             stateFlow
                 .onEach { value ->
                     doClick(value)
-                    button.value = value
                 }
                 .launchIn(flowScope)
         }
@@ -214,17 +156,7 @@ sealed interface NestdropControl {
         private val sliderAddressMin: String = "/Controls/Deck$deck/s$propertyName/Min"
         private val sliderAddressMax: String = "/Controls/Deck$deck/s$propertyName/Max"
 
-        private val minFader =
-            OscSynced.Value("/nd/controls/min/Deck$deck/$propertyName", valueToSlider(range, initialValue.first))
-        private val maxFader = OscSynced.Value(
-            "/nd/controls/max/Deck$deck/$propertyName",
-            valueToSlider(range, initialValue.second)
-        )
-        private val reset = OscSynced.Trigger("/nd/controls/reset/Deck$deck/$propertyName")
-        private val propertyLabel =
-            OscSynced.Value("/nd/controls/property/Deck$deck/$propertyName", propertyName, receive = false)
-        private val valueLabel =
-            OscSynced.Value("/nd/controls/value/Deck$deck/$propertyName", "", receive = false)
+        private val valueLabel = MutableStateFlow("")
 
         suspend fun doClick() {
             stateFlow.value = defaultValue
@@ -252,19 +184,6 @@ sealed interface NestdropControl {
         }
 
         override suspend fun startFlows() {
-            propertyLabel.value = propertyName
-
-            minFader.combine(maxFader) { min, max -> min to max }
-                .onEach { (minValue, maxValue) ->
-                    stateFlow.value = sliderToValue(range, minValue) to sliderToValue(range, maxValue)
-                }
-                .launchIn(flowScope)
-
-            reset
-                .onEach {
-                    doClick()
-                }
-                .launchIn(flowScope)
 
             stateFlow
                 .map { (minValue, maxValue) ->
@@ -276,8 +195,6 @@ sealed interface NestdropControl {
                 .onEach { (minValue, maxValue) ->
                     valueLabel.value = "${round(minValue)} - ${round(maxValue)}"
                     onSliderValueChanged(minValue, maxValue)
-                    minFader.value = valueToSlider(range, minValue)
-                    maxFader.value = valueToSlider(range, maxValue)
                 }
                 .launchIn(flowScope)
         }
@@ -286,12 +203,13 @@ sealed interface NestdropControl {
     class Dropdown <T: Any>(
         override val deck: Int,
         override val propertyName: String,
-//        private val range: ClosedFloatingPointRange<Float>,
         private val enumToValue: (T) -> Int,
         private val initialValue: T,
         private val stateFlow: MutableStateFlow<T> = MutableStateFlow(initialValue),
     ) : MutableStateFlow<T> by stateFlow, NestdropControl {
         private val dropdownAddress: String get() = "/Controls/Deck$deck/cb$propertyName"
+
+        private val valueLabel = MutableStateFlow("")
 
         private suspend fun onValueChanged(value: Int) {
             nestdropSendChannel.send(
@@ -303,18 +221,15 @@ sealed interface NestdropControl {
         }
 
 
-        suspend fun doReset() {
+        fun doReset() {
             stateFlow.value = initialValue
         }
 
         override suspend fun startFlows() {
             stateFlow
-                .map {
-                    enumToValue(it)
-                }
                 .onEach {
-//                    valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
-                    onValueChanged(it)
+                    valueLabel.value = it.toString()
+                    onValueChanged(enumToValue(it))
 //                    fader.value = valueToSlider(range, it)
                 }
                 .launchIn(flowScope)

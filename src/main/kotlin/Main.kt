@@ -16,12 +16,12 @@ import io.klogging.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
@@ -29,14 +29,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import logging.debugF
 import logging.errorF
 import logging.fatalF
 import logging.infoF
@@ -164,7 +162,7 @@ object Main {
         val groupSyncedValues = (1..4).associateWith { group ->
             val arenaMotionExtractionBypassed = OscSynced.Value<Int>(
                 address = "/composition/groups/$group/video/effects/motionextraction/bypassed",
-                initialValue = 1, target = OscSynced.Target.Arena
+                initialValue = 1, target = OscSynced.Target.ResolumeArena
             ).also {
                 it.logReceived = false
 //                arenaSendChannel.send(OSCMessage(it.address, "?"))
@@ -172,7 +170,7 @@ object Main {
             }
             val arenaMotionExtractionDelay = OscSynced.Value<Float>(
                 address = "/composition/groups/$group/video/effects/motionextraction/effect/delay",
-                initialValue = 0.25f, target = OscSynced.Target.Arena
+                initialValue = 0.25f, target = OscSynced.Target.ResolumeArena
             ).also {
                 it.logReceived = false
 //                arenaSendChannel.send(OSCMessage(it.address, "?"))
@@ -180,13 +178,13 @@ object Main {
             }
             val arenaAutomaskBypassed = OscSynced.Value<Int>(
                 "/composition/groups/$group/video/effects/automask/bypassed",
-                initialValue = 1, target = OscSynced.Target.Arena
+                initialValue = 1, target = OscSynced.Target.ResolumeArena
             ).also {
                 it.logReceived = false
 //                arenaSendChannel.send(OSCMessage(it.address, "?"))
                 it.dropFirst = 1
             }
-            val motionExtractionEnabled = OscSynced.Value("/resolume/$group/motion_extraction/enabled", false)
+            val motionExtractionEnabled = MutableStateFlow(false) // OscSynced.Value("/resolume/$group/motion_extraction/enabled", false)
             motionExtractionEnabled
                 .sample(100.milliseconds)
                 .onEach {
@@ -199,7 +197,7 @@ object Main {
                     motionExtractionEnabled.value = it == 0
                 }
                 .launchIn(flowScope)
-            val motionExtractionDelay = OscSynced.Value("/resolume/$group/motion_extraction/delay", 0.5f)
+            val motionExtractionDelay = MutableStateFlow(0.5f) // OscSynced.Value("/resolume/$group/motion_extraction/delay", 0.5f)
             motionExtractionDelay
                 .sample(100.milliseconds)
                 .onEach {
@@ -213,7 +211,7 @@ object Main {
                 }
                 .launchIn(flowScope)
             (motionExtractionEnabled to motionExtractionDelay)
-            val automaskEnabled = OscSynced.Value("/resolume/$group/auto_mask", false)
+            val automaskEnabled = MutableStateFlow(false) // OscSynced.Value("/resolume/$group/auto_mask", false)
             automaskEnabled
                 .sample(100.milliseconds)
                 .onEach {
@@ -229,8 +227,8 @@ object Main {
             Triple(motionExtractionEnabled, motionExtractionDelay, automaskEnabled)
         }
 
-        val resetResolume = OscSynced.Trigger("/resolume/reset")
-        resetResolume
+        val resetResolumeTrigger = MutableStateFlow(0) // OscSynced.Trigger("/resolume/reset")
+        resetResolumeTrigger
             .drop(1)
             .onEach {
                 logger.errorF { "executing resolume reset now" }

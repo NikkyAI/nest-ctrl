@@ -18,7 +18,6 @@ private val logger = logger(OscSynced::class.qualifiedName!!)
 
 
 sealed interface OscSynced {
-
     val receive: Boolean
     var logReceived: Boolean
     var logSending: Boolean
@@ -26,12 +25,9 @@ sealed interface OscSynced {
     val messageSelector: MessageSelector
     val target: Target
     var dropFirst: Int
-//    val lastChanged: Instant
 
     enum class Target(val label :String) {
-        @Deprecated("stop using touch osc")
-        TouchOSC("touchosc"),
-        Arena("Arena"),
+        ResolumeArena("ResolumeArena"),
     }
 
     suspend fun onMessageEvent(event: OSCMessageEvent)
@@ -143,7 +139,7 @@ sealed interface OscSynced {
             address: String,
             initialValue: T,
             receive: Boolean = true,
-            target: Target = Target.TouchOSC,
+            target: Target,
             valueToMessages: suspend (String, T) -> List<OSCMessage> = { address, value ->
                 listOf(
                     OSCMessage(address, value)
@@ -238,7 +234,7 @@ sealed interface OscSynced {
             addressPrefix: String,
             n: Int,
             initialValue: Int,
-            target: Target = Target.TouchOSC,
+            target: Target,
         ) : this(
             addressPrefix = addressPrefix,
             n = n,
@@ -282,7 +278,7 @@ sealed interface OscSynced {
 
         constructor(
             address: String,
-            target: Target = Target.TouchOSC,
+            target: Target,
         ) : this(
             address = address,
             target = target,
@@ -334,7 +330,7 @@ sealed interface OscSynced {
             address: String,
             initialValue: T,
             timeout: Duration = 500.milliseconds,
-            target: Target = Target.TouchOSC,
+            target: Target,
         ) : this(
             address = address,
             timeout = timeout,

@@ -17,9 +17,7 @@ import java.net.SocketException
 
 object Link {
     private val logger = logger(Link::class.qualifiedName!!)
-    val isConnected = OscSynced.Value("/linkConnected", false, target = Target.TouchOSC).apply {
-        logSending = false
-    }
+    val isConnected = MutableStateFlow(false)
     val bpm = MutableStateFlow(120f)
 //    OscSynced.Value("/bpm", 120.0f, target = Target.TouchOSC).apply {
 //        logSending = false

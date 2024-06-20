@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.onEach
 import logging.infoF
 import nestdrop.Queue
 import osc.OSCMessage
-import osc.OscSynced
 import osc.nestdropSendChannel
 
 
@@ -25,33 +24,8 @@ class PresetQueues(
 
     val deckSwitches = List(20) { MutableStateFlow( 0 ) }
 
-    @Deprecated("stop using touchosc")
-    private val deckTogglesMap = List(20) { index ->
-        mapOf(
-            1 to OscSynced.Value("/preset_queue/deck_switch/1/$index", false, target = OscSynced.Target.TouchOSC),
-            2 to OscSynced.Value("/preset_queue/deck_switch/2/$index", false, target = OscSynced.Target.TouchOSC),
-            3 to OscSynced.Value("/preset_queue/deck_switch/3/$index", false, target = OscSynced.Target.TouchOSC),
-            4 to OscSynced.Value("/preset_queue/deck_switch/4/$index", false, target = OscSynced.Target.TouchOSC),
-        )
-    }
-    private val labels = List(20) { index ->
-        OscSynced.Value("/preset_queue/label/$index", "", receive = false).apply {
-            logSending = true
-        }
-    }
-//    val toggles = List(20) { index ->
-//        OscSynced.Value("/preset_queue/$index/toggle", false).apply {
-////            logSending = false
-//        }
-//    }
-
-    init {
-
-    }
-
     suspend fun startFlows() {
         logger.infoF { "initializing preset queues" }
-
 
         queues.onEach {
             logger.infoF { "queues updated" }
@@ -86,15 +60,6 @@ class PresetQueues(
             }
             .launchIn(flowScope)
 
-        this
-            .onEach { queues ->
-                labels.forEachIndexed { index, label ->
-                    label.value = queues.getOrNull(index)
-                        ?.name
-                        ?: ""
-                }
-            }
-            .launchIn(flowScope)
         this
             .onEach { queues ->
                 deckSwitches.forEachIndexed { index, stateFlow ->

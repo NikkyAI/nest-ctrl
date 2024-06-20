@@ -46,8 +46,8 @@ class Deck(
     }
 
 
-    val bpmSyncEnabled = OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
-    val bpmSyncMultiplier = OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
+    val bpmSyncEnabled = MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
+    val bpmSyncMultiplier = MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
 
     inner class NdTime {
 
@@ -192,12 +192,9 @@ class Deck(
 
     val ndOutput = NdOutput()
 
-    val transitionTime: OscSynced.Value<Float> =
-        OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
-    val triggerTime: OscSynced.Value<Float> = OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
+    val transitionTime = MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
+    val triggerTime = MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
     val currentPreset = MutableStateFlow<PerformanceLogRow?>(null)
-
-    val emitTransitionTime = OscSynced.Trigger("/deck$N/transitionTime/sync")
 
     suspend fun startFlows() {
         logger.infoF { "initializing $deckName" }
@@ -247,34 +244,15 @@ class Deck(
 //    val presetQueues = PresetQueues()
 
     inner class PresetQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
-        //        val index = OSCSynced.ValueWithState("/deck$N/queue/index", -1) { newValue, state ->
-//            logger.warnF { "$newValue + $state" }
-//            newValue.takeUnless { it == state } ?: -1
-//        }
-//        val index = OSCSynced.Value("/deck$N/queue/index", -1)
-        private val trigger = OscSynced.Trigger("/deck$N/preset_queue/next")
-        val name = OscSynced.Value("/deck$N/preset_queue/name", "uninitialized", receive = false)
+        private val trigger = MutableStateFlow(0) // OscSynced.Trigger("/deck$N/preset_queue/next")
+        val name = MutableStateFlow("uninitialized")
 
         val index = MutableStateFlow(-1)
 
-        //        @Deprecated("stop using touch osc")
-        // val index = OscSynced.ExclusiveSwitch(addressPrefix = "/deck$N/preset_queue/index", n = 20, initialValue = -1)
-//        @Deprecated("stop using touch osc")
-//        private val enabled = List(20) {
-//            OscSynced.Value(address = "/deck$N/preset_queue/enabled/$it", initialValue = true, receive = false)
-//        }
-//        private val labels = List(20) {
-//            OscSynced.Value("/deck$n/preset_queue/label/$it", "", receive = false).apply {
-//                logSending = false
-//            }
-//        }
         val toggles = List(20) {
             MutableStateFlow(false)
-//            OscSynced.Value("/deck$N/preset_queue/toggle/${it}", false).apply {
-////            logSending = false
-//            }
         }
-        val autoChange = OscSynced.Value("/deck$N/preset_queue/autoChange", false)
+        val autoChange = MutableStateFlow(false)
 
         suspend fun next() {
             logger.infoF { "$deckName.presetQueue.next()" }
@@ -375,14 +353,12 @@ class Deck(
 
 
     inner class Preset {
-        private val trigger = OscSynced.Trigger("/deck$N/preset/next")
-        val autoChange = OscSynced.Value("/deck$N/preset/autoChange", false)
-        val name = OscSynced.Value("/deck$N/preset/name", "uninitialized", receive = false)
+        private val trigger = MutableStateFlow(0)
+        val autoChange = MutableStateFlow(false)
+        val name = MutableStateFlow("uninitialized")
 
         suspend fun next() {
             logger.infoF { "$deckName.preset.next()" }
-            emitTransitionTime.trigger()
-            //    setTransitionTimeDeck1()
             // TODO: trigger this by emitting a history event (queue, deck, index or such)
             presetQueue.value?.also { queue ->
                 val index = Random.nextInt(queue.presets.size)
@@ -415,32 +391,16 @@ class Deck(
     val preset = Preset()
 
     inner class SpriteQueues : MutableStateFlow<List<Queue>> by MutableStateFlow(emptyList()) {
-        val labels = List(20) {
-            OscSynced.Value("/deck$N/sprite_queues/label/$it", "", receive = false).apply {
-                logSending = false
-            }
-        }
-
         suspend fun startFlows() {
             logger.infoF { "initializing $deckName sprite queues" }
-
-            this
-                .onEach {
-                    spriteQueues.labels.forEachIndexed { index, label ->
-                        label.value = it.getOrNull(index)
-                            ?.name
-                            ?: ""
-                    }
-                }
-                .launchIn(flowScope)
         }
     }
 
     val spriteQueues = SpriteQueues()
 
     inner class SpriteQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
-        val index = OscSynced.Value("/deck$N/sprite_queue/index", -1)
-        val name = OscSynced.Value("/deck$N/sprite_queue/name", "uninitialized", receive = false)
+        val index = MutableStateFlow(-1)
+        val name = MutableStateFlow("uninitialized")
 
         suspend fun startFlows() {
             logger.infoF { "initializing $deckName sprite queue" }
@@ -453,30 +413,12 @@ class Deck(
                 .launchIn(flowScope)
 
             index
-//                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spriteQueues) { index, queues ->
                     queues.getOrNull(index)
                 }
                 .onEach {
                     spriteQueue.value = it
                 }.launchIn(flowScope)
-
-            this
-                .onEach {
-                    it?.presets?.let { presets ->
-                        imgSprite.labels.forEachIndexed { index, label ->
-                            label.value = presets.getOrNull(index)
-                                ?.name
-                                ?.substringBeforeLast(".jpg")
-                                ?.substringBeforeLast(".png")
-//                        ?.also {
-//                            logger.debugF { "label: $it" }
-//                        }
-                                ?: ""
-                        }
-                    }
-                }
-                .launchIn(flowScope)
         }
     }
 
@@ -484,17 +426,10 @@ class Deck(
 
     inner class ImgSprite {
         val toggles = List(40) {
-            OscSynced.Value("/deck$N/sprite/toggle/${it}", false).apply {
-                logSending = false
-            }
+            MutableStateFlow(false)
         }
-        val labels = List(40) {
-            OscSynced.Value("/deck$N/sprite/label/${it}", "", receive = false).apply {
-                logSending = false
-            }
-        }
-        private val trigger = OscSynced.Trigger("/deck$N/sprite/next")
-        val autoChange = OscSynced.Value("/deck$N/sprite/autoChange", true)
+        private val trigger = MutableStateFlow(0)
+        val autoChange = MutableStateFlow(false)
 
         val index = MutableStateFlow(-2) // OscSynced.ExclusiveSwitch("/deck$N/sprite/index", 40, -2)
         val name =
@@ -599,21 +534,19 @@ class Deck(
     val imgSprite = ImgSprite()
 
     inner class ImgSpriteFX {
-        val autoChange = MutableStateFlow(true) // OscSynced.Value("/deck$N/sprite_FX/autoChange", true)
-        val blendMode = MutableStateFlow(true) //OscSynced.Value("/deck$N/sprite_FX/blendMode", false)
-        val index = MutableStateFlow(0) // OscSynced.Value("/deck$N/sprite_FX/index", 0)
-        val name =
-            MutableStateFlow("uninitialized") //OscSynced.Value("/deck$N/sprite_FX/description", "uninitialized", receive = false)
-        val shortLabel =
-            MutableStateFlow("uninitialized") //OscSynced.Value("/deck$N/sprite_FX/description", "uninitialized", receive = false)
+        val autoChange = MutableStateFlow(true)
+        val blendMode = MutableStateFlow(false)
+        val index = MutableStateFlow(0)
+        val name = MutableStateFlow("uninitialized")
+        val shortLabel = MutableStateFlow("uninitialized")
         val toggles = List(50) {
             MutableStateFlow(false)
 //            OscSynced.Value("/deck$N/sprite_FX/toggle/${it}", false).apply {
 //                logSending = false
 //            }
         }
-        val sync = OscSynced.Trigger("/deck$N/sprite_FX/sync")
-        private val trigger = OscSynced.Trigger("/deck$N/sprite_FX/next")
+        val sync = MutableStateFlow(0)
+        private val trigger = MutableStateFlow(0)
 
         suspend fun next() {
             logger.infoF { "$deckName.spriteFX.next()" }
@@ -674,9 +607,8 @@ class Deck(
     val imgSpriteFx = ImgSpriteFX()
 
     inner class SpoutQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
-        val index = OscSynced.Value("/deck$N/spout_queue/index", -1)
-        val name = OscSynced.Value("/deck$N/spout_queue/name", "uninitialized", receive = false)
-
+        val index = MutableStateFlow(-1)
+        val name = MutableStateFlow("uninitialized")
 
         suspend fun startFlows() {
             logger.infoF { "initializing $deckName spout queue" }
@@ -692,43 +624,21 @@ class Deck(
             onEach {
                 name.value = it?.name ?: "unset"
             }.launchIn(flowScope)
-
-            onEach {
-                it?.presets?.let { presets ->
-                    spout.labels.forEachIndexed { index, label ->
-                        label.value = presets
-                            .getOrNull(index)
-                            ?.label
-                            .orEmpty()
-//                        ?.also {
-//                            logger.debugF { "label: $it" }
-//                        }
-                    }
-                }
-            }
-                .launchIn(flowScope)
         }
     }
 
     val spoutQueue = SpoutQueue()
 
     inner class Spout {
-        //        val toggles = List(20) {
-//            OSCSynced.Value("/deck$N/spout/toggle/${it}", false).apply {
-//                logSending = false
-//            }
+//        val toggles = List(20) {
+//            MutableStateFlow(false)
 //        }
-        val labels = List(20) {
-            OscSynced.Value("/deck$N/spout/label/${it}", "", receive = false).apply {
-                logSending = false
-            }
-        }
 
-        val sync = OscSynced.Trigger("/deck$N/spout/sync")
+        val sync = MutableStateFlow(0)
 
-        //        val autoChange = OSCSynced.Value("/deck$N/spout/autoChange", true)
-        val index = OscSynced.ExclusiveSwitch("/deck$N/spout/index", 20, -1)
-        val name = OscSynced.Value("/deck$N/spout/name", "uninitialized", receive = false)
+        // val autoChange = MutableStateFlow(false)
+        val index = MutableStateFlow(-1)
+        val name = MutableStateFlow("uninitialized")
         val fx = MutableStateFlow(0)
 
         private val nestdropSpout = NestdropSpriteQueue(
@@ -870,7 +780,8 @@ class Deck(
 
     fun nestdropDeckAddress(address: String) = "/Controls/Deck$N/$address"
 
-    private val hasSwitched: OscSynced.Value<Boolean> = OscSynced.Value("/deck$N/switched", false)
+
+    private val hasSwitched = MutableStateFlow(false)
 
     suspend fun resetLatch() {
         hasSwitched.value = false
