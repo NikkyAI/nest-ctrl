@@ -33,7 +33,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
+import nestdrop.deck.Effect
 import nestdrop.deck.PresetQueues
+import nestdrop.deck.Trigger
+import nestdrop.deck.Waveform
+import ui.components.Dropdown
 import ui.components.verticalScroll
 import ui.screens.ColorControl
 import ui.screens.autoChangeScreen
@@ -66,6 +70,61 @@ fun App(
                         val enabled by deck.enabled.collectAsState()
                         if (enabled) {
                             ColorControl(deck)
+                        }
+                    }
+                    decks.forEach { deck ->
+                        val enabled by deck.enabled.collectAsState()
+                        if (enabled) {
+                            Column {
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    val effect by deck.ndStrobe.effect.collectAsState()
+                                    Dropdown(deck.dimmedColor, deck.color, Effect.entries, effect, renderItem = { selected ->
+                                        Text(selected.toString())
+                                    }) {
+                                        deck.ndStrobe.effect.value = it
+                                    }
+                                    Text("Effect")
+                                }
+
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    val trigger by deck.ndStrobe.trigger.collectAsState()
+                                    Dropdown(
+                                        deck.dimmedColor,
+                                        deck.color,
+                                        Trigger.entries,
+                                        trigger,
+                                        renderItem = { selected ->
+                                            Text(selected.toString())
+                                        }) {
+                                        deck.ndStrobe.trigger.value = it
+                                    }
+                                    Text("Trigger")
+                                }
+
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    val waveForm by deck.ndStrobe.waveForm.collectAsState()
+                                    Dropdown(
+                                        deck.dimmedColor,
+                                        deck.color,
+                                        Waveform.entries,
+                                        waveForm,
+                                        renderItem = { selected ->
+                                            Text(selected.toString())
+                                        }) {
+                                        deck.ndStrobe.waveForm.value = it
+                                    }
+                                    Text("Waveform")
+                                }
+                            }
                         }
                     }
                 }

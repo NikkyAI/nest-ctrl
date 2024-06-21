@@ -60,8 +60,9 @@ compose.desktop {
                 TargetFormat.Msi,
 //                TargetFormat.Deb,
             )
-            packageName = "KotlinJvmComposeDesktopApplication"
+            packageName = "nestctrl"
             packageVersion = "1.0.0"
+            this.vendor = null
 
             windows {
                 iconFile.set(project.file("src/main/resources/drawable/blobhai_trans.ico"))

@@ -147,15 +147,18 @@ class Deck(
         val effect = NestdropControl.Dropdown(N, "StrobeEffect", {Effect.entries.indexOf(it)}, Effect.AnimationSpeed)
         val effectSpan = NestdropControl.RangeSliderWithResetButton(N, "StrobeEffectSpan", 0f..1f, 0f to 1f)
         val trigger = NestdropControl.Dropdown(N, "StrobeTrigger", {Trigger.entries.indexOf(it)}, Trigger.TimesPerSecond)
-        val waveForm = NestdropControl.Dropdown(N, "StrobeRamp", {Waveform.entries.indexOf(it)}, Waveform.Square)
         val effectSpeed = NestdropControl.Slider(N, "StrobeSpeed", 0.01f..30f, 3f)
         val pulseWidth = NestdropControl.SliderWithResetButton(N, "StrobePulseWidth", 0f..1f, 1f)
+        val waveForm = NestdropControl.Dropdown(N, "StrobeRamp", {Waveform.entries.indexOf(it)}, Waveform.Square)
         val enabled = NestdropControl.ToggleButton(N, "StrobeOnOff", false)
 
         suspend fun startFlows() {
+            effect.startFlows()
             effectSpan.startFlows()
+            trigger.startFlows()
             effectSpeed.startFlows()
             pulseWidth.startFlows()
+            waveForm.startFlows()
             enabled.startFlows()
 
             Link.bpm
