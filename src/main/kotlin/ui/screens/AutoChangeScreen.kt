@@ -92,7 +92,12 @@ private fun autoChangeRow(
                 scope.launch { onNext() }
             },
         ) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = deck.color, modifier = Modifier.padding(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Next",
+                tint = deck.color,
+                modifier = Modifier.padding(8.dp)
+            )
         }
 
 //        Button(
@@ -109,7 +114,9 @@ private fun autoChangeRow(
 
 
 @Composable
-fun autoChangeScreen(vararg decks: Deck) {
+fun autoChangeScreen(
+    decks: List<Deck>,
+) {
     // autochange
     // next
     // current
@@ -121,17 +128,20 @@ fun autoChangeScreen(vararg decks: Deck) {
             .fillMaxWidth(0.9f),
         horizontalAlignment = Alignment.CenterHorizontally,
 
-    ) {
+        ) {
         Row(
             horizontalArrangement = horizontal,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
             decks.forEach { deck ->
-                autoChangeRow(
-                    deck, "Preset Queue", deck.presetQueue.autoChange, deck.presetQueue.name, "Next"
-                ) {
-                    deck.presetQueue.next()
+                val enabled by deck.enabled.collectAsState()
+                if (enabled) {
+                    autoChangeRow(
+                        deck, "Preset Queue", deck.presetQueue.autoChange, deck.presetQueue.name, "Next"
+                    ) {
+                        deck.presetQueue.next()
+                    }
                 }
             }
         }
@@ -143,10 +153,13 @@ fun autoChangeScreen(vararg decks: Deck) {
                 .fillMaxWidth()
         ) {
             decks.forEach { deck ->
-                autoChangeRow(
-                    deck, "Preset", deck.preset.autoChange, deck.preset.name, "Next"
-                ) {
-                    deck.preset.next()
+                val enabled by deck.enabled.collectAsState()
+                if (enabled) {
+                    autoChangeRow(
+                        deck, "Preset", deck.preset.autoChange, deck.preset.name, "Next"
+                    ) {
+                        deck.preset.next()
+                    }
                 }
             }
         }
@@ -158,10 +171,13 @@ fun autoChangeScreen(vararg decks: Deck) {
                 .fillMaxWidth()
         ) {
             decks.forEach { deck ->
-                autoChangeRow(
-                    deck, "IMG Sprite", deck.imgSprite.autoChange, deck.imgSprite.name, "Next"
-                ) {
-                    deck.imgSprite.next()
+                val enabled by deck.enabled.collectAsState()
+                if (enabled) {
+                    autoChangeRow(
+                        deck, "IMG Sprite", deck.imgSprite.autoChange, deck.imgSprite.name, "Next"
+                    ) {
+                        deck.imgSprite.next()
+                    }
                 }
             }
         }
@@ -172,10 +188,13 @@ fun autoChangeScreen(vararg decks: Deck) {
                 .fillMaxWidth()
         ) {
             decks.forEach { deck ->
-                autoChangeRow(
-                    deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange, deck.imgSpriteFx.name, "Next"
-                ) {
-                    deck.imgSpriteFx.next()
+                val enabled by deck.enabled.collectAsState()
+                if (enabled) {
+                    autoChangeRow(
+                        deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange, deck.imgSpriteFx.name, "Next"
+                    ) {
+                        deck.imgSpriteFx.next()
+                    }
                 }
             }
         }

@@ -3,11 +3,8 @@ package ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -30,11 +27,12 @@ import androidx.compose.ui.unit.dp
 import customTags
 import nestdrop.deck.Deck
 import ui.components.lazyList
-import java.awt.SystemColor.text
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun tagEditScreen(vararg decks: Deck) {
+fun tagEditScreen(
+    decks: List<Deck>,
+) {
 
     val customTagsCollected by customTags.collectAsState()
 
@@ -57,6 +55,9 @@ fun tagEditScreen(vararg decks: Deck) {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
+
                     var newTagName by remember { mutableStateOf(TextFieldValue("")) }
 
                     val newTag = if (newTagName.text.length > 3) {
@@ -76,7 +77,9 @@ fun tagEditScreen(vararg decks: Deck) {
                             onValueChange = { newText ->
                                 newTagName = newText
                             },
-                            singleLine = true
+                            singleLine = true,
+                            modifier = Modifier
+                                .weight(0.6f)
                         )
                         Button(
                             onClick = {
@@ -90,13 +93,14 @@ fun tagEditScreen(vararg decks: Deck) {
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
+                            modifier = Modifier
+                                .weight(0.3f)
                         ) {
                             if(newTag == null) {
                                 Text("Enter text")
                             } else {
-                                Text("Add ${newTag}")
+                                Text("Add $newTag")
                             }
-
                         }
                     }
                 }
@@ -111,6 +115,9 @@ fun tagEditScreen(vararg decks: Deck) {
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
+
                     val preset by deck.preset.name.collectAsState()
                     val isTagged = preset.substringBeforeLast(".milk") in entries
 

@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
+import nestdrop.deck.PresetQueues
 import ui.components.verticalScroll
 import ui.screens.ColorControl
 import ui.screens.autoChangeScreen
@@ -42,7 +43,6 @@ import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreen
 import ui.screens.presetQueues
 import ui.screens.presetScreen
-import ui.screens.presetScreenSingle
 import ui.screens.scribbles.ButtonScreen
 import ui.screens.scribbles.SliderScreen
 import ui.screens.spoutScreen
@@ -51,7 +51,8 @@ import ui.screens.tagEditScreen
 @Composable
 @Preview
 fun App(
-    vararg decks: Deck,
+    presetQueues: PresetQueues,
+    decks: List<Deck>,
 ) {
 
     MaterialTheme(colors = darkColors()) {
@@ -60,9 +61,12 @@ fun App(
                 Column(
 //                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    beatProgressScreen(*decks)
-                    decks.forEach {
-                        ColorControl(it)
+                    beatProgressScreen(decks)
+                    decks.forEach { deck ->
+                        val enabled by deck.enabled.collectAsState()
+                        if (enabled) {
+                            ColorControl(deck)
+                        }
                     }
                 }
 //                Column {
@@ -71,9 +75,9 @@ fun App(
 //                    }
 //                }
                 Column {
-                    presetScreen(*decks)
-                    tabScreen(*decks)
-                    autoChangeScreen(*decks)
+                    presetScreen(decks)
+                    tabScreen(presetQueues, decks)
+                    autoChangeScreen(decks)
                 }
             }
 
@@ -116,7 +120,8 @@ enum class Tabs(
 
 @Composable
 fun ColumnScope.tabScreen(
-    vararg decks: Deck,
+    presetQueues: PresetQueues,
+    decks: List<Deck>,
 ) {
     var currentTab by remember { mutableStateOf(Tabs.PresetQueues) }
     val tabs = Tabs.entries
@@ -137,21 +142,24 @@ fun ColumnScope.tabScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 decks.forEach { deck ->
-                                    val nameMutableStateFlow = getName(deck)
-                                    val name by nameMutableStateFlow.collectAsState()
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(deck.dimmedColor)
-                                            .padding(vertical = 4.dp)
-                                            .height(24.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = name,
+                                    val enabled by deck.enabled.collectAsState()
+                                    if(enabled) {
+                                        val nameMutableStateFlow = getName(deck)
+                                        val name by nameMutableStateFlow.collectAsState()
+                                        Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                        )
+                                                .background(deck.dimmedColor)
+                                                .padding(vertical = 4.dp)
+                                                .height(24.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                text = name,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            )
+                                        }
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -169,13 +177,13 @@ fun ColumnScope.tabScreen(
         when (currentTab) {
             Tabs.PresetQueues -> {
                 verticalScroll {
-                    presetQueues(*decks)
+                    presetQueues(presetQueues, decks)
                 }
             }
 
             Tabs.ImgSprites -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    imgSpritesScreen(*decks)
+                    imgSpritesScreen(decks)
 //                        decks.forEach {
 //                        }
 
@@ -184,7 +192,7 @@ fun ColumnScope.tabScreen(
 
             Tabs.ImgFx -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    imgFxScreen(*decks)
+                    imgFxScreen(decks)
                 }
 //                verticalScroll {
 //                    Row(modifier = Modifier.fillMaxWidth()) {
@@ -196,18 +204,18 @@ fun ColumnScope.tabScreen(
 
             Tabs.SpoutSprites -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    spoutScreen(*decks)
+                    spoutScreen(decks)
                 }
             }
 
             Tabs.TagEdit -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    tagEditScreen(*decks)
+                    tagEditScreen(decks)
                 }
             }
 
             Tabs.Debug -> {
-                debugScreen(*decks)
+                debugScreen(decks)
             }
         }
     }

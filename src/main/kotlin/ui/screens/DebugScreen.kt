@@ -1,12 +1,17 @@
 package ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,25 +22,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import nestdropFolder
-import osc.OSCMessage
-import osc.nestdropPortSend
 import tagMap
+import ui.components.fontDseg14
 import ui.components.lazyList
 import java.io.File
 import kotlin.time.Duration
 import kotlin.time.measureTime
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun debugScreen(
-    vararg decks: Deck
+    decks: List<Deck>,
 ) {
     var scanRunning by remember {
         mutableStateOf(false)
@@ -48,6 +56,14 @@ fun debugScreen(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                text = "NEST\nCTRL",
+                fontFamily = fontDseg14,
+                fontSize = 30.sp,
+                lineHeight = 45.sp,
+                modifier = Modifier.padding(32.dp)
+            )
+            Spacer(modifier = Modifier.width(30.dp))
             Button(
                 {
                     scope.launch {
@@ -67,6 +83,8 @@ fun debugScreen(
             if (scanDuration > Duration.ZERO) {
                 Text("Scan took $scanDuration")
             }
+
+
         }
 
         val presetsMap by presetsMap.collectAsState()
@@ -74,14 +92,48 @@ fun debugScreen(
 
         lazyList {
             val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
+            var lastCategory: Pair<String, String?>? = null
             presetsMap.forEach { (name, presetEntry) ->
+                val currentCategory = presetEntry.category to presetEntry.subCategory
+                if(currentCategory != lastCategory) {
+                    stickyHeader(currentCategory) {
+                        Row(
+                            modifier = Modifier
+                                .background(Brush.verticalGradient(
+                                    listOf(
+                                        Color.Black,
+                                        MaterialTheme.colors.background,
+                                    )
+                                ))
+//                                .background(MaterialTheme.colors.background)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+//                            Spacer(modifier = Modifier.width(30.dp))
+                            Text(currentCategory.first, modifier = Modifier.padding(16.dp))
+                            val subCategory = currentCategory.second
+                            if(subCategory != null) {
+                                Text(" > ", modifier = Modifier.padding(16.dp))
+                                Text(subCategory, modifier = Modifier.padding(16.dp))
+                            }
+                        }
+                    }
+
+                    lastCategory = currentCategory
+                }
+
                 item(key = name) {
                     val image = remember { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
                     Row {
-                        Image(bitmap = image, contentDescription = presetEntry.previewPath)
+                        Column {
+                            Image(bitmap = image, contentDescription = presetEntry.previewPath)
+                            Text(presetEntry.id.toString())
+                        }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             decks.forEach { deck ->
+                                val enabled by deck.enabled.collectAsState()
+
                                 Button(
                                     onClick = {
                                         scope.launch {
@@ -90,14 +142,15 @@ fun debugScreen(
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         backgroundColor = deck.dimmedColor
-                                    )
+                                    ),
+                                    enabled = enabled
                                 ) {
-                                    Text(presetEntry.id.toString())
+                                    Text("deck: ${deck.N}")
                                 }
                             }
                         }
                         Column(
-                            modifier = Modifier.width(150.dp)
+                            modifier = Modifier.width(300.dp)
                         ) {
                             val tags = tagMap[name] ?: emptySet()
                             tags.forEach {
@@ -106,7 +159,7 @@ fun debugScreen(
                         }
 //                        Text("${presetEntry.id}")
                         Spacer(modifier = Modifier.width(10.dp))
-                        Text(presetEntry.path)
+                        Text(presetEntry.name)
                     }
                 }
             }
@@ -119,7 +172,8 @@ fun imageFromFile(file: File): ImageBitmap {
     return org.jetbrains.skia.Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
 }
 
-val presetsMap = MutableStateFlow<Map<String, PresetLocation>>(emptyMap())
+val presetsMap = MutableStateFlow<Map<String, PresetLocation.Milk>>(emptyMap())
+val spritesMap = MutableStateFlow<Map<String, PresetLocation.Img>>(emptyMap())
 
 data class AutoplayState(
     val presetQueue: Boolean,
@@ -135,34 +189,43 @@ data class AutoplayState(
     }
 }
 
-suspend fun nestdropSetPreset(id: Int, deck: Int, hardcut: Boolean = false) {
-    nestdropPortSend(
-        OSCMessage("/PresetID/$id/Deck$deck", if (hardcut) 0 else 1)
-    )
+enum class PresetType {
+    MILK,
+    IMG,
 }
 
-data class PresetLocation(
-    val name: String,
-    val id: Int,
-    val path: String,
-    val previewPath: String,
-    val category: String,
-    val subCategory: String? = null,
-)
+sealed class PresetLocation {
+    abstract val id: Int
+    data class Milk(
+        val name: String,
+        override val id: Int,
+        val path: String,
+        val previewPath: String,
+        val category: String,
+        val subCategory: String? = null,
+    ): PresetLocation()
+
+    data class Img(
+        val name: String,
+        override val id: Int,
+        val path: String,
+        val category: String,
+        val subCategory: String? = null,
+    ): PresetLocation()
+}
 
 fun scanPresets() {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
 
     var id: Int = 0
-    val categories = presetsFolder.listFiles().filter { it.isDirectory }
-    val map = categories.flatMap { categoryFolder ->
-        val categoryFiles = categoryFolder.listFiles().filter { it.isFile }.filter { it.extension == "milk" }
+    val milkPresets = presetsFolder.listFiles().orEmpty().filter { it.isDirectory }.flatMap { categoryFolder ->
+        val categoryFiles = categoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "milk" }
         val categoryPresets = categoryFiles.filterNotNull().map { file ->
             val name = file.nameWithoutExtension
             val path = file.toRelativeString(presetsFolder)
             val previewPath = file.resolveSibling(file.nameWithoutExtension + ".jpg").toRelativeString(presetsFolder)
 
-            PresetLocation(
+            PresetLocation.Milk(
                 name = name,
                 id = id++,
                 path = path,
@@ -170,10 +233,10 @@ fun scanPresets() {
                 category = categoryFolder.name,
             )
         }
-        val subCategories = categoryFolder.listFiles().filter { it.isDirectory }
+        val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }
 
         val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
-            val subCategoryFiles = subCategoryFolder.listFiles().filter { it.isFile }.filter { it.extension == "milk" }
+            val subCategoryFiles = subCategoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "milk" }
             if (subCategoryFiles.isNotEmpty()) {
                 if (index == 0) {
                     if (categoryPresets.isNotEmpty()) {
@@ -189,7 +252,7 @@ fun scanPresets() {
                 val previewPath =
                     file.resolveSibling(file.nameWithoutExtension + ".jpg").toRelativeString(presetsFolder)
 
-                PresetLocation(
+                PresetLocation.Milk(
                     name = name,
                     id = id++,
                     path = path,
@@ -202,6 +265,51 @@ fun scanPresets() {
 
         categoryPresets + subCategoryEntries
     }.associateBy { it.name }
+
+    val spritesFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Sprites")
+
+    val imgPresets = spritesFolder.listFiles().orEmpty().filter { it.isDirectory }.flatMap { categoryFolder ->
+        val categoryFiles = categoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "png" || it.extension == "jpg" }
+        val categoryPresets = categoryFiles.filterNotNull().map { file ->
+            val name = file.name
+            val path = file.toRelativeString(presetsFolder)
+
+            PresetLocation.Img(
+                name = name,
+                id = id++,
+                path = path,
+                category = categoryFolder.name,
+            )
+        }
+        val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }
+
+        val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
+            val subCategoryFiles = subCategoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "milk" }
+            if (subCategoryFiles.isNotEmpty()) {
+                if (index == 0) {
+                    if (categoryPresets.isNotEmpty()) {
+                        id++
+                    }
+                } else {
+                    id++
+                }
+            }
+            subCategoryFiles.filterNotNull().map { file ->
+                val name = file.name
+                val path = file.toRelativeString(presetsFolder)
+
+                PresetLocation.Img(
+                    name = name,
+                    id = id++,
+                    path = path,
+                    category = categoryFolder.name,
+                )
+            }
+        }
+
+        categoryPresets + subCategoryEntries
+    }.associateBy { it.name }
+
 
 //    val map = presetsFolder.walkTopDown().filter { it.extension == "milk" }
 //
@@ -225,5 +333,6 @@ fun scanPresets() {
 //        )
 //    }.toMap()
 
-    presetsMap.value = map
+    presetsMap.value = milkPresets
+    spritesMap.value = imgPresets
 }

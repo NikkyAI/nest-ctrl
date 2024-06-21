@@ -26,6 +26,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import logging.debugF
 import logging.infoF
+import logging.warnF
 import nestdrop.NestdropControl
 import nestdrop.NestdropSpriteQueue
 import nestdrop.PerformanceLogRow
@@ -35,6 +36,7 @@ import nestdrop.imgFxMap
 import osc.OSCMessage
 import osc.nestdropPortSend
 import osc.nestdropSendChannel
+import presetQueues
 import utils.HistoryNotNull
 import utils.runningHistory
 import kotlin.math.roundToInt
@@ -46,8 +48,9 @@ class Deck(
     val first: Boolean,
     val last: Boolean,
     val hexColor: Long,
-    val presetQueues: PresetQueues
+//    val presetQueues: PresetQueues
 ) {
+    val enabled = MutableStateFlow(false)
     val color = Color(hexColor)
     val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
 
@@ -329,10 +332,11 @@ class Deck(
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(presetQueues) { index, queues ->
+//                    logger.warnF { "${deckName } finding queue by index $index in $queues" }
                     queues.getOrNull(index)
                         ?.takeIf { it.deck == N }
                 }.onEach { queue ->
-                    presetQueue.value = queue
+                    this.value = queue
                 }
                 .launchIn(flowScope)
 
@@ -341,7 +345,7 @@ class Deck(
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .onEach { (queue, previousQueue) ->
                     logger.infoF { "$deckName queue: ${queue?.name}" }
-                    presetQueue.name.value = queue?.name ?: "disabled"
+                    this.name.value = queue?.name ?: "error"
                     if (queue != null && previousQueue?.name != queue.name) {
                         nestdropPortSend(
                             OSCMessage("/Queue/${queue.name}", listOf(1))
@@ -835,6 +839,6 @@ class Deck(
     }
 
 
-    val deckName: String = "deck$N"
+    val deckName: String = "Deck $N"
 }
 

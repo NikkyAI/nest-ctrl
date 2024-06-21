@@ -1,6 +1,10 @@
 package nestdrop
 
+import flowScope
 import io.klogging.logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import logging.errorF
 import logging.infoF
 import nestdrop.deck.Deck
@@ -12,14 +16,30 @@ import java.io.File
 
 private val logger = logger("nestdrop.loadQueuesKt")
 
-suspend fun loadQueues(
+val nestdropDeckCount = MutableStateFlow(1)
+
+suspend fun loadNumberOfDecks(): Int {
+    return runCommandCaptureOutput(
+        "xq", "-x", "/NestDropSettings/MainWindow/Settings_General/@NbDecks",
+        workingDir = File("."),
+        input = nestdropConfig
+    ).trim().toInt()
+}
+
+suspend fun loadNestdropConfig(
     presetQueues: PresetQueues,
-    deck1: Deck,
-    deck2: Deck,
+    decks: List<Deck>,
+//    deck1: Deck,
+//    deck2: Deck,
 ) {
+    val numberOfDecks = loadNumberOfDecks()
+    nestdropDeckCount.value = numberOfDecks
+    decks.forEach { deck ->
+        deck.enabled.value = deck.N <= numberOfDecks
+    }
+
     logger.infoF { "loading queues from $nestdropConfig" }
     try {
-
         val queueCount = runCommandCaptureOutput(
             "xq", "-x", "count(/NestDropSettings/QueueWindows/*)",
             workingDir = File("."),
@@ -31,8 +51,9 @@ suspend fun loadQueues(
         }
 
         presetQueues.queues.value = queues.filter { it.open && it.type == QueueType.Preset }
-        deck1.spriteQueues.value = queues.filter { it.open && it.deck == 1 && it.type == QueueType.Sprite }
-        deck2.spriteQueues.value = queues.filter { it.open && it.deck == 2 && it.type == QueueType.Sprite }
+        decks.forEach { deck ->
+            deck.spriteQueues.value = queues.filter { it.open && it.deck == deck.N && it.type == QueueType.Sprite }
+        }
     } catch (e: Exception) {
         logger.errorF(e) { "failed to load queues" }
     }

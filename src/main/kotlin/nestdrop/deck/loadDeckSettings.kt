@@ -11,10 +11,10 @@ import java.io.File
 
 private val logger = logger("nestdrop.deck.loadDeckSettingsKt")
 
-suspend fun loadDeckSettings(deck1: Deck, deck2: Deck) {
-    listOf(deck1, deck2).forEachIndexed { deckIndex, deck ->
+suspend fun loadDeckSettings(decks: List<Deck>) {
+    decks.forEach { deck ->
         logger.infoF { "loading settings from ${deck.deckName}" }
-        val deckSettings = parseDeckConfig(deckIndex + 1)
+        val deckSettings = parseDeckConfig(deck.N)
 
         deck.ndTime.transitionTime.value = deckSettings.transitTime.value
         deck.ndTime.animationSpeed.value = deckSettings.animationSpeed.value

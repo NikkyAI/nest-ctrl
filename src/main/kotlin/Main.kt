@@ -18,13 +18,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
@@ -47,7 +43,7 @@ import nestdrop.PerformanceLogRow
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdrop.deck.loadDeckSettings
-import nestdrop.loadQueues
+import nestdrop.loadNestdropConfig
 import nestdrop.parsePerformanceLog
 import nestdrop.performanceLogsFlow
 import nestdrop.setupSpriteFX
@@ -61,7 +57,6 @@ import osc.runNestDropSend
 import osc.runResolumeSend
 import osc.startResolumeListener
 import ui.App
-import ui.screens.presetsMap
 import ui.screens.scanPresets
 import ui.splashScreen
 import utils.KWatchChannel
@@ -76,14 +71,26 @@ import kotlin.time.Duration.Companion.seconds
 
 
 private val logger = logger(Main::class.qualifiedName!!)
+//val decks = MutableStateFlow<List<Deck>>(emptyList())
+
+val presetQueues = PresetQueues()
+val decks = List(4) { index ->
+    when(val n = index + 1) {
+        1 -> Deck(n, first = true, last = false, 0xFFBB0000)
+        2 -> Deck(n, first = false, last = false, 0xFF00BB00)
+        3 -> Deck(n, first = false, last = false, 0xFF0000BB)
+        4 -> Deck(n, first = false, last = true, 0xFFBBBB00)
+        else -> null
+    }
+}.filterNotNull()
 
 object Main {
 
     @OptIn(FlowPreview::class)
     suspend fun initApplication(
         presetQueues: PresetQueues,
-        deck1: Deck,
-        deck2: Deck,
+//        deck1: Deck,
+//        deck2: Deck,
     ) {
         setupLogging()
         println("testing logging")
@@ -147,20 +154,35 @@ object Main {
             val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Date())
             val historyFile = historyFolder.resolve("$timestamp.ndjson")
 
-            listOf(
-                deck1.currentState.debounce(3.seconds),
-                deck2.currentState.debounce(3.seconds),
-            )
-                .merge()
-                .onEach {
-                    historyFile.appendText(
-                        json.encodeToString(
-                            Deck.DeckState.serializer(), it
-                        ) + "\n"
-                    )
-                }
-                .flowOn(Dispatchers.IO)
-                .launchIn(flowScope)
+            //TODO: write history to file again
+
+//            decks.flatMapConcat { it ->
+//                it.asFlow().map {
+//                    it.currentState.debounce(1.seconds)
+//                }
+//            }.flattenConcat()
+//                .onEach {
+//                    historyFile.appendText(
+//                        json.encodeToString(
+//                            Deck.DeckState.serializer(), it
+//                        ) + "\n"
+//                    )
+//                }
+
+//            listOf(
+//                deck1.currentState.debounce(3.seconds),
+//                deck2.currentState.debounce(3.seconds),
+//            )
+//                .merge()
+//                .onEach {
+//                    historyFile.appendText(
+//                        json.encodeToString(
+//                            Deck.DeckState.serializer(), it
+//                        ) + "\n"
+//                    )
+//                }
+//                .flowOn(Dispatchers.IO)
+//                .launchIn(flowScope)
         }
 
         // motion extraction toggles and sliders
@@ -296,7 +318,7 @@ object Main {
                 .launchIn(flowScope)
         }
 
-        startBeatCounter(deck1, deck2)
+        startBeatCounter()
 
         flowScope.launch(Dispatchers.IO) {
 //            performanceLogsMap.value = nestdropPerformanceLog.listFiles().orEmpty().mapNotNull { file ->
@@ -357,25 +379,36 @@ object Main {
                 }
         }
 
-        performanceLogsFlow
-            .sample(500.milliseconds)
-            .filter {
-                it.deck == deck1.N
-            }
-            .onEach {
-                deck1.currentPreset.value = it
-            }
-            .launchIn(flowScope)
-
-        performanceLogsFlow
-            .sample(500.milliseconds)
-            .filter {
-                it.deck == deck2.N
-            }
-            .onEach {
-                deck2.currentPreset.value = it
-            }
-            .launchIn(flowScope)
+        decks.forEach { deck ->
+            performanceLogsFlow
+                .sample(500.milliseconds)
+                .filter {
+                    it.deck == deck.N
+                }
+                .onEach {
+                    deck.currentPreset.value = it
+                }
+                .launchIn(flowScope)
+        }
+//        performanceLogsFlow
+//            .sample(500.milliseconds)
+//            .filter {
+//                it.deck == deck1.N
+//            }
+//            .onEach {
+//                deck1.currentPreset.value = it
+//            }
+//            .launchIn(flowScope)
+//
+//        performanceLogsFlow
+//            .sample(500.milliseconds)
+//            .filter {
+//                it.deck == deck2.N
+//            }
+//            .onEach {
+//                deck2.currentPreset.value = it
+//            }
+//            .launchIn(flowScope)
 
 //        performanceLogsMap
 //            .map {
@@ -398,14 +431,14 @@ object Main {
 
 
         flowScope.launch(Dispatchers.IO) {
+            loadNestdropConfig(presetQueues, decks)
             nestdropConfig.asWatchChannel(KWatchChannel.Mode.SingleFile).consumeEach {
                 if (it.kind == KWatchEvent.Kind.Modified) {
-                    loadQueues(presetQueues, deck1, deck2)
+                    loadNestdropConfig(presetQueues, decks)
                 }
             }
         }
 
-        loadQueues(presetQueues, deck1, deck2)
 
         while (presetQueues.queues.value.isEmpty()) {
             delay(500)
@@ -417,20 +450,34 @@ object Main {
 //            delay(500)
 //        }
 
-        loadConfig(deck1, deck2)
+        loadConfig()
         delay(500)
 
         presetQueues.startFlows()
-        deck1.startFlows()
-        deck2.startFlows()
+        flowScope.launch {
+            decks.forEach { deck ->
+                launch {
+                    deck.startFlows()
+                }
+            }
+        }
+//        deck1.startFlows()
+//        deck2.startFlows()
 
-        loadDeckSettings(deck1, deck2)
+        loadDeckSettings(decks)
+
+        decks.forEach {
+            it.imgSprite.index.value++
+        }
+        decks.forEach {
+            it.imgSprite.index.value--
+        }
 
         // TODO ensure that sprites are set AGAIN correctly
-        deck1.imgSprite.index.value++
-        deck1.imgSprite.index.value--
-        deck2.imgSprite.index.value++
-        deck2.imgSprite.index.value--
+//        deck1.imgSprite.index.value++
+//        deck1.imgSprite.index.value--
+//        deck2.imgSprite.index.value++
+//        deck2.imgSprite.index.value--
 
         logger.infoF { "initializing OSC" }
         initializeSyncedValues()
@@ -443,15 +490,26 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) = runBlocking {
-        val presetQueues = PresetQueues()
-        val deck1 = Deck(1, first = true, last = false, 0xFFBB0000, presetQueues)
-        val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
-
+//        val presetQueues = PresetQueues()
         awaitApplication {
+//            nestdropDeckCount.onEach { deckCount ->
+//                val newDecks = List(deckCount) { index ->
+//                    when(val n = index + 1) {
+//                        1 -> Deck(n, first = true, last = n == deckCount, 0xFFBB0000, presetQueues)
+//                        2 -> Deck(n, first = false, last = n == deckCount, 0xFF00BB00, presetQueues)
+//                        3 -> Deck(n, first = false, last = n == deckCount, 0xFF0000BB, presetQueues)
+//                        4 -> Deck(n, first = false, last = n == deckCount, 0xFFBBBB00, presetQueues)
+//                        else -> null
+//                    }
+//                }.filterNotNull()
+//                decks.value = newDecks
+//            }.launchIn(flowScope)
+//            val deck1 = Deck(1, first = true, last = false, 0xFFBB0000, presetQueues)
+//            val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
 
             var isSplashScreenShowing by remember { mutableStateOf(true) }
             LaunchedEffect(Unit) {
-                initApplication(presetQueues, deck1, deck2)
+                initApplication(presetQueues)
                 logger.info { "await application" }
                 isSplashScreenShowing = false
             }
@@ -482,9 +540,7 @@ object Main {
                         useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
                     )
                 ) {
-                    App(
-                        deck1, deck2
-                    )
+                    App(presetQueues, decks)
                 }
 
 

@@ -93,7 +93,9 @@ fun presetScreenSingle(deck: Deck) {
 }
 
 @Composable
-fun presetScreen(vararg decks: Deck) {
+fun presetScreen(
+    decks: List<Deck>,
+) {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
     val tagMap by tagMap.collectAsState()
@@ -103,6 +105,9 @@ fun presetScreen(vararg decks: Deck) {
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         decks.forEach { deck ->
+            val enabled by deck.enabled.collectAsState()
+            if(!enabled) return@forEach
+
             Row(
                 modifier = Modifier
                     .weight(0.25f)

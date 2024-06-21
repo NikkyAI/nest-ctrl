@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import logging.debugF
+import logging.errorF
 import logging.infoF
+import presetQueues
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -22,7 +24,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         this@applyConfig.ndStrobe.enabled.value = strobe.enabled
 
         this@applyConfig.triggerTime.value = triggerTime
-        val presetQueuesV = this@applyConfig.presetQueues.queues.value
+        val presetQueuesV = presetQueues.queues.value
 
         run {
             this@applyConfig.presetQueue.autoChange.value = presetQueue.autoChange
@@ -52,7 +54,10 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                         .also { logger.debugF { it } }
                         .isNotEmpty()
                 }
-            } ?: error("failed to load sprite queues on $deckName")
+            } ?: run {
+                logger.errorF { "failed to load sprite queues on $deckName" }
+                emptyList()
+            }
             val spriteQueueValue = spriteQueuesValue.firstOrNull() { it.name == spriteQueue.name }
 
             run {

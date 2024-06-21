@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nestdrop.Queue
 import nestdrop.deck.Deck
@@ -29,7 +28,9 @@ import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun spoutScreen(vararg decks: Deck) {
+fun spoutScreen(
+    decks: List<Deck>,
+) {
 
 
     val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {
@@ -51,6 +52,8 @@ fun spoutScreen(vararg decks: Deck) {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
 
                     val presetNullable by deck.spout.collectAsState()
                     val preset = presetNullable
@@ -95,10 +98,13 @@ fun spoutScreen(vararg decks: Deck) {
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
+
                     val queue: Queue? by deck.spoutQueue.collectAsState()
                     val activeIndexState = deck.spout.index
                     val activeIndex by activeIndexState.collectAsState()
-                    val preset = queue?.presets?.getOrNull(i) ?: return@forEach
+                    val preset = queue?.presets?.getOrNull(i)
                     val queueLength = queue?.presets?.size ?: 0
 
 
@@ -108,31 +114,33 @@ fun spoutScreen(vararg decks: Deck) {
 //                            .width(400.dp)
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        VerticalRadioButton(
-                            selected = (activeIndex == i),
-                            onClick = {
-                                if (activeIndex == i) {
-                                    activeIndexState.value = -1
-                                } else {
-                                    activeIndexState.value = i
-                                }
-                            },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = deck.color,
-                                unselectedColor = deck.dimmedColor
-                            ),
-                            height = 36.dp,
-                            connectTop = i > 0,
-                            connectBottom = i < queueLength - 1,
-                        )
+                        if(preset != null) {
+                            VerticalRadioButton(
+                                selected = (activeIndex == i),
+                                onClick = {
+                                    if (activeIndex == i) {
+                                        activeIndexState.value = -1
+                                    } else {
+                                        activeIndexState.value = i
+                                    }
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = deck.color,
+                                    unselectedColor = deck.dimmedColor
+                                ),
+                                height = 36.dp,
+                                connectTop = i > 0,
+                                connectBottom = i < queueLength - 1,
+                            )
 
-                        Text(
-                            "FX: ${preset.effects ?: 0}",
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            preset.label,
-                        )
+                            Text(
+                                "FX: ${preset.effects ?: 0}",
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                preset.label,
+                            )
+                        }
                     }
                 }
             }

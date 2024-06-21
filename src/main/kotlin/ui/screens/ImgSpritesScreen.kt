@@ -28,7 +28,9 @@ import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun imgSpritesScreen(vararg decks: Deck) {
+fun imgSpritesScreen(
+    decks: List<Deck>,
+) {
 
     val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {
         decks.maxOfOrNull {
@@ -48,6 +50,8 @@ fun imgSpritesScreen(vararg decks: Deck) {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
 
                     val current by deck.imgSprite.name.collectAsState()
 
@@ -87,54 +91,59 @@ fun imgSpritesScreen(vararg decks: Deck) {
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
+
                     val queue: Queue? by deck.spriteQueue.collectAsState()
                     val activeIndexState = deck.imgSprite.index
                     val activeIndex by activeIndexState.collectAsState()
 //                    val (queue, activeIndex) = pairs.getValue(deck.N)
-                    val preset = queue?.presets?.getOrNull(i) ?: return@forEach
-                    val queueLength = queue?.presets?.size ?: 0
 
                     val toggledStateflow = deck.imgSprite.toggles.getOrNull(i) ?: return@forEach
                     val toggled by toggledStateflow.collectAsState()
 
+                    val preset = queue?.presets?.getOrNull(i)
+                    val queueLength = queue?.presets?.size ?: 0
 
                     Row(
                         modifier = Modifier
                             .weight(0.2f)
 //                            .width(400.dp)
                     ) {
-                        VerticalRadioButton(
-                            selected = (activeIndex == i),
-                            onClick = {
-                                if (activeIndex == i) {
-                                    activeIndexState.value = -1
-                                } else {
-                                    activeIndexState.value = i
-                                }
-                            },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = deck.color,
-                                unselectedColor = deck.dimmedColor
-                            ),
-                            height = 36.dp,
-                            connectTop = i > 0,
-                            connectBottom = i < queueLength - 1,
-                        )
+                        if(preset != null) {
+                            VerticalRadioButton(
+                                selected = (activeIndex == i),
+                                onClick = {
+                                    if (activeIndex == i) {
+                                        activeIndexState.value = -1
+                                    } else {
+                                        activeIndexState.value = i
+                                    }
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = deck.color,
+                                    unselectedColor = deck.dimmedColor
+                                ),
+                                height = 36.dp,
+                                connectTop = i > 0,
+                                connectBottom = i < queueLength - 1,
+                            )
 
-                        Checkbox(
-                            checked = toggled,
-                            onCheckedChange = {
-                                toggledStateflow.value = it
-                            },
-                            colors = CheckboxDefaults.colors(
-                                checkmarkColor = deck.dimmedColor,
-                                uncheckedColor = deck.color,
-                                checkedColor = deck.color,
-                                disabledColor = Color.DarkGray
-                            ),
-                        )
+                            Checkbox(
+                                checked = toggled,
+                                onCheckedChange = {
+                                    toggledStateflow.value = it
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkmarkColor = deck.dimmedColor,
+                                    uncheckedColor = deck.color,
+                                    checkedColor = deck.color,
+                                    disabledColor = Color.DarkGray
+                                ),
+                            )
 
-                        Text(preset.name, modifier = Modifier.fillMaxWidth())
+                            Text(preset.name, modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }

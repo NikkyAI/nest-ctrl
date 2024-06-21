@@ -27,10 +27,10 @@ class PresetQueues(
     suspend fun startFlows() {
         logger.infoF { "initializing preset queues" }
 
-        queues.onEach {
-            logger.infoF { "queues updated" }
-        }
-            .launchIn(flowScope)
+//        queues.onEach {
+//            logger.infoF { "queues updated" }
+//        }
+//            .launchIn(flowScope)
 
         queues
             .combine(
@@ -55,8 +55,10 @@ class PresetQueues(
                 }
             }
             .onEach {
-                logger.infoF { "queues updated" }
                 mutableQueues.value = it
+                logger.infoF { "preset queues updated: ${it.joinToString { 
+                    "name: ${it.name} deck: ${it.deck} presets: ${it.presets.size}"
+                }}" }
             }
             .launchIn(flowScope)
 

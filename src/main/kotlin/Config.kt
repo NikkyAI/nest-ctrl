@@ -27,10 +27,16 @@ val configScope = CoroutineScope(
 data class Config(
     val beats: Int = 32,
     val deck1: DeckConfig = DeckConfig(
-        triggerTime = 0.75f
+        triggerTime = 0.5f + 0.125f
     ),
     val deck2: DeckConfig = DeckConfig(
-        triggerTime = 0.25f
+        triggerTime = 0.125f
+    ),
+    val deck3: DeckConfig = DeckConfig(
+        triggerTime = 0.75f + 0.125f
+    ),
+    val deck4: DeckConfig = DeckConfig(
+        triggerTime = 0.25f + 0.125f
     )
 )
 
@@ -124,10 +130,32 @@ val json5 = Json5 {
 suspend fun updateConfig(block: suspend Config.() -> Config) {
     config.value = config.value.block()
 }
+suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
+    updateConfig {
+        when (N) {
+            1 -> {
+                copy(deck1 = deckConfig)
+            }
+            2 -> {
+                copy(deck2 = deckConfig)
+            }
+            3 -> {
+                copy(deck3 = deckConfig)
+            }
+            4 -> {
+                copy(deck4 = deckConfig)
+            }
+            else -> {
+                copy()
+            }
+        }
+    }
+}
 
 suspend fun loadConfig(
-    deck1: Deck,
-    deck2: Deck,
+//    decks: List<Deck>,
+//    deck1: Deck,
+//    deck2: Deck,
 ) {
     if (configFile.exists()) {
         configFile.readText()
@@ -152,26 +180,41 @@ suspend fun loadConfig(
         .launchIn(configScope)
 
 
-    deck1.configFlow
-        .onEach { deckConfig ->
-            updateConfig {
-                copy(deck1 = deckConfig)
+    decks.forEach { deck ->
+        deck.configFlow
+            .onEach { deckConfig ->
+                deck.updateConfig(deckConfig)
             }
-        }
-        .launchIn(configScope)
-    deck2.configFlow
-        .onEach { deckConfig ->
-            updateConfig {
-                copy(deck2 = deckConfig)
-            }
-        }
-        .launchIn(configScope)
+            .launchIn(configScope)
+    }
+//    deck1.configFlow
+//        .onEach { deckConfig ->
+//            updateConfig {
+//                copy(deck1 = deckConfig)
+//            }
+//        }
+//        .launchIn(configScope)
+//    deck2.configFlow
+//        .onEach { deckConfig ->
+//            updateConfig {
+//                copy(deck2 = deckConfig)
+//            }
+//        }
+//        .launchIn(configScope)
 
     config.value.also { config ->
         logger.infoF { "loaded $config" }
         beatFrame.value = config.beats
-        deck1.applyConfig(config.deck1)
-        deck2.applyConfig(config.deck2)
+        decks.forEach { deck ->
+            when (deck.N) {
+                1 -> deck.applyConfig(config.deck1)
+                2 -> deck.applyConfig(config.deck2)
+                3 -> deck.applyConfig(config.deck3)
+                4 -> deck.applyConfig(config.deck4)
+            }
+        }
+//        deck1.applyConfig(config.deck1)
+//        deck2.applyConfig(config.deck2)
     }
 }
 

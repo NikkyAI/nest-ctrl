@@ -25,10 +25,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,12 +33,13 @@ import beatProgress
 import bpmRoundedInt
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
+import ui.components.fontDseg14
 import kotlin.math.max
 import kotlin.math.roundToInt
 
 @Composable
 fun beatProgressScreen(
-    vararg decks: Deck,
+    decks: List<Deck>,
     size: Dp = 200.dp,
     strokeWidth: Dp = 32.dp
 ) {
@@ -50,14 +47,6 @@ fun beatProgressScreen(
 //    val beatProgress  = 0f // 0.25f
 
     //TODO: display current BPM
-
-    val fontFamily = FontFamily(
-        Font(
-            resource = "fonts-DSEG_v046/DSEG14-Classic/DSEG14Classic-Regular.ttf",
-            weight = FontWeight.W400,
-            style = FontStyle.Normal
-        )
-    )
 
     val bpm by Link.bpm.collectAsState()
     val bpmRounded by bpmRoundedInt.collectAsState()
@@ -77,10 +66,16 @@ fun beatProgressScreen(
         Stroke(width = (strokeWidth / 8).toPx(), cap = StrokeCap.Butt)
     }
 
-    val triggerTimes = decks.map { deck ->
+    val triggerTimes = decks.mapNotNull { deck ->
+        val enabled by deck.enabled.collectAsState()
         val triggerTime by deck.triggerTime.collectAsState()
 
-        deck.color to triggerTime
+        if(enabled)
+        {
+            deck.color to triggerTime
+        } else {
+            null
+        }
     }
 
     Row(
@@ -95,13 +90,13 @@ fun beatProgressScreen(
 
             Text(
                 text = "BPM: $bpmRounded",
-                fontFamily = fontFamily,
+                fontFamily = fontDseg14,
 //                modifier = Modifier.padding(8.dp, 0.dp)
             )
             val beatFrameText = frame.toString()
             Text(
                 text = "BEAT: ${currentBeat.toString().padStart(beatFrameText.length, '0')} / $beatFrameText",
-                fontFamily = fontFamily,
+                fontFamily = fontDseg14,
 //                modifier = Modifier.padding(8.dp, 0.dp)
             )
 //        Text(
@@ -183,6 +178,10 @@ fun beatProgressScreen(
             }
 
             decks.forEach { deck ->
+                val enabled by deck.enabled.collectAsState()
+                if(!enabled) {
+                    return@forEach
+                }
                 val triggerTime by deck.triggerTime.collectAsState()
 
                 Row(
@@ -226,7 +225,7 @@ fun beatProgressScreen(
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
                 contentPadding = PaddingValues(horizontal = 4.dp),
             ) {
-                Text("+8", fontFamily = fontFamily)
+                Text("+8", fontFamily = fontDseg14)
             }
             Button(
                 onClick = {
@@ -237,7 +236,7 @@ fun beatProgressScreen(
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
                 contentPadding = PaddingValues(horizontal = 4.dp),
             ) {
-                Text("-8", fontFamily = fontFamily)
+                Text("-8", fontFamily = fontDseg14)
             }
             Button(
                 onClick = {
@@ -248,7 +247,7 @@ fun beatProgressScreen(
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
                 contentPadding = PaddingValues(horizontal = 4.dp),
             ) {
-                Text("32", fontFamily = fontFamily)
+                Text("32", fontFamily = fontDseg14)
             }
             Button(
                 onClick = {
@@ -259,7 +258,7 @@ fun beatProgressScreen(
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
                 contentPadding = PaddingValues(horizontal = 4.dp),
             ) {
-                Text("64", fontFamily = fontFamily)
+                Text("64", fontFamily = fontDseg14)
             }
             Button(
                 onClick = {
@@ -270,7 +269,7 @@ fun beatProgressScreen(
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
                 contentPadding = PaddingValues(horizontal = 4.dp),
             ) {
-                Text("128", fontFamily = fontFamily)
+                Text("128", fontFamily = fontDseg14)
             }
         }
     }

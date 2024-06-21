@@ -95,6 +95,8 @@ class XmlDataClasses {
         val settingCaptureValues: String? = null,
         @SerialName("Type")
         val type: String? = null,
+        @SerialName("Comments")
+        val comments: String? = null,
     )
 
     @Serializable

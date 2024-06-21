@@ -32,7 +32,9 @@ import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun imgFxScreen(vararg decks: Deck) {
+fun imgFxScreen(
+    decks: List<Deck>,
+) {
     lazyList {
         stickyHeader(key = "header") {
             Row(
@@ -47,6 +49,8 @@ fun imgFxScreen(vararg decks: Deck) {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
 
                     val blendModeState = deck.imgSpriteFx.blendMode
                     val blendMode by blendModeState.collectAsState()
@@ -100,6 +104,9 @@ fun imgFxScreen(vararg decks: Deck) {
                     }
             ) {
                 decks.forEach { deck ->
+                    val enabled by deck.enabled.collectAsState()
+                    if(!enabled) return@forEach
+
                     val selectedIndexState = deck.imgSpriteFx.index
                     val selectedIndex by selectedIndexState.collectAsState()
                     val imgFxMap by imgFxMap.collectAsState()

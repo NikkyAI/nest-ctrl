@@ -1,8 +1,13 @@
 import io.klogging.logger
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -17,10 +22,12 @@ import kotlin.time.Duration.Companion.milliseconds
 
 val beatFrame = MutableStateFlow(64) // OscSynced.Value("/beats", 64, target = OscSynced.Target.TouchOSC)
 val beatProgress = MutableStateFlow(0f)
+
 // OscSynced.Value("/beatProgress", 0.0f, receive = false, target = OscSynced.Target.TouchOSC).apply {
 //    logSending = false
 //}
 val bpmRounded = MutableStateFlow(120f)
+
 //    OscSynced.Value("/bpmRounded", 120.0f).apply {
 //    logSending = false
 //}
@@ -29,7 +36,7 @@ val bpmRoundedInt = MutableStateFlow(120)
 private val logger = logger("beatCounter")
 
 suspend fun startBeatCounter(
-    vararg decks: Deck
+//    vararg decks: Deck
 ) {
     @OptIn(FlowPreview::class)
     Link.bpm
@@ -82,46 +89,11 @@ suspend fun startBeatCounter(
         }
             .launchIn(flowScope)
 
-        decks.forEach {
-            it
-                .beatFlow(beatCounter.runningHistoryNotNull())
+        decks.forEach { deck ->
+            deck.beatFlow(beatCounter.runningHistoryNotNull())
                 .launchIn(flowScope)
         }
-//        deck1
-//            .beatFlow(beatCounter.runningHistoryNotNull())
-//            .launchIn(flowScope)
-//        deck2
-//            .beatFlow(beatCounter.runningHistoryNotNull())
-//            .launchIn(flowScope)
 
-
-//            beatCounter.runningHistoryNotNull().combine(
-//                deck1.triggerTime.combine(beatFrame) { a, b -> a * b}
-//            ) { (currentBeat, lastBeat), triggerAt ->
-//                if(!deck1Switched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-//                    deck1Switched.value = true
-//                    deck1.doSwitch()
-//                }
-//            }
-//                .launchIn(flowScope)
-//            beatCounter.runningHistoryNotNull().combine(
-//                deck2.triggerTime.combine(beatFrame) { a, b -> a * b}
-//            ) { (currentBeat, lastBeat), triggerAt ->
-//                if(!deck2Switched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-//                    deck2Switched.value = true
-//                    deck2.doSwitch()
-//                }
-//            }
-//                .launchIn(flowScope)
-
-
-//            Link.beat
-//                .runningHistoryNotNull()
-//                .drop(1)
-//                .onEach { (beats, lastBeats) ->
-//                    beatCounter.value += (beats - lastBeats).coerceAtLeast(0.0)
-//                }
-//                .launchIn(flowScope)
         flowScope.launch {
             var lastLoop = Clock.System.now()
 //            var beats = 0.0

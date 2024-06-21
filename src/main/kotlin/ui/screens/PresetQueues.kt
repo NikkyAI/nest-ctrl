@@ -14,12 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nestdrop.deck.Deck
+import nestdrop.deck.PresetQueues
 import ui.components.HorizontalRadioButton
 import ui.components.VerticalRadioButton
 
 @Composable
-fun presetQueues(vararg decks: Deck) {
-    val presetQueues = decks[0].presetQueues
+fun presetQueues(
+    presetQueues: PresetQueues,
+    decks: List<Deck>,
+) {
+//    val presetQueues = decks[0].presetQueues
     val queues by presetQueues.collectAsState()
 
 //    Column {
@@ -28,6 +32,8 @@ fun presetQueues(vararg decks: Deck) {
 //        }
         Row {
             decks.forEach { deck ->
+                val enabled by deck.enabled.collectAsState()
+                if(!enabled) return@forEach
 
                 val activeIndex by deck.presetQueue.index.collectAsState()
 
@@ -71,6 +77,8 @@ fun presetQueues(vararg decks: Deck) {
                 }
             }
             decks.forEach { deck ->
+                val enabled by deck.enabled.collectAsState()
+                if(!enabled) return@forEach
                 Column {
                     queues.forEachIndexed { i, queue ->
                         val deckSwitch = presetQueues.deckSwitches.getOrNull(i) ?: return@forEachIndexed
@@ -136,6 +144,8 @@ fun presetQueues(vararg decks: Deck) {
                             .height(36.dp)
                     ) {
                         decks.forEach { deck ->
+                            val enabled by deck.enabled.collectAsState()
+//                            if(!enabled) return@forEach
                             HorizontalRadioButton(
                                 selected = (deckNumber == deck.N),
                                 onClick = {
@@ -148,7 +158,8 @@ fun presetQueues(vararg decks: Deck) {
 
                                 connectStart = !deck.first,
                                 connectEnd = !deck.last,
-//                                width = 16.dp
+//                                width = 16.dp,
+                                enabled = enabled
                             )
                         }
                     }
