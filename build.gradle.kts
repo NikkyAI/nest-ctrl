@@ -74,21 +74,23 @@ compose.desktop {
     }
 }
 
-tasks {
-    val packageJar by creating {
-        group = "package"
-//        dependsOn(getByName("packageUberJarForCurrentOS"))
-        doLast {
+project.afterEvaluate {
+    tasks {
+        val packageJar by creating {
+            group = "package"
+            dependsOn(getByName("packageUberJarForCurrentOS"))
+            doLast {
 //            val file = compose.desktop.application.mainJar.asFile.get()
 //            file.copyTo(
 //                project.file("build").resolve("nestctrl.jar"),
 //                overwrite = true
 //            )
-            copy {
-                from(getByName("packageUberJarForCurrentOS"))
-                into(project.file("build"))
-                rename {
-                    "nestctrl.jsr"
+                copy {
+                    from(getByName("packageUberJarForCurrentOS"))
+                    into(project.file("build"))
+                    rename {
+                        "nestctrl.jar"
+                    }
                 }
             }
         }

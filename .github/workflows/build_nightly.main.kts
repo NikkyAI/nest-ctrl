@@ -56,6 +56,7 @@ workflow(
         )
 
         run(command = "./gradlew packageJar --no-daemon")
+        run(command = "ls build")
 
 
         uses(
