@@ -4,7 +4,9 @@
 
 name: 'Test workflow'
 on:
-  push: {}
+  push:
+    branches:
+    - 'main'
 jobs:
   check_yaml_consistency:
     name: 'Check YAML consistency'
@@ -40,7 +42,7 @@ jobs:
       name: 'setup gradle'
       uses: 'gradle/actions/setup-gradle@v3'
     - id: 'step-3'
-      run: './gradlew packageJar  --no-daemon'
+      run: './gradlew packageJar --no-daemon'
     - id: 'step-4'
       name: 'create release'
       uses: 'IsaacShelton/update-existing-release@v1.3.4'

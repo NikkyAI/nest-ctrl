@@ -22,7 +22,9 @@ import io.github.typesafegithub.workflows.yaml.ConsistencyCheckJobConfig
 
 workflow(
     name = "Test workflow",
-    on = listOf(Push()),
+    on = listOf(
+        Push(branches = listOf("main"))
+    ),
     sourceFile = __FILE__,
     consistencyCheckJobConfig = ConsistencyCheckJobConfig.Configuration(
         condition = null,
