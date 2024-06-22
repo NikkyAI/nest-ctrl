@@ -7,13 +7,16 @@
 
 @file:DependsOn("actions:checkout:v4")
 @file:DependsOn("actions:setup-java:v3")
-@file:DependsOn("IsaacShelton:update-existing-release:v1.3.4")
+@file:DependsOn("softprops:action-gh-release:v2.0.6")
+@file:DependsOn("joutvhu:/create-release:v1.0.1")
 @file:DependsOn("gradle:actions__setup-gradle:v3")
 
 import io.github.typesafegithub.workflows.actions.actions.CheckoutV4
+import io.github.typesafegithub.workflows.actions.actions.CreateReleaseV1
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
-import io.github.typesafegithub.workflows.actions.isaacshelton.UpdateExistingRelease
+import io.github.typesafegithub.workflows.actions.softprops.ActionGhRelease
+import io.github.typesafegithub.workflows.actions.softprops.ActionGhReleaseV2
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.Push
 import io.github.typesafegithub.workflows.dsl.expressions.expr
@@ -54,17 +57,22 @@ workflow(
 
         run(command = "./gradlew packageJar --no-daemon")
 
+
         uses(
             name = "create release",
-            action = UpdateExistingRelease(
-                token = expr { github.token },
-                release = "Nightly",
-                tag = "nightly",
-                body = "Nightly build",
-                files = "build/nestctrl.jar",
-//                prerelease = "false", //"true",
-                replace = "true",
-//                updateTag = "true"
+            action = ActionGhRelease(
+                body = "Nightly Build",
+                draft = false,
+                prerelease = true,
+                files = listOf(
+                    "build/nestctrl.jar"
+                ),
+                name = "Nightly",
+                tagName = "nightly",
+                failOnUnmatchedFiles = true,
+//                token = expr { github.token },
+                generateReleaseNotes = true,
+//                makeLatest = ActionGhRelease.MakeLatest.True,
             )
         )
     }
