@@ -54,18 +54,42 @@ compose.desktop {
     application {
         mainClass = "Main"
 
+        mainJar.set(
+            project.file("build").resolve("nestctrl.jar")
+        )
         nativeDistributions {
-            targetFormats(
+//            targetFormats(
 //                TargetFormat.Dmg,
-                TargetFormat.Msi,
+//                TargetFormat.Msi,
 //                TargetFormat.Deb,
-            )
+//            )
             packageName = "nestctrl"
-            packageVersion = "1.0.0"
-            this.vendor = null
+            packageVersion = "0.0.1"
+//            this.vendor = null
 
             windows {
                 iconFile.set(project.file("src/main/resources/drawable/blobhai_trans.ico"))
+            }
+        }
+    }
+}
+
+tasks {
+    val packageJar by creating {
+        group = "package"
+//        dependsOn(getByName("packageUberJarForCurrentOS"))
+        doLast {
+//            val file = compose.desktop.application.mainJar.asFile.get()
+//            file.copyTo(
+//                project.file("build").resolve("nestctrl.jar"),
+//                overwrite = true
+//            )
+            copy {
+                from(getByName("packageUberJarForCurrentOS"))
+                into(project.file("build"))
+                rename {
+                    "nestctrl.jsr"
+                }
             }
         }
     }
