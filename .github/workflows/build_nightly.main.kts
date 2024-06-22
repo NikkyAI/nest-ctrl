@@ -31,7 +31,7 @@ workflow(
 
     }
 ) {
-    job(id = "test_job", runsOn = UbuntuLatest) {
+    job(id = "build_nightly", runsOn = UbuntuLatest) {
         uses(name = "Check out", action = CheckoutV4())
 
         uses(
@@ -50,7 +50,7 @@ workflow(
             action = ActionsSetupGradle()
         )
 
-        run(command = "./gradlew packageJar")
+        run(command = "./gradlew packageJar --no-daemon")
 
         uses(
             name = "create release",
@@ -58,8 +58,9 @@ workflow(
                 token = expr { github.token },
                 release = "Nightly",
                 tag = "nightly",
+                body = "Nightly build",
                 files = "build/nestctrl.jar",
-                prerelease = "true",
+//                prerelease = "false", //"true",
                 replace = "true",
 //                updateTag = "true"
             )
