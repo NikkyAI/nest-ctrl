@@ -52,7 +52,6 @@ import osc.initializeSyncedValues
 import osc.resolumeClipConnect
 import osc.resolumeLayerClear
 import osc.resolumeLayerStates
-import osc.resyncToTouchOSC
 import osc.runNestDropSend
 import osc.runResolumeSend
 import osc.startResolumeListener
@@ -483,7 +482,6 @@ object Main {
         initializeSyncedValues()
         delay(500)
         logger.infoF { "re-emitting all values" }
-        resyncToTouchOSC.value++
 
         scanPresets()
     }

@@ -1,13 +1,8 @@
 import io.klogging.logger
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -15,7 +10,6 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import logging.traceF
-import nestdrop.deck.Deck
 import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
@@ -76,8 +70,6 @@ suspend fun startBeatCounter(
                 decks.forEach {
                     it.resetLatch()
                 }
-//                deck1.resetLatch()
-//                deck2.resetLatch()
             }
         }
             .launchIn(flowScope)

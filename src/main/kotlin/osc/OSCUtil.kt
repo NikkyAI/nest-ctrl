@@ -18,6 +18,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -50,71 +51,88 @@ private val logger = logger("osc.OSCUtil")
 val nestdropSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 val arenaSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 
+val nestdropAddress = MutableStateFlow(
+    InetSocketAddress(
+        InetAddress.getLoopbackAddress(), // InetAddress.getByName("127.0.0.1"),
+        8000
+    )
+)
+val resolumeArenaSendAddress = MutableStateFlow(
+    InetSocketAddress(
+        InetAddress.getLoopbackAddress(), // InetAddress.getByName("127.0.0.1"),
+        7000
+    )
+)
+val resolumeArenaReceiveAddress = MutableStateFlow(
+    InetSocketAddress(
+        InetAddress.getLoopbackAddress(),
+        7001
+    )
+)
+
 suspend fun runNestDropSend() {
-    coroutineScope {
-        val nestdropPort = // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
-            OSCPortOutBuilder()
-                .setRemoteSocketAddress(
-                    InetSocketAddress(
-                        InetAddress.getByName("127.0.0.1"),
-                        8000
+    nestdropAddress.collectLatest { address ->
+        coroutineScope {
+            val nestdropPort = // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
+                OSCPortOutBuilder()
+                    .setRemoteSocketAddress(
+                        address
                     )
-                )
-                .build()
-        nestdropPort.connect()
-        logger.debugF { "constructed OSC port" }
-        for (oscPacket in nestdropSendChannel) {
-            try {
-                logger.traceF { "ND OUT: ${oscPacket.stringify()}" }
-                nestdropPort.send(oscPacket)
-            } catch (e: Exception) {
-                logger.error(e) {}
+                    .build()
+            nestdropPort.connect()
+            logger.debugF { "constructed OSC port" }
+            for (oscPacket in nestdropSendChannel) {
+                try {
+                    logger.traceF { "ND OUT: ${oscPacket.stringify()}" }
+                    nestdropPort.send(oscPacket)
+                } catch (e: Exception) {
+                    logger.error(e) {}
+                }
             }
+            logger.error { "port closed" }
+            nestdropPort.close()
         }
-        logger.error { "port closed" }
-        nestdropPort.close()
+
     }
 }
 
 suspend fun runResolumeSend() {
-    coroutineScope {
-        val arenaPort = // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
-            OSCPortOutBuilder()
-                .setRemoteSocketAddress(
-                    InetSocketAddress(
-                        InetAddress.getLocalHost(),
-                        7000
-                    )
-                )
-                .build()
-        arenaPort.connect()
 
-        logger.debugF { "constructed OSC port" }
-        val job = launch {
-            while (true) {
-                delay(50)
-                val oscMessages = arenaSendChannel.receiveAvailable(32)
-                if (oscMessages.isNotEmpty()) {
+    resolumeArenaSendAddress.collectLatest { address ->
+        coroutineScope {
+            val arenaPort = // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
+                OSCPortOutBuilder()
+                    .setRemoteSocketAddress(address)
+                    .build()
+            arenaPort.connect()
+
+            logger.debugF { "constructed OSC port" }
+            val job = launch {
+                while (true) {
+                    delay(50)
+                    val oscMessages = arenaSendChannel.receiveAvailable(32)
+                    if (oscMessages.isNotEmpty()) {
 //                    oscMessages.forEach {
 //                        logger.debugF { "Arena OUT: ${it.stringify()}" }
 //                    }
 //                logger.debugF { "sending ${packets.size} packets" }
-                    val oscPacket = if (oscMessages.size == 1) {
-                        oscMessages.first()
-                    } else {
-                        OSCBundle(oscMessages)
-                    }
-                    try {
-                        arenaPort.send(oscPacket)
-                    } catch (e: Exception) {
-                        logger.errorF(e) { "failed to send messages: ${oscMessages.joinToString { it.stringify() }} " }
+                        val oscPacket = if (oscMessages.size == 1) {
+                            oscMessages.first()
+                        } else {
+                            OSCBundle(oscMessages)
+                        }
+                        try {
+                            arenaPort.send(oscPacket)
+                        } catch (e: Exception) {
+                            logger.errorF(e) { "failed to send messages: ${oscMessages.joinToString { it.stringify() }} " }
+                        }
                     }
                 }
             }
+            job.join()
+            logger.error { "port closed" }
+            arenaPort.close()
         }
-        job.join()
-        logger.error { "port closed" }
-        arenaPort.close()
     }
 }
 
@@ -146,7 +164,7 @@ fun connectSpecificClip(
             target = OscSynced.Target.ResolumeArena
         ) { address, value ->
 //            updateResolumeLayerState(resolumeLayerIndex(group, layer), -1, false)
-            if(value < 0) {
+            if (value < 0) {
                 listOf(
                     OSCMessage("/composition/layers/$layerIndex/clear", 1),
                     OSCMessage("/composition/layers/$layerIndex/clear", 0),
@@ -178,9 +196,11 @@ val resolumeGroupSizes = sequence {
 //        yield(1)
 //    }
 }.toList()
+
 fun resolumeLayerIndex(group: Int, layer: Int): Int {
-    return resolumeGroupSizes.take(group-1).sum() + layer
+    return resolumeGroupSizes.take(group - 1).sum() + layer
 }
+
 fun resolumeLayerAddr(
     group: Int,
     layer: Int,
@@ -188,12 +208,14 @@ fun resolumeLayerAddr(
     val layerIndex = resolumeLayerIndex(group, layer)
     return "/composition/layers/$layerIndex"
 }
+
 fun resolumeLayerClearAddr(
     group: Int,
     layer: Int,
 ): String {
     return resolumeLayerAddr(group = group, layer = layer) + "/clear"
 }
+
 fun resolumeClipAddr(
     group: Int,
     layer: Int,
@@ -201,12 +223,14 @@ fun resolumeClipAddr(
 ): String {
     return resolumeLayerAddr(group = group, layer = layer) + "/clips/$clip"
 }
+
 fun resolumeClipConnectAddr(
     group: Int,
     layer: Int,
 ): String {
     return resolumeLayerAddr(group = group, layer = layer) + "/connectspecificclip"
 }
+
 fun resolumeDashboardLinkAddr(
     group: Int,
     layer: Int,
@@ -222,8 +246,9 @@ suspend fun resolumeClipConnect(
     clip: Int
 ) {
     updateResolumeLayerState(resolumeLayerIndex(group, layer), clip, true)
-    connectSpecificClip(group, layer).value = clip-1
+    connectSpecificClip(group, layer).value = clip - 1
 }
+
 suspend fun resolumeLayerClear(
     group: Int,
     layer: Int,
@@ -235,116 +260,122 @@ suspend fun resolumeLayerClear(
 suspend fun startResolumeListener() {
 //    val resolumeState = MutableStateFlow<Map<String, String>>(emptyMap())
     val messages = Channel<Pair<String, String>>(Channel.BUFFERED)
-    val receiver = OSCPortInBuilder()
-        .setSocketAddress(InetSocketAddress(withContext(Dispatchers.IO) {
-            InetAddress.getByName("127.0.0.1")
-        }, 7001))
-        .setPacketListener(OSCPortIn.defaultPacketListener())
-        .let { inBuilder ->
-            OscSynced.syncedValues.filter {
-                it.receive && it.target == OscSynced.Target.ResolumeArena
-            }.fold(inBuilder) { builder, syncedValue ->
-                builder.addMessageListener(
-                    syncedValue.messageSelector
-                ) { messageEvent ->
-                    runBlocking {
-                        val msg = messageEvent.message
-                        if (syncedValue.logReceived) {
-                            logger.debugF { "Arena IN: ${msg.stringify()}" }
-                        }
-                        syncedValue.onMessageEvent(messageEvent)
-                    }
-                }
-            }
-        }
-        .addPacketListener(object : OSCPacketListener {
-            override fun handlePacket(event: OSCPacketEvent) {
-                val packet = event.packet
-
-                handlePacket(packet)
-            }
-
-            fun handlePacket(packet: OSCPacket) {
-                when (packet) {
-                    is OSCBundle -> {
-                        packet.packets.forEach {
-                            handlePacket(it)
+    var receiver: OSCPortIn? = null
+    flowScope.launch(Dispatchers.IO) {
+        resolumeArenaReceiveAddress.collectLatest { address ->
+            receiver?.close()
+            logger.infoF { "connecting to resolume arena ${address}" }
+            receiver = OSCPortInBuilder()
+                .setSocketAddress(address)
+                .setPacketListener(OSCPortIn.defaultPacketListener())
+                .let { inBuilder ->
+                    OscSynced.syncedValues.filter {
+                        it.receive && it.target == OscSynced.Target.ResolumeArena
+                    }.fold(inBuilder) { builder, syncedValue ->
+                        builder.addMessageListener(
+                            syncedValue.messageSelector
+                        ) { messageEvent ->
+                            runBlocking {
+                                val msg = messageEvent.message
+                                if (syncedValue.logReceived) {
+                                    logger.debugF { "Arena IN: ${msg.stringify()}" }
+                                }
+                                syncedValue.onMessageEvent(messageEvent)
+                            }
                         }
                     }
-
-                    is OSCMessage -> {
-                        handleMessage(packet)
-                    }
                 }
-            }
+                .addPacketListener(object : OSCPacketListener {
+                    override fun handlePacket(event: OSCPacketEvent) {
+                        val packet = event.packet
 
-            val layerClipConnectedPattern = """/composition/layers/(\d+)/clips/(\d+)/connected""".toRegex()
+                        handlePacket(packet)
+                    }
 
-            fun handleMessage(message: OSCMessage) {
-                runBlocking {
+                    fun handlePacket(packet: OSCPacket) {
+                        when (packet) {
+                            is OSCBundle -> {
+                                packet.packets.forEach {
+                                    handlePacket(it)
+                                }
+                            }
+
+                            is OSCMessage -> {
+                                handleMessage(packet)
+                            }
+                        }
+                    }
+
+                    val layerClipConnectedPattern = """/composition/layers/(\d+)/clips/(\d+)/connected""".toRegex()
+
+                    fun handleMessage(message: OSCMessage) {
+                        runBlocking {
 //                    logger.debugF { "RESOLUME IN: ${message.stringify()}" }
-                    val address = message.address
+                            val address = message.address
 
 //                    if(address.endsWith("connected")) {
 //                        logger.infoF { message.stringify() }
 //                    }
 
-                    try {
-                        layerClipConnectedPattern.matchEntire(message.address)?.let { matchResult ->
+                            try {
+                                layerClipConnectedPattern.matchEntire(message.address)?.let { matchResult ->
 //                            val (_, layer, clip) = matchResult.groupValues
-                            val layer = matchResult.groupValues[1].toInt()
-                            val clip = matchResult.groupValues[2].toInt()
-                            val arg = message.arguments.first() as Int
+                                    val layer = matchResult.groupValues[1].toInt()
+                                    val clip = matchResult.groupValues[2].toInt()
+                                    val arg = message.arguments.first() as Int
 
 //                            val binaryString = arg.toString(2).padStart(4, ' ')
-                            val description = when (arg) {
-                                0 -> "_"
-                                1 -> "_"
-                                2 -> "selected"
-                                3 -> "connected"
-                                4 -> "connected and selected"
-                                else -> "unknown"
+                                    val description = when (arg) {
+                                        0 -> "_"
+                                        1 -> "_"
+                                        2 -> "selected"
+                                        3 -> "connected"
+                                        4 -> "connected and selected"
+                                        else -> "unknown"
+                                    }
+                                    val connected = arg == 3 || arg == 4
+                                    logger.debugF { "layer: $layer, clip: $clip=$arg ($description)" }
+                                    updateResolumeLayerState(
+                                        layer = layer,
+                                        clip = clip,
+                                        connected = connected
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                logger.errorF(e) { "unhandled exception" }
                             }
-                            val connected = arg == 3 || arg == 4
-                            logger.debugF { "layer: $layer, clip: $clip=$arg ($description)" }
-                            updateResolumeLayerState(
-                                layer = layer,
-                                clip = clip,
-                                connected = connected
-                            )
+
+                            val arguments = message.arguments.joinToString(" ")
+                            messages.send(address to arguments)
                         }
-                    } catch (e: Exception) {
-                        logger.errorF(e) { "unhandled exception" }
                     }
 
-                    val arguments = message.arguments.joinToString(" ")
-                    messages.send(address to arguments)
-                }
-            }
+                    override fun handleBadData(event: OSCBadDataEvent) {
+                        runBlocking {
+                            logger.warnF { "osc bad data: $event" }
+                        }
+                        // TODO("Not yet implemented")
+                    }
 
-            override fun handleBadData(event: OSCBadDataEvent) {
-                runBlocking {
-                    logger.warnF { "osc bad data: $event" }
+                })
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/*")
+                ) { messageEvent ->
+                    runBlocking {
+                        val message = messageEvent.message
+                        logger.debugF { "RESOLUME IN: ${message.stringify()}" }
+                        val address = message.address
+                        val arguments = message.stringifyArguments()
+                        messages.send(address to arguments)
+                    }
                 }
-                // TODO("Not yet implemented")
-            }
+                .build()
+                .also {
+                    it.startListening()
+                }
+        }
 
-        })
-        .addMessageListener(
-            OSCPatternAddressMessageSelector("/*")
-        ) { messageEvent ->
-            runBlocking {
-                val message = messageEvent.message
-                logger.debugF { "RESOLUME IN: ${message.stringify()}" }
-                val address = message.address
-                val arguments = message.stringifyArguments()
-                messages.send(address to arguments)
-            }
-        }
-        .build()
-        .also {
-            it.startListening()
-        }
+    }
 
     val resolumeStateFile = File("resolume_state.json")
     val json = Json5 {
@@ -392,16 +423,17 @@ suspend fun startResolumeListener() {
 
     resolumeGroupSizes.forEachIndexed { groupIndex, groupSize ->
         (1..groupSize).forEach { layer ->
-            val resolumeLayerIndex = resolumeLayerIndex(groupIndex+1, layer)
-            logger.infoF { "creating buttons for group ${groupIndex+1} layer ${layer} ($resolumeLayerIndex)" }
+            val resolumeLayerIndex = resolumeLayerIndex(groupIndex + 1, layer)
+            logger.infoF { "creating buttons for group ${groupIndex + 1} layer ${layer} ($resolumeLayerIndex)" }
             val connectSpecificClip = connectSpecificClip(groupIndex + 1, layer)
 
-            val exclusiveSwitch = MutableStateFlow(-1) // OscSynced.ExclusiveSwitch("/resolume/group${groupIndex+1}/layer${layer}", 6, -1)
+            val exclusiveSwitch =
+                MutableStateFlow(-1) // OscSynced.ExclusiveSwitch("/resolume/group${groupIndex+1}/layer${layer}", 6, -1)
 
             exclusiveSwitch
                 .drop(1)
                 .onEach { clipIndex ->
-                    logger.infoF { "resolume switch group ${groupIndex+1} layer ${layer} changed to index $clipIndex" }
+                    logger.infoF { "resolume switch group ${groupIndex + 1} layer ${layer} changed to index $clipIndex" }
 
                     connectSpecificClip.value = clipIndex
                 }
@@ -418,12 +450,12 @@ suspend fun startResolumeListener() {
 
             connectSpecificClip
                 .onEach {
-                    logger.infoF { "resolume group ${groupIndex+1} layer ${layer} connectSpecificClip index $it" }
-                    exclusiveSwitch.value = if(it < 0) -1 else it
+                    logger.infoF { "resolume group ${groupIndex + 1} layer ${layer} connectSpecificClip index $it" }
+                    exclusiveSwitch.value = if (it < 0) -1 else it
                 }
                 .launchIn(flowScope)
         }
     }
 
-    delay(1000)
+//    delay(1000)
 }
