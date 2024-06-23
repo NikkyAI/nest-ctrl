@@ -10,11 +10,13 @@
 @file:DependsOn("softprops:action-gh-release:v2.0.6")
 @file:DependsOn("joutvhu:/create-release:v1.0.1")
 @file:DependsOn("gradle:actions__setup-gradle:v3")
+@file:DependsOn("jimeh:update-tags-action:v1.0.1")
 
 import io.github.typesafegithub.workflows.actions.actions.CheckoutV4
 import io.github.typesafegithub.workflows.actions.actions.CreateReleaseV1
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
+import io.github.typesafegithub.workflows.actions.jimeh.UpdateTagsAction
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhRelease
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhReleaseV2
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
@@ -58,6 +60,12 @@ workflow(
         run(command = "./gradlew packageJar --no-daemon")
         run(command = "ls build")
 
+        uses(
+            name = "update tag",
+            action = UpdateTagsAction(
+                tags = "nightly"
+            )
+        )
 
         uses(
             name = "create release",
