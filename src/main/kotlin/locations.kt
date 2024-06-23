@@ -1,11 +1,14 @@
 import io.github.cdimascio.dotenv.dotenv
 import java.io.File
 
-val dotenv = dotenv()
+val dotenv = dotenv {
+    File(".env").takeIf { !it.exists() }?.createNewFile()
+    ignoreIfMissing = true
+}
 
 val userHome = File(System.getProperty("user.home"))
 
-val nestdropFolder = dotenv["NESTDROP"]?.let {
+val nestdropFolder = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {
     if (it.startsWith("~/") || it.startsWith("~\\")) {
         System.getProperty("user.home") + it.substring(1)
     } else {

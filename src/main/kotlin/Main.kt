@@ -319,7 +319,21 @@ object Main {
 
         startBeatCounter()
 
+        decks.forEach { deck ->
+            performanceLogsFlow
+                .sample(500.milliseconds)
+                .filter {
+                    it.deck == deck.N
+                }
+                .onEach {
+                    deck.currentPreset.value = it
+                }
+                .launchIn(flowScope)
+        }
+
         flowScope.launch(Dispatchers.IO) {
+            delay(100)
+
 //            performanceLogsMap.value = nestdropPerformanceLog.listFiles().orEmpty().mapNotNull { file ->
 //                parsePerformanceLog(file)?.let {
 //                    file.nameWithoutExtension to it
@@ -378,17 +392,6 @@ object Main {
                 }
         }
 
-        decks.forEach { deck ->
-            performanceLogsFlow
-                .sample(500.milliseconds)
-                .filter {
-                    it.deck == deck.N
-                }
-                .onEach {
-                    deck.currentPreset.value = it
-                }
-                .launchIn(flowScope)
-        }
 //        performanceLogsFlow
 //            .sample(500.milliseconds)
 //            .filter {

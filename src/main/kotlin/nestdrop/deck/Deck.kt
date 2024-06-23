@@ -118,7 +118,7 @@ class Deck(
         val gamma = NestdropControl.SliderWithResetButton(N, "Gamma", 0.5f..1.5f, 1.0f)
         val hueShift = NestdropControl.SliderWithResetButton(N, "Hue", 0f..2f, 0f)
         val saturation = NestdropControl.SliderWithResetButton(N, "Saturation", 0f..1f, 1f)
-        val lumaKey = NestdropControl.RangeSliderWithResetButton(N, "LumaKey", 0f..1f, 0f to 1f)
+        val lumaKey = NestdropControl.RangeSliderWithResetButton(N, "LumaKey", 0f..1f, 0f, 1f)
         val red = NestdropControl.SliderWithResetButton(N, "R", 0f..1f, 1f)
         val green = NestdropControl.SliderWithResetButton(N, "G", 0f..1f, 1f)
         val blue = NestdropControl.SliderWithResetButton(N, "B", 0f..1f, 1f)
@@ -144,12 +144,12 @@ class Deck(
     //strobe / lfo
     inner class NdStrobe {
 
-        val effect = NestdropControl.Dropdown(N, "StrobeEffect", {Effect.entries.indexOf(it)}, Effect.AnimationSpeed)
-        val effectSpan = NestdropControl.RangeSliderWithResetButton(N, "StrobeEffectSpan", 0f..1f, 0f to 1f)
-        val trigger = NestdropControl.Dropdown(N, "StrobeTrigger", {Trigger.entries.indexOf(it)}, Trigger.TimesPerSecond)
+        val effect = NestdropControl.Dropdown(N, "StrobeEffect", Effect.entries, {Effect.entries.indexOf(it)}, Effect.AnimationSpeed)
+        val effectSpan = NestdropControl.RangeSliderWithResetButton(N, "StrobeEffectSpan", 0f..1f, 0f,  1f)
+        val trigger = NestdropControl.Dropdown(N, "StrobeTrigger", Trigger.entries, {Trigger.entries.indexOf(it)}, Trigger.TimesPerSecond)
         val effectSpeed = NestdropControl.Slider(N, "StrobeSpeed", 0.01f..30f, 3f)
         val pulseWidth = NestdropControl.SliderWithResetButton(N, "StrobePulseWidth", 0f..1f, 1f)
-        val waveForm = NestdropControl.Dropdown(N, "StrobeRamp", {Waveform.entries.indexOf(it)}, Waveform.Square)
+        val waveForm = NestdropControl.Dropdown(N, "StrobeRamp", Waveform.entries, {Waveform.entries.indexOf(it)}, Waveform.Square)
         val enabled = NestdropControl.ToggleButton(N, "StrobeOnOff", false)
 
         suspend fun startFlows() {

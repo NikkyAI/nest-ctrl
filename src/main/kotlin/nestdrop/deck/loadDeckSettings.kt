@@ -35,11 +35,13 @@ suspend fun loadDeckSettings(decks: List<Deck>) {
         deck.ndColor.gamma.value = deckSettings.gamma.value
         deck.ndColor.hueShift.value = deckSettings.hue.value
         deck.ndColor.saturation.value = deckSettings.saturation.value
-        deck.ndColor.lumaKey.value = deckSettings.lumaKey.min to deckSettings.lumaKey.max
+        deck.ndColor.lumaKey.minState.value = deckSettings.lumaKey.min
+        deck.ndColor.lumaKey.maxState.value = deckSettings.lumaKey.max
         deck.ndColor.alpha.value = deckSettings.alpha.value
 
         deck.ndStrobe.effect.value = Effect.entries[deckSettings.strobe.effectIndex]
-        deck.ndStrobe.effectSpan.value = deckSettings.strobe.effectSpanMin to deckSettings.strobe.effectSpanMax
+        deck.ndStrobe.effectSpan.minState.value = deckSettings.strobe.effectSpanMin
+        deck.ndStrobe.effectSpan.maxState.value = deckSettings.strobe.effectSpanMax
         deck.ndStrobe.trigger.value = Trigger.entries[deckSettings.strobe.triggerIndex]
         deck.ndStrobe.effectSpeed.value = deckSettings.strobe.speed
         deck.ndStrobe.pulseWidth.value = deckSettings.strobe.pulseWidth

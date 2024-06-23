@@ -16,7 +16,7 @@ import kotlinx.datetime.LocalTime
 import logging.errorF
 import java.io.File
 
-val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = Int.MAX_VALUE, )
+val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = 20, extraBufferCapacity = 8 )
 //val performanceLogsMap = MutableStateFlow<Map<String, List<PerformanceLogRow>>>(emptyMap())
 //val performanceLogs = MutableStateFlow<List<PerformanceLogRow>>(emptyList())
 
