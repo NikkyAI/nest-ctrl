@@ -45,12 +45,13 @@ import ui.screens.beatProgressScreen
 import ui.screens.debugScreen
 import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreen
-import ui.screens.presetQueues
+import ui.screens.presetQueuesScreen
 import ui.screens.presetScreen
 import ui.screens.scribbles.ButtonScreen
 import ui.screens.scribbles.SliderScreen
 import ui.screens.spoutScreen
 import ui.screens.tagEditScreen
+import ui.screens.tagSearchScreen
 
 @Composable
 @Preview
@@ -172,6 +173,7 @@ enum class Tabs(
             it.spout.name
         }
     ),
+    TagSearch("Tag Search"),
     TagEdit("Edit Tags"),
     Debug("Debug"),
     ;
@@ -236,13 +238,13 @@ fun ColumnScope.tabScreen(
         when (currentTab) {
             Tabs.PresetQueues -> {
                 verticalScroll {
-                    presetQueues(presetQueues, decks)
+                    presetQueuesScreen()
                 }
             }
 
             Tabs.ImgSprites -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    imgSpritesScreen(decks)
+                    imgSpritesScreen()
 //                        decks.forEach {
 //                        }
 
@@ -251,7 +253,7 @@ fun ColumnScope.tabScreen(
 
             Tabs.ImgFx -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    imgFxScreen(decks)
+                    imgFxScreen()
                 }
 //                verticalScroll {
 //                    Row(modifier = Modifier.fillMaxWidth()) {
@@ -263,18 +265,24 @@ fun ColumnScope.tabScreen(
 
             Tabs.SpoutSprites -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    spoutScreen(decks)
+                    spoutScreen()
+                }
+            }
+
+            Tabs.TagSearch -> {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    tagSearchScreen()
                 }
             }
 
             Tabs.TagEdit -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    tagEditScreen(decks)
+                    tagEditScreen()
                 }
             }
 
             Tabs.Debug -> {
-                debugScreen(decks)
+                debugScreen()
             }
         }
     }

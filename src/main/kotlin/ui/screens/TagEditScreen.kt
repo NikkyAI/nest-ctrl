@@ -25,13 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import customTags
-import nestdrop.deck.Deck
+import decks
 import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun tagEditScreen(
-    decks: List<Deck>,
 ) {
 
     val customTagsCollected by customTags.collectAsState()

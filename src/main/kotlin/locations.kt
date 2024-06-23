@@ -24,5 +24,8 @@ val nestdropFolder = dotenv["NESTDROP"]?.let {
 //    File(it)
 //} ?: userHome.resolve("VJ").resolve("NestDropProV2") // File("C:\\Users\\nikky\\VJ\\NestDropProV2")
 val nestdropConfig = nestdropFolder.resolve("DefaultUserProfile.xml")
+
+val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
+
 val nestdropPerformanceLog = nestdropFolder.resolve("PerformanceHistory").canonicalFile
 val nestdropImgModes = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile

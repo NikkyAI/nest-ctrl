@@ -13,15 +13,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import decks
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
+import presetQueues
 import ui.components.HorizontalRadioButton
 import ui.components.VerticalRadioButton
 
 @Composable
-fun presetQueues(
-    presetQueues: PresetQueues,
-    decks: List<Deck>,
+fun presetQueuesScreen(
 ) {
 //    val presetQueues = decks[0].presetQueues
     val queues by presetQueues.collectAsState()

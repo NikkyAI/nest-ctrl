@@ -28,12 +28,14 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import decks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import nestdropFolder
-import tagMap
+import presetTags
+import presetsFolder
 import ui.components.fontDseg14
 import ui.components.lazyList
 import java.io.File
@@ -42,9 +44,7 @@ import kotlin.time.measureTime
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun debugScreen(
-    decks: List<Deck>,
-) {
+fun debugScreen() {
     var scanRunning by remember {
         mutableStateOf(false)
     }
@@ -88,10 +88,9 @@ fun debugScreen(
         }
 
         val presetsMap by presetsMap.collectAsState()
-        val tagMap by tagMap.collectAsState()
+        val tagMap by presetTags.collectAsState()
 
         lazyList {
-            val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
             var lastCategory: Pair<String, String?>? = null
             presetsMap.forEach { (name, presetEntry) ->
                 val currentCategory = presetEntry.category to presetEntry.subCategory
@@ -154,7 +153,7 @@ fun debugScreen(
                         ) {
                             val tags = tagMap[name] ?: emptySet()
                             tags.forEach {
-                                Text(it)
+                                Text(it.label)
                             }
                         }
 //                        Text("${presetEntry.id}")

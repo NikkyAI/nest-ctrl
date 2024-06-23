@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nestdrop.deck.Deck
 import nestdropFolder
-import tagMap
+import presetTags
 import ui.components.verticalScroll
 
 
@@ -30,7 +29,7 @@ import ui.components.verticalScroll
 fun presetScreenSingle(deck: Deck) {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
-    val tagMap by tagMap.collectAsState()
+    val tagMap by presetTags.collectAsState()
 
     val currentPreset by deck.preset.name.collectAsState()
     val presetEntry = presetsMap[currentPreset]
@@ -55,7 +54,7 @@ fun presetScreenSingle(deck: Deck) {
                 ) {
                     val tags = tagMap[currentPreset] ?: emptySet()
                     tags.forEach {
-                        Text(it)
+                        Text(it.label)
                     }
                 }
             }
@@ -98,7 +97,7 @@ fun presetScreen(
 ) {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
-    val tagMap by tagMap.collectAsState()
+    val tagMap by presetTags.collectAsState()
     Row(
         modifier = Modifier.height(150.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -151,7 +150,7 @@ fun presetScreen(
                         ) {
                             val tags = tagMap[currentPreset] ?: emptySet()
                             tags.forEach {
-                                Text(it)
+                                Text(it.label)
                             }
                         }
                     }

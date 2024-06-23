@@ -25,16 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import nestdrop.deck.Deck
+import decks
 import nestdrop.imgFxMap
 import ui.components.VerticalRadioButton
 import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun imgFxScreen(
-    decks: List<Deck>,
-) {
+fun imgFxScreen() {
     lazyList {
         stickyHeader(key = "header") {
             Row(

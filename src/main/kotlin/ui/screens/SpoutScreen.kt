@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import decks
 import nestdrop.Queue
 import nestdrop.deck.Deck
 import ui.components.VerticalRadioButton
@@ -28,9 +29,7 @@ import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun spoutScreen(
-    decks: List<Deck>,
-) {
+fun spoutScreen() {
 
 
     val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {

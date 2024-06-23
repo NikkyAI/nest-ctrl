@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import nestdrop.deck.PresetQueues
 import ui.screens.presetsMap
 import utils.KWatchEvent
@@ -12,13 +13,13 @@ import utils.asWatchChannel
 import utils.runningHistoryNotNull
 import java.io.File
 
-val tagMap = MutableStateFlow<Map<String, Set<String>>>(
+val presetTags = MutableStateFlow<Map<String, Set<Tag>>>(
     emptyMap()
 )
 
-
 val tagsFolder = File("tags")
 
+@Serializable
 data class Tag(
     val name: String,
     val namespace: List<String> = emptyList()
@@ -28,6 +29,10 @@ data class Tag(
         namespace.fold(tagsFolder) { file, namespace ->
             file.resolve(namespace)
         }.resolve("$name.txt")
+    }
+
+    override fun toString(): String {
+        return label
     }
 
     companion object {
@@ -60,17 +65,17 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
     tagsFolder.mkdirs()
 
     combine(presetsMap, presetQueues, customTags) { presetsMap, queues, customTags ->
-        tagMap.value = presetsMap.mapValues { (_, entry) ->
-            val categoryTag = entry.category.let { "cat:$it" }
-            val subCategoryTag = entry.subCategory?.let { "sub:$it" }
+        presetTags.value = presetsMap.mapValues { (_, entry) ->
+            val categoryTag = entry.category.let { Tag(it, listOf("cat")) }
+            val subCategoryTag = entry.subCategory?.let { Tag(it, listOf("sub")) }
             val queueTags = queues.filter {
 //                    System.err.println(it.presets)
                 it.presets.any { it.name.substringBeforeLast(".milk") == entry.name }
-            }.map { "q:${it.name}" }.toSet()
+            }.map { Tag(it.name, listOf("q")) }.toSet()
 
             val c = customTags.filterValues { tagEntries ->
                 entry.name in tagEntries
-            }.keys.map { (it.namespace + it.name).joinToString(":") }
+            }.keys // .map { (it.namespace + it.name).joinToString(":") }
 
             setOfNotNull(categoryTag, subCategoryTag) + queueTags + c
         }
