@@ -15,12 +15,18 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -141,6 +148,31 @@ fun deckSettingsScreen() {
                                 deck.ndStrobe.effectSpan.asSlider(deck)
                                 deck.ndStrobe.trigger.asDropdown(deck)
                                 deck.ndStrobe.effectSpeed.asSlider(deck)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    val scope = rememberCoroutineScope()
+                                    listOf(0.1f, 0.125f, 0.25f, 0.5f, 1.0f).forEach { presetValue ->
+                                        Button(
+                                            onClick = {
+                                                scope.launch {
+                                                    deck.ndStrobe.effectSpeed.value = presetValue
+                                                }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                backgroundColor = deck.dimmedColor
+                                            ),
+                                            modifier = Modifier
+                                                .weight(0.2f)
+                                                .padding(4.dp, 0.dp)
+                                        ) {
+                                            Text(
+                                                text = "$presetValue",
+                                            )
+                                        }
+                                    }
+
+                                }
                                 deck.ndStrobe.pulseWidth.asSlider(deck)
                                 deck.ndStrobe.waveForm.asDropdown(deck)
                                 deck.ndStrobe.enabled.asCheckbox(deck)
@@ -193,12 +225,15 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .height(36.dp),
-
     ) {
         Text(
             this@asSlider.propertyName,
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(8.dp, 0.dp)
+        )
+        Text(
+            text = "value\n%6.3f".format(value),
             modifier = Modifier
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
@@ -220,25 +255,17 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
                 .weight(0.6f)
         )
         Text("max\n${range.endInclusive}")
-        Button(
+        IconButton(
             onClick = {
                 scope.launch {
                     doReset()
                 }
             },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = deck.dimmedColor
-            ),
             modifier = Modifier
                 .weight(0.2f)
                 .padding(8.dp, 0.dp)
-//                .align(Alignment.CenterHorizontally)
-//                .height(24.dp),
-//            contentPadding = PaddingValues(4.dp, 0.dp)
         ) {
-            Text(
-                text = "%5.2f".format(value),
-            )
+            Icon(Icons.Filled.Refresh, modifier = Modifier.scale(scaleX = -1f, scaleY = 1f), contentDescription = "reset value")
         }
     }
 //    }
@@ -252,12 +279,15 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .height(36.dp),
-
     ) {
         Text(
             this@asSlider.propertyName,
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(8.dp, 0.dp)
+        )
+        Text(
+            text = "value\n%6.3f".format(value),
             modifier = Modifier
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
@@ -279,25 +309,17 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
                 .weight(0.6f)
         )
         Text("max\n${range.endInclusive}")
-        Button(
+        IconButton(
             onClick = {
                 scope.launch {
                     doReset()
                 }
             },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = deck.dimmedColor
-            ),
             modifier = Modifier
                 .weight(0.2f)
                 .padding(8.dp, 0.dp)
-//                .align(Alignment.CenterHorizontally)
-//                .height(24.dp),
-//            contentPadding = PaddingValues(4.dp, 0.dp)
         ) {
-            Text(
-                text = "%5.2f".format(value),
-            )
+            Icon(Icons.Filled.Refresh, modifier = Modifier.scale(scaleX = -1f, scaleY = 1f), contentDescription = "reset value")
         }
     }
 //    }
@@ -307,17 +329,20 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
 fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
     val minValue by minState.collectAsState()
     val maxValue by maxState.collectAsState()
-//    Column {
     val scope = rememberCoroutineScope()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .height(36.dp),
-
     ) {
         Text(
             this@asSlider.propertyName,
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(8.dp, 0.dp)
+        )
+
+        Text(
+            text = "value\n%5.2f - %5.2f".format(minValue, maxValue),
             modifier = Modifier
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
@@ -371,25 +396,17 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
 
 
         Text("max\n${range.endInclusive}")
-        Button(
+        IconButton(
             onClick = {
                 scope.launch {
                     doReset()
                 }
             },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = deck.dimmedColor
-            ),
             modifier = Modifier
                 .weight(0.2f)
                 .padding(8.dp, 0.dp)
-//                .align(Alignment.CenterHorizontally)
-//                .height(24.dp),
-//            contentPadding = PaddingValues(4.dp, 0.dp)
         ) {
-            Text(
-                text = "%5.2f - %5.2f".format(minValue, maxValue),
-            )
+            Icon(Icons.Filled.Refresh, modifier = Modifier.scale(scaleX = -1f, scaleY = 1f), contentDescription = "reset value")
         }
     }
 }
@@ -398,14 +415,9 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
 @Composable
 fun <T : Any> NestdropControl.Dropdown<T>.asDropdown(deck: Deck) {
     val value: T by collectAsState()
-//    Column {
-    val scope = rememberCoroutineScope()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .height(36.dp),
-
     ) {
         Text(
             this@asDropdown.propertyName,
@@ -432,14 +444,9 @@ fun <T : Any> NestdropControl.Dropdown<T>.asDropdown(deck: Deck) {
 @Composable
 fun NestdropControl.ToggleButton.asCheckbox(deck: Deck) {
     val value by collectAsState()
-//    Column {
-    val scope = rememberCoroutineScope()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .height(36.dp),
-
     ) {
         Text(
             this@asCheckbox.propertyName,

@@ -113,7 +113,8 @@ class Deck(
     // color
     inner class NdColor {
         val negative = NestdropControl.Slider(N, "Negative", 0f..1f, 0f)
-        val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.5f, 1.0f)
+//        val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.5f, 1.0f)
+        val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.0f, 1.0f)
         val contrast = NestdropControl.SliderWithResetButton(N, "Contrast", 0.5f..1.5f, 1.0f)
         val gamma = NestdropControl.SliderWithResetButton(N, "Gamma", 0.5f..1.5f, 1.0f)
         val hueShift = NestdropControl.SliderWithResetButton(N, "Hue", 0f..2f, 0f)

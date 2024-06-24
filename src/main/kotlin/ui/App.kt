@@ -174,7 +174,7 @@ enum class Tabs(
             it.spout.name
         }
     ),
-    NestdropControls("ND CTRL"),
+    NestdropControls("Nestdrop\nDeck\nSettings"),
     TagSearch("Tag Search"),
     TagEdit("Edit Tags"),
     Debug("Debug"),

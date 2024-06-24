@@ -20,3 +20,4 @@ config.json5
 resolume_state.json
 resolume_layers.json
 /tags/
+/run/
