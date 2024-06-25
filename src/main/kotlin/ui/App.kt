@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
@@ -65,70 +66,16 @@ fun App(
         Scaffold {
             Row {
                 Column(
-//                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.width(300.dp)
                 ) {
                     beatProgressScreen(decks)
                     decks.forEach { deck ->
                         val enabled by deck.enabled.collectAsState()
                         if (enabled) {
-                            ColorControl(deck)
+//                            ColorControl(deck)
+                            autoChangeScreen(deck)
                         }
                     }
-//                    decks.forEach { deck ->
-//                        val enabled by deck.enabled.collectAsState()
-//                        if (enabled) {
-//                            Column {
-//                                Row(
-//                                    horizontalArrangement = Arrangement.SpaceBetween,
-//                                    verticalAlignment = Alignment.CenterVertically,
-//                                ) {
-//                                    val effect by deck.ndStrobe.effect.collectAsState()
-//                                    Dropdown(deck.dimmedColor, deck.color, Effect.entries, effect, renderItem = { selected ->
-//                                        Text(selected.toString())
-//                                    }) {
-//                                        deck.ndStrobe.effect.value = it
-//                                    }
-//                                    Text("Effect")
-//                                }
-//
-//                                Row(
-//                                    horizontalArrangement = Arrangement.SpaceBetween,
-//                                    verticalAlignment = Alignment.CenterVertically,
-//                                ) {
-//                                    val trigger by deck.ndStrobe.trigger.collectAsState()
-//                                    Dropdown(
-//                                        deck.dimmedColor,
-//                                        deck.color,
-//                                        Trigger.entries,
-//                                        trigger,
-//                                        renderItem = { selected ->
-//                                            Text(selected.toString())
-//                                        }) {
-//                                        deck.ndStrobe.trigger.value = it
-//                                    }
-//                                    Text("Trigger")
-//                                }
-//
-//                                Row(
-//                                    horizontalArrangement = Arrangement.SpaceBetween,
-//                                    verticalAlignment = Alignment.CenterVertically,
-//                                ) {
-//                                    val waveForm by deck.ndStrobe.waveForm.collectAsState()
-//                                    Dropdown(
-//                                        deck.dimmedColor,
-//                                        deck.color,
-//                                        Waveform.entries,
-//                                        waveForm,
-//                                        renderItem = { selected ->
-//                                            Text(selected.toString())
-//                                        }) {
-//                                        deck.ndStrobe.waveForm.value = it
-//                                    }
-//                                    Text("Waveform")
-//                                }
-//                            }
-//                        }
-//                    }
                 }
 //                Column {
 //                    decks.forEach {
@@ -138,7 +85,6 @@ fun App(
                 Column {
                     presetScreen(decks)
                     tabScreen(presetQueues, decks)
-                    autoChangeScreen(decks)
                 }
             }
 

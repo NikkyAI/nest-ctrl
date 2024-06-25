@@ -38,8 +38,6 @@ private fun autoChangeRow(
     deck: Deck,
     label: String,
     checkedMutableStateflow: MutableStateFlow<Boolean>,
-    nameMutableStateFlow: MutableStateFlow<String>,
-    nextLabel: String,
     onNext: suspend CoroutineScope.() -> Unit
 ) {
     val autoChange by checkedMutableStateflow.collectAsState()
@@ -49,13 +47,6 @@ private fun autoChangeRow(
             .height(40.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label,
-            modifier = Modifier
-                .width(150.dp),
-            textAlign = TextAlign.End
-        )
-        Spacer(modifier = Modifier.width(10.dp))
         Checkbox(
             checked = autoChange,
             onCheckedChange = {
@@ -68,23 +59,13 @@ private fun autoChangeRow(
                 disabledColor = Color.DarkGray
             ),
         )
-//        Spacer(modifier = Modifier.width(50.dp))
-//        val name by nameMutableStateFlow.collectAsState()
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(0.75f)
-//                .background(deck.dimmedColor)
-//                .padding(4.dp),
-//            verticalAlignment = Alignment.CenterVertically,
-//        ) {
-//            Text(
-//                text = name,
-//                modifier = Modifier
-//                    .fillMaxHeight(0.8f)
-//                    .fillMaxWidth(0.8f)
-//            )
-//        }
-
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = label,
+            modifier = Modifier
+                .width(150.dp),
+            textAlign = TextAlign.End
+        )
         Spacer(modifier = Modifier.width(10.dp))
         val scope = rememberCoroutineScope()
         IconButton(
@@ -99,24 +80,17 @@ private fun autoChangeRow(
                 modifier = Modifier.padding(8.dp)
             )
         }
-
-//        Button(
-//            onClick = {
-//                scope.launch { onNext() }
-//            },
-//            colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
-//            contentPadding = PaddingValues(horizontal = 4.dp),
-//        ) {
-//            Text(nextLabel)
-//        }
     }
 }
 
 
 @Composable
 fun autoChangeScreen(
-    decks: List<Deck>,
+    deck: Deck,
 ) {
+    val enabled by deck.enabled.collectAsState()
+    if (!enabled) return
+
     // autochange
     // next
     // current
@@ -124,26 +98,25 @@ fun autoChangeScreen(
     val horizontal = Arrangement.Start
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth(0.9f),
         horizontalAlignment = Alignment.CenterHorizontally,
-
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
         ) {
         Row(
             horizontalArrangement = horizontal,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            decks.forEach { deck ->
-                val enabled by deck.enabled.collectAsState()
-                if (enabled) {
+//            decks.forEach { deck ->
+//                val enabled by deck.enabled.collectAsState()
+//                if (enabled) {
                     autoChangeRow(
-                        deck, "Preset Queue", deck.presetQueue.autoChange, deck.presetQueue.name, "Next"
+                        deck, "Preset Queue", deck.presetQueue.autoChange
                     ) {
                         deck.presetQueue.next()
                     }
-                }
-            }
+//                }
+//            }
         }
 
 
@@ -152,16 +125,16 @@ fun autoChangeScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            decks.forEach { deck ->
-                val enabled by deck.enabled.collectAsState()
-                if (enabled) {
+//            decks.forEach { deck ->
+//                val enabled by deck.enabled.collectAsState()
+//                if (enabled) {
                     autoChangeRow(
-                        deck, "Preset", deck.preset.autoChange, deck.preset.name, "Next"
+                        deck, "Preset", deck.preset.autoChange
                     ) {
                         deck.preset.next()
                     }
-                }
-            }
+//                }
+//            }
         }
 
 
@@ -170,16 +143,16 @@ fun autoChangeScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            decks.forEach { deck ->
-                val enabled by deck.enabled.collectAsState()
-                if (enabled) {
+//            decks.forEach { deck ->
+//                val enabled by deck.enabled.collectAsState()
+//                if (enabled) {
                     autoChangeRow(
-                        deck, "IMG Sprite", deck.imgSprite.autoChange, deck.imgSprite.name, "Next"
+                        deck, "IMG Sprite", deck.imgSprite.autoChange
                     ) {
                         deck.imgSprite.next()
                     }
-                }
-            }
+//                }
+//            }
         }
 
         Row(
@@ -187,16 +160,16 @@ fun autoChangeScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            decks.forEach { deck ->
-                val enabled by deck.enabled.collectAsState()
-                if (enabled) {
+//            decks.forEach { deck ->
+//                val enabled by deck.enabled.collectAsState()
+//                if (enabled) {
                     autoChangeRow(
-                        deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange, deck.imgSpriteFx.name, "Next"
+                        deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange
                     ) {
                         deck.imgSpriteFx.next()
                     }
-                }
-            }
+//                }
+//            }
         }
     }
 }
