@@ -6,6 +6,8 @@ val dotenv = dotenv {
     ignoreIfMissing = true
 }
 
+val tagsFolder = File("tags")
+
 val userHome = File(System.getProperty("user.home"))
 
 val nestdropFolder = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {

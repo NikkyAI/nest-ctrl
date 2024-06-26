@@ -19,9 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import decks
 import nestdrop.deck.Deck
 import nestdropFolder
-import presetTags
+import tags.presetTagsMapping
 import ui.components.verticalScroll
 
 
@@ -29,7 +30,7 @@ import ui.components.verticalScroll
 fun presetScreenSingle(deck: Deck) {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
-    val tagMap by presetTags.collectAsState()
+    val tagMap by presetTagsMapping.collectAsState()
 
     val currentPreset by deck.preset.name.collectAsState()
     val presetEntry = presetsMap[currentPreset]
@@ -92,12 +93,10 @@ fun presetScreenSingle(deck: Deck) {
 }
 
 @Composable
-fun presetScreen(
-    decks: List<Deck>,
-) {
+fun presetScreen() {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
-    val tagMap by presetTags.collectAsState()
+    val tagMap by presetTagsMapping.collectAsState()
     Row(
         modifier = Modifier.height(150.dp),
         verticalAlignment = Alignment.CenterVertically,

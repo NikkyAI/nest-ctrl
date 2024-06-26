@@ -55,8 +55,8 @@ import osc.resolumeLayerStates
 import osc.runNestDropSend
 import osc.runResolumeSend
 import osc.startResolumeListener
+import tags.startTagsFileWatcher
 import ui.App
-import ui.screens.scanPresets
 import ui.splashScreen
 import utils.KWatchChannel
 import utils.KWatchEvent
@@ -141,6 +141,8 @@ object Main {
             }
         }
 
+        scanPresets()
+        delay(100)
         startTagsFileWatcher(presetQueues)
 
         run {
@@ -485,8 +487,6 @@ object Main {
         initializeSyncedValues()
         delay(500)
         logger.infoF { "re-emitting all values" }
-
-        scanPresets()
     }
 
     @JvmStatic
@@ -541,7 +541,7 @@ object Main {
                         useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
                     )
                 ) {
-                    App(presetQueues, decks)
+                    App()
                 }
 
 

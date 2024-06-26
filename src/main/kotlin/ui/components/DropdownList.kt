@@ -13,7 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import javax.swing.Icon
+import kotlin.math.exp
 
 @Composable
 fun <T : Any> Dropdown(
@@ -113,4 +118,48 @@ fun <T : Any> Dropdown(
         }
     }
 
+}
+
+@Composable
+fun <T> DropDownPopupIconButton(
+    icon: @Composable () -> Unit,
+    items: List<T>,
+    onItemClick: (T) -> Unit,
+    itemEnabled: (T) -> Boolean = { true },
+    renderItem: @Composable (T) -> Unit
+) {
+//    Row {
+        var expanded by remember { mutableStateOf(false) }
+        IconButton(
+            onClick = {
+                expanded = true
+            },
+        ) {
+            icon()
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+            },
+            modifier = Modifier
+                .height(items.size * 36.dp + 16.dp)
+//            .align(Alignment.CenterVertically)
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    onClick = {
+                        onItemClick(item)
+                        expanded = false
+                    },
+                    modifier = Modifier
+                        .height(36.dp)
+                        .padding(2.dp),
+                    enabled = itemEnabled(item)
+                ) {
+                    renderItem(item)
+                }
+            }
+        }
+//    }
 }

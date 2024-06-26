@@ -24,8 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import customTags
+import tags.customTagsMapping
 import decks
+import tags.Tag
 import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -33,7 +34,7 @@ import ui.components.lazyList
 fun tagEditScreen(
 ) {
 
-    val customTagsCollected by customTags.collectAsState()
+    val customTagsCollected by customTagsMapping.collectAsState()
 
 //    val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {
 //        decks.maxOfOrNull {
@@ -84,7 +85,7 @@ fun tagEditScreen(
                             onClick = {
                                 if (newTag != null) {
                                     if (newTag !in customTagsCollected.keys) {
-                                        customTags.value += newTag to emptySet()
+                                        customTagsMapping.value += newTag to emptySet()
                                     } else {
                                         System.err.println("prevented overriding tag $newTag")
                                     }
@@ -130,9 +131,9 @@ fun tagEditScreen(
                             checked = isTagged,
                             onCheckedChange = {
                                 if (it) {
-                                    customTags.value += tag to entries + preset.substringBeforeLast(".milk")
+                                    customTagsMapping.value += tag to entries + preset.substringBeforeLast(".milk")
                                 } else {
-                                    customTags.value += tag to entries - preset.substringBeforeLast(".milk")
+                                    customTagsMapping.value += tag to entries - preset.substringBeforeLast(".milk")
                                 }
                             },
                             colors = CheckboxDefaults.colors(

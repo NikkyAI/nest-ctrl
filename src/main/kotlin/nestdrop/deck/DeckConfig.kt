@@ -1,7 +1,10 @@
 package nestdrop.deck
 
 import DeckConfig
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import io.klogging.logger
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -13,6 +16,8 @@ import logging.debugF
 import logging.errorF
 import logging.infoF
 import presetQueues
+import tags.nestdropQueueSearches
+import ui.screens.customSearches
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -102,6 +107,24 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             this@applyConfig.imgSpriteFx.toggles.forEachIndexed { index, toggle ->
                 toggle.value = index in spriteFX.toggles
             }
+        }
+        run {
+            val combinedSearches = withTimeoutOrNull(5.seconds) {
+                while (true) {
+                    delay(100)
+                    val customSearches = customSearches.value
+                    System.err.println("custom: ${customSearches.size}")
+                    val nestdropQueueSearches = nestdropQueueSearches.value
+                    System.err.println("nd: ${nestdropQueueSearches.size}")
+
+                    val combinedSearches = customSearches + nestdropQueueSearches
+                    if(combinedSearches.isNotEmpty()) return@withTimeoutOrNull combinedSearches
+                }
+                null
+            } ?: emptyList()
+
+            this@applyConfig.search.autochange.value = search.autoChange
+            this@applyConfig.search.value = combinedSearches.firstOrNull { it.label == search.name }
         }
         run {
             this@applyConfig.bpmSyncEnabled.value = bpmSync.enabled
@@ -292,6 +315,20 @@ val Deck.configFlow: Flow<DeckConfig>
             ) { config, strobeEnabled ->
                 config.copy(
                     strobe = DeckConfig.Strobe(strobeEnabled)
+                )
+            }
+            .combine(
+                search.combine(
+                    search.autochange
+                ) { search, autoChange ->
+                    DeckConfig.SearchConfig(
+                        autoChange = autoChange,
+                        name = search?.label
+                    )
+                }
+            ) { config, searchConfig ->
+                config.copy (
+                    search = searchConfig
                 )
             }
     }

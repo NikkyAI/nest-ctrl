@@ -3,6 +3,7 @@ import io.klogging.logger
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -13,6 +14,8 @@ import logging.infoF
 import nestdrop.deck.Deck
 import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
+import tags.TagScoreEval
+import ui.screens.customSearches
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
@@ -37,7 +40,8 @@ data class Config(
     ),
     val deck4: DeckConfig = DeckConfig(
         triggerTime = 0.25f + 0.125f
-    )
+    ),
+    val searches: List<TagScoreEval> = emptyList()
 )
 
 @Serializable
@@ -45,6 +49,7 @@ data class DeckConfig(
     val triggerTime: Float = 1.0f,
     val transitionTime: Float = 5.0f,
 //    val presetQueues: PresetQueues = PresetQueues(),
+    val search: SearchConfig = SearchConfig(),
     val presetQueue: PresetQueue = PresetQueue(),
     val preset: Preset = Preset(),
     val sprite: Sprite = Sprite(),
@@ -55,6 +60,11 @@ data class DeckConfig(
     val bpmSync: BpmSync = BpmSync(),
     val strobe: Strobe = Strobe()
 ) {
+    @Serializable
+    data class SearchConfig(
+        val autoChange: Boolean = false,
+        val name: String? = null,
+    )
     @Serializable
     data class PresetQueue(
         val index: Int = -1,
@@ -152,11 +162,7 @@ suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
     }
 }
 
-suspend fun loadConfig(
-//    decks: List<Deck>,
-//    deck1: Deck,
-//    deck2: Deck,
-) {
+suspend fun loadConfig() {
     if (configFile.exists()) {
         configFile.readText()
         config.value = json5.decodeFromString(
@@ -179,32 +185,10 @@ suspend fun loadConfig(
 //        }
         .launchIn(configScope)
 
-
-    decks.forEach { deck ->
-        deck.configFlow
-            .onEach { deckConfig ->
-                deck.updateConfig(deckConfig)
-            }
-            .launchIn(configScope)
-    }
-//    deck1.configFlow
-//        .onEach { deckConfig ->
-//            updateConfig {
-//                copy(deck1 = deckConfig)
-//            }
-//        }
-//        .launchIn(configScope)
-//    deck2.configFlow
-//        .onEach { deckConfig ->
-//            updateConfig {
-//                copy(deck2 = deckConfig)
-//            }
-//        }
-//        .launchIn(configScope)
-
     config.value.also { config ->
         logger.infoF { "loaded $config" }
         beatFrame.value = config.beats
+        customSearches.value = config.searches
         decks.forEach { deck ->
             when (deck.N) {
                 1 -> deck.applyConfig(config.deck1)
@@ -213,11 +197,24 @@ suspend fun loadConfig(
                 4 -> deck.applyConfig(config.deck4)
             }
         }
-//        deck1.applyConfig(config.deck1)
-//        deck2.applyConfig(config.deck2)
-    }
-}
 
+        delay(250)
+    }
+
+    decks.forEach { deck ->
+        deck.configFlow
+            .onEach { deckConfig ->
+                deck.updateConfig(deckConfig)
+            }
+            .launchIn(configScope)
+    }
+
+    customSearches.onEach { searches ->
+        updateConfig {
+            copy(searches = searches)
+        }
+    }.launchIn(configScope)
+}
 
 suspend fun saveConfig(config: Config) {
     configFile.writeText(

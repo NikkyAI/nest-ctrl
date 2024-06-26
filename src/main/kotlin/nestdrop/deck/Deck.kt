@@ -1,6 +1,8 @@
 package nestdrop.deck
 
 import Link
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import beatFrame
@@ -33,10 +35,15 @@ import nestdrop.PerformanceLogRow
 import nestdrop.PresetIdState
 import nestdrop.Queue
 import nestdrop.imgFxMap
+import nestdrop.nestdropSetPreset
 import osc.OSCMessage
 import osc.nestdropPortSend
 import osc.nestdropSendChannel
 import presetQueues
+import tags.TagScoreEval
+import tags.pickItemToGenerate
+import tags.presetTagsMapping
+import ui.screens.presetsMap
 import utils.HistoryNotNull
 import utils.runningHistory
 import kotlin.math.roundToInt
@@ -48,18 +55,20 @@ class Deck(
     val first: Boolean,
     val last: Boolean,
     val hexColor: Long,
-//    val presetQueues: PresetQueues
 ) {
     val enabled = MutableStateFlow(false)
     val color = Color(hexColor)
     val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
+
 
     companion object {
         private val logger = logger(Deck::class.qualifiedName!!)
     }
 
 
+    @Deprecated("disable bpm sync")
     val bpmSyncEnabled = MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
+    @Deprecated("disable bpm sync")
     val bpmSyncMultiplier = MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
 
     inner class NdTime {
@@ -249,6 +258,42 @@ class Deck(
         spout.startFlows()
     }
 
+    inner class Search : MutableStateFlow<TagScoreEval?> by MutableStateFlow(null) {
+
+        val autochange = MutableStateFlow(false)
+
+
+        suspend fun next() {
+            search.value?.let { search ->
+
+                val presets = presetsMap.value
+                val presetTags = presetTagsMapping.value
+
+//            val sortedKeys = presets.keys.sortedByDescending { key ->
+//                val tags = presetTags[key].orEmpty()
+//
+//                search.score(tags)
+//            }
+
+                val filtered = presets.mapNotNull { (key, preset) ->
+                    val tags = presetTags[key].orEmpty()
+
+                    val score = search.score(tags)
+//                val preset = presets[key]
+                    if (score >= 0.0) {
+                        preset to (score + 0.01)
+                    } else {
+                        null
+                    }
+                }.toMap()
+
+                val id = pickItemToGenerate(filtered)
+                nestdropSetPreset(id.id, deck = N)
+            }
+        }
+//        val search = MutableStateFlow<TagScoreEval?>(null)
+    }
+    val search = Search()
 
 //    @Deprecated("use new preset queues")
 //    inner class PresetQueues : MutableStateFlow<List<Queue>> by MutableStateFlow(emptyList()) {
@@ -839,6 +884,9 @@ class Deck(
 
         if (imgSpriteFx.autoChange.value) {
             imgSpriteFx.next()
+        }
+        if(search.autochange.value) {
+            search.next()
         }
     }
 

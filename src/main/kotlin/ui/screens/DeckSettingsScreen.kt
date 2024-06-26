@@ -1,73 +1,46 @@
 package ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
 import decks
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import nestdrop.NestdropControl
 import nestdrop.deck.Deck
-import nestdropFolder
-import presetTags
-import presetsFolder
-import ui.Tabs
 import ui.components.Dropdown
-import ui.components.asFader
-import ui.components.fader
-import ui.components.fontDseg14
-import ui.components.lazyList
 import ui.components.verticalScroll
-import java.io.File
-import kotlin.time.Duration
-import kotlin.time.measureTime
+
+private val selectedTab = MutableStateFlow(0)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun deckSettingsScreen() {
-    var currentTab by remember { mutableStateOf(0) }
+    val currentTab by selectedTab.collectAsState()
     val tabs = listOf("Time", "Color", "Strobe", "Audio", "Output")
 
     verticalScroll {
@@ -81,7 +54,7 @@ fun deckSettingsScreen() {
                             Text(tab)
                         },
                         selected = currentTab == index,
-                        onClick = { currentTab = index }
+                        onClick = { selectedTab.value = index }
                     )
                 }
             }

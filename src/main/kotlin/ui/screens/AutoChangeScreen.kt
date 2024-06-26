@@ -101,58 +101,17 @@ fun autoChangeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth(0.9f)
-        ) {
+    ) {
         Row(
             horizontalArrangement = horizontal,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-//            decks.forEach { deck ->
-//                val enabled by deck.enabled.collectAsState()
-//                if (enabled) {
-                    autoChangeRow(
-                        deck, "Preset Queue", deck.presetQueue.autoChange
-                    ) {
-                        deck.presetQueue.next()
-                    }
-//                }
-//            }
-        }
-
-
-        Row(
-            horizontalArrangement = horizontal,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-//            decks.forEach { deck ->
-//                val enabled by deck.enabled.collectAsState()
-//                if (enabled) {
-                    autoChangeRow(
-                        deck, "Preset", deck.preset.autoChange
-                    ) {
-                        deck.preset.next()
-                    }
-//                }
-//            }
-        }
-
-
-        Row(
-            horizontalArrangement = horizontal,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-//            decks.forEach { deck ->
-//                val enabled by deck.enabled.collectAsState()
-//                if (enabled) {
-                    autoChangeRow(
-                        deck, "IMG Sprite", deck.imgSprite.autoChange
-                    ) {
-                        deck.imgSprite.next()
-                    }
-//                }
-//            }
+            autoChangeRow(
+                deck, "Preset Queue", deck.presetQueue.autoChange
+            ) {
+                deck.presetQueue.next()
+            }
         }
 
         Row(
@@ -160,16 +119,47 @@ fun autoChangeScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-//            decks.forEach { deck ->
-//                val enabled by deck.enabled.collectAsState()
-//                if (enabled) {
-                    autoChangeRow(
-                        deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange
-                    ) {
-                        deck.imgSpriteFx.next()
-                    }
-//                }
-//            }
+            autoChangeRow(
+                deck, "Preset", deck.preset.autoChange
+            ) {
+                deck.preset.next()
+            }
+        }
+
+        Row(
+            horizontalArrangement = horizontal,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            autoChangeRow(
+                deck, "Search", deck.search.autochange
+            ) {
+                deck.search.next()
+            }
+        }
+
+        Row(
+            horizontalArrangement = horizontal,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            autoChangeRow(
+                deck, "IMG Sprite", deck.imgSprite.autoChange
+            ) {
+                deck.imgSprite.next()
+            }
+        }
+
+        Row(
+            horizontalArrangement = horizontal,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            autoChangeRow(
+                deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange
+            ) {
+                deck.imgSpriteFx.next()
+            }
         }
     }
 }

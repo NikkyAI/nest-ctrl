@@ -27,11 +27,6 @@ class PresetQueues(
     suspend fun startFlows() {
         logger.infoF { "initializing preset queues" }
 
-//        queues.onEach {
-//            logger.infoF { "queues updated" }
-//        }
-//            .launchIn(flowScope)
-
         queues
             .combine(
                 flow = deckSwitches.foldIndexed<MutableStateFlow<Int>, Flow<Map<Int, Int>>>(

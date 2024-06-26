@@ -28,39 +28,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import decks
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
-import nestdrop.deck.Effect
-import nestdrop.deck.PresetQueues
-import nestdrop.deck.Trigger
-import nestdrop.deck.Waveform
-import ui.components.Dropdown
 import ui.components.verticalScroll
-import ui.screens.ColorControl
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
 import ui.screens.debugScreen
 import ui.screens.deckSettingsScreen
+import ui.screens.editSearchesScreen
 import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreen
 import ui.screens.presetQueuesScreen
 import ui.screens.presetScreen
-import ui.screens.scribbles.ButtonScreen
-import ui.screens.scribbles.SliderScreen
+import ui.screens.searchSelectorScreen
 import ui.screens.spoutScreen
 import ui.screens.tagEditScreen
-import ui.screens.tagSearchScreen
 
 @Composable
 @Preview
-fun App(
-    presetQueues: PresetQueues,
-    decks: List<Deck>,
-) {
+fun App() {
 
     MaterialTheme(colors = darkColors()) {
         Scaffold {
@@ -83,8 +70,8 @@ fun App(
 //                    }
 //                }
                 Column {
-                    presetScreen(decks)
-                    tabScreen(presetQueues, decks)
+                    presetScreen()
+                    tabScreen()
                 }
             }
 
@@ -101,6 +88,12 @@ enum class Tabs(
         {
             it.presetQueue.name
         }
+    ),
+    SearchSelector(
+        "Program",
+//        {
+//            it.presetQueue.name
+//        }
     ),
     ImgSprites(
         "IMG Sprites",
@@ -120,17 +113,15 @@ enum class Tabs(
             it.spout.name
         }
     ),
+    Tagging("Tags"),
+    Searches("Searches"),
     NestdropControls("Nestdrop\nDeck\nSettings"),
-    TagSearch("Tag Search"),
-    TagEdit("Edit Tags"),
     Debug("Debug"),
     ;
 }
 
 @Composable
 fun ColumnScope.tabScreen(
-    presetQueues: PresetQueues,
-    decks: List<Deck>,
 ) {
     var currentTab by remember { mutableStateOf(Tabs.PresetQueues) }
     val tabs = Tabs.entries
@@ -189,6 +180,11 @@ fun ColumnScope.tabScreen(
                     presetQueuesScreen()
                 }
             }
+            Tabs.SearchSelector -> {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    searchSelectorScreen()
+                }
+            }
 
             Tabs.ImgSprites -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -216,21 +212,24 @@ fun ColumnScope.tabScreen(
                     spoutScreen()
                 }
             }
+
+            Tabs.Tagging -> {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    tagEditScreen()
+                }
+            }
+
+            Tabs.Searches -> {
+                Row(modifier = Modifier.fillMaxWidth()) {
+//                    tagSearchScreen()
+                    editSearchesScreen()
+                }
+            }
+
+
             Tabs.NestdropControls -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     deckSettingsScreen()
-                }
-            }
-
-            Tabs.TagSearch -> {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    tagSearchScreen()
-                }
-            }
-
-            Tabs.TagEdit -> {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    tagEditScreen()
                 }
             }
 
@@ -238,85 +237,5 @@ fun ColumnScope.tabScreen(
                 debugScreen()
             }
         }
-    }
-}
-
-@Composable
-@Preview
-fun App(
-) {
-    val sliderMutableFlow = MutableStateFlow<Float>(0.0f)
-
-
-    GlobalScope.launch {
-        while (true) {
-            delay(100)
-            val v = sliderMutableFlow.value
-//            println(v)
-            if (v > 0) {
-                sliderMutableFlow.value -= 0.1f
-            } else {
-                sliderMutableFlow.value = 0.0f
-            }
-        }
-    }
-
-    MaterialTheme(colors = darkColors()) {
-        Scaffold {
-            var tabIndex by remember { mutableStateOf(0) }
-            val tabs = listOf("1", "2", "3")
-            Column(modifier = Modifier.fillMaxWidth()) {
-                TabRow(
-                    selectedTabIndex = tabIndex
-                ) {
-                    tabs.forEachIndexed { index, tabTitle ->
-                        Tab(
-                            text = { Text(tabTitle) },
-                            selected = tabIndex == index,
-                            onClick = { tabIndex = index }
-                        )
-                    }
-                }
-                when (tabIndex) {
-                    0 -> {
-                        var value1 by remember {
-                            mutableStateOf(0.15f)
-                        }
-                        var value2 by remember {
-                            mutableStateOf(0.85f)
-                        }
-//                        Row {
-//                            fader(
-//                                value = value1,
-//                                notches = 9,
-//                                color = Color.Red,
-//                                verticalText = "Red Fader",
-//                            ) {
-//                                value1 = it
-//                            }
-//
-//                            fader(
-//                                value = value2,
-//                                notches = 19,
-//                                color = Color.Green,
-//                                verticalText = "Green Fader",
-//                            ) {
-//                                value2 = it
-//                            }
-//                        }
-
-                    }
-
-                    1 -> {
-                        ButtonScreen()
-                    }
-
-                    2 -> {
-                        SliderScreen(sliderMutableFlow)
-                    }
-                }
-            }
-        }
-
     }
 }
