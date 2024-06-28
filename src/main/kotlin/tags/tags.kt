@@ -100,7 +100,7 @@ data class Tag(
 suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
     tagsFolder.mkdirs()
 
-    combine(presetsMap, presetQueues.queues, customTagsMapping) { presetsMap, queues, customTags ->
+    combine(presetsMap, presetQueues.allQueues, customTagsMapping) { presetsMap, queues, customTags ->
         presetTagsMapping.value = presetsMap.mapValues { (_, entry) ->
             val categoryTag = entry.category.let { Tag(it, listOf("nestdrop")) }
             val subCategoryTag = entry.subCategory?.let { Tag(it, listOf("nestdrop", entry.category)) }
@@ -123,30 +123,12 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
         }
         .launchIn(flowScope)
 
-    presetQueues.queues
-        .onEach {
-            val queueTags = it.map { Tag(it.name, listOf("queue")) }.toSet()
-            queueTagsSet.value = queueTags
-        }
-        .launchIn(flowScope)
+    presetQueues.allQueues
+        .onEach { queues ->
+            val queueTagsAndSearches = queues.associate { queue ->
 
-//    presetTagsMapping
-//        .onEach { tagsMapping ->
-//            val allTags = tagsMapping.values.flatten().toSet().sortedBy { it.encode() }.toSet()
-//
-//            val queueTags = allTags.filter { it.namespace[0] == "queue" }.toSet()
-//            val nestdropCategoryTags = allTags.filter { it.namespace[0] == "nestdrop" }.toSet()
-////            val customTags = allTags - (queueTags + nestdropCategoryTags)
-////            queueTagsSet.value = queueTags
-//            nestdropCategoryTagsSet.value = nestdropCategoryTags
-////            customTagsSet.value = customTags
-//        }
-//        .launchIn(flowScope)
-
-    queueTagsSet
-        .onEach { queueTags ->
-            nestdropQueueSearches.value = queueTags.map { tag ->
-                TagScoreEval(
+                val tag = Tag(queue.name, listOf("queue"))
+                val search = TagScoreEval(
                     label = "Queue ${tag.name}",
                     terms = listOf(
                         Term(
@@ -157,12 +139,14 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
                         )
                     )
                 )
+                tag to search
             }
+            queueTagsSet.value = queueTagsAndSearches.keys
+            nestdropQueueSearches.value = queueTagsAndSearches.values.toList()
         }
         .launchIn(flowScope)
 
     flowScope.launch(Dispatchers.IO) {
-
         customTagsMapping.value = tagsFolder
             .walkTopDown().filter { file -> file.isFile && file.extension == "txt" }
             .associate { file ->

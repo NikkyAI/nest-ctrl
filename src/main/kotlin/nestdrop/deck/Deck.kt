@@ -56,15 +56,12 @@ class Deck(
     val last: Boolean,
     val hexColor: Long,
 ) {
-    val enabled = MutableStateFlow(false)
-    val color = Color(hexColor)
-    val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
-
-
     companion object {
         private val logger = logger(Deck::class.qualifiedName!!)
     }
-
+    val enabled = MutableStateFlow(false)
+    val color = Color(hexColor)
+    val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
 
     @Deprecated("disable bpm sync")
     val bpmSyncEnabled = MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
@@ -95,25 +92,6 @@ class Deck(
             verticalMotion.startFlows()
             stretchSpeed.startFlows()
             waveMode.startFlows()
-
-//            bpm
-//                .map {
-//                    val beatsPerSecond = it / 60.0f
-//                    beatsPerSecond * 4.0f
-//                }
-//                .map {
-//                    (it * 100).roundToInt() / 100f
-//                }
-//                .distinctUntilChanged()
-//                .combine(syncBpmAndTransitionTime) { v, toggle ->
-//                    v to toggle
-//                }
-//                .onEach { (v, toggle) ->
-//                    if(toggle) {
-//                        ndTransitionTime.value = v
-//                    }
-//                }
-//                .launchIn(flowScope)
         }
     }
 

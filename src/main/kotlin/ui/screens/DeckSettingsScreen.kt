@@ -11,6 +11,7 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
@@ -211,7 +212,8 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
         )
-        Text("min\n${range.start}")
+//        Text("min\n${range.start}")
+        Text("${range.start}", color = deck.color)
         Slider(
             value = value,
             onValueChange = {
@@ -227,7 +229,8 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
             modifier = Modifier
                 .weight(0.6f)
         )
-        Text("max\n${range.endInclusive}")
+//        Text("max\n${range.endInclusive}")
+        Text("${range.endInclusive}", color = deck.color)
         IconButton(
             onClick = {
                 scope.launch {
@@ -265,7 +268,8 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
         )
-        Text("min\n${range.start}")
+//        Text("min\n${range.start}")
+        Text("${range.start}", color = deck.color)
         Slider(
             value = value,
             onValueChange = {
@@ -281,7 +285,8 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
             modifier = Modifier
                 .weight(0.6f)
         )
-        Text("max\n${range.endInclusive}")
+//        Text("max\n${range.endInclusive}")
+        Text("${range.endInclusive}", color = deck.color)
         IconButton(
             onClick = {
                 scope.launch {
@@ -321,7 +326,8 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
                 .padding(8.dp, 0.dp)
         )
 
-        Text("min\n${range.start}")
+//        Text("min\n${range.start}")
+        Text("${range.start}", color = deck.color)
         Column(
             modifier = Modifier
                 .weight(0.6f)
@@ -329,7 +335,7 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("min")
+//                Text("min")
                 Slider(
                     value = minValue,
                     onValueChange = {
@@ -349,7 +355,7 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("max")
+//                Text("max")
                 Slider(
                     value = maxValue,
                     onValueChange = {
@@ -368,7 +374,8 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
         }
 
 
-        Text("max\n${range.endInclusive}")
+//        Text("max\n${range.endInclusive}")
+        Text("${range.endInclusive}", color = deck.color)
         IconButton(
             onClick = {
                 scope.launch {

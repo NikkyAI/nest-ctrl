@@ -109,19 +109,19 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             }
         }
         run {
-            val combinedSearches = withTimeoutOrNull(5.seconds) {
-                while (true) {
+            val customSearches = withTimeoutOrNull(5.seconds) {
+                while (customSearches.value.isEmpty()) {
                     delay(100)
-                    val customSearches = customSearches.value
-                    System.err.println("custom: ${customSearches.size}")
-                    val nestdropQueueSearches = nestdropQueueSearches.value
-                    System.err.println("nd: ${nestdropQueueSearches.size}")
-
-                    val combinedSearches = customSearches + nestdropQueueSearches
-                    if(combinedSearches.isNotEmpty()) return@withTimeoutOrNull combinedSearches
                 }
-                null
-            } ?: emptyList()
+                customSearches.value
+            }.orEmpty()
+            val nestdropQueueSearches = withTimeoutOrNull(5.seconds) {
+                while (nestdropQueueSearches.value.isEmpty()) {
+                    delay(100)
+                }
+                nestdropQueueSearches.value
+            }.orEmpty()
+            val combinedSearches = customSearches + nestdropQueueSearches
 
             this@applyConfig.search.autochange.value = search.autoChange
             this@applyConfig.search.value = combinedSearches.firstOrNull { it.label == search.name }

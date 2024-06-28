@@ -444,9 +444,13 @@ object Main {
         }
 
 
-        while (presetQueues.queues.value.isEmpty()) {
-            delay(500)
-        }
+        withTimeoutOrNull(10.seconds) {
+
+            while (presetQueues.queues.value.isEmpty()) {
+                delay(500)
+            }
+            true
+        } ?: error ("failed to load queues")
 //        while(deck1.spriteQueues.value.isEmpty()) {
 //            delay(500)
 //        }

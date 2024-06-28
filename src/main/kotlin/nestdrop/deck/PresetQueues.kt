@@ -19,6 +19,7 @@ import osc.nestdropSendChannel
 class PresetQueues(
     private val mutableQueues: MutableStateFlow<List<Queue>> = MutableStateFlow(emptyList())
 ) : StateFlow<List<Queue>> by mutableQueues {
+    val allQueues = MutableStateFlow<List<Queue>>(emptyList())
     val queues = MutableStateFlow<List<Queue>>(emptyList())
     private val logger = logger(PresetQueues::class.qualifiedName!!)
 
