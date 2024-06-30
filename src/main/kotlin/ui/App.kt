@@ -90,7 +90,7 @@ enum class Tabs(
         }
     ),
     SearchSelector(
-        "Program",
+        "Preset Playlists",
         { deck ->
             deck.search.map { s -> s?.label ?: "-" }
         }

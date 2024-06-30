@@ -77,7 +77,7 @@ val decks = List(4) { index ->
     when(val n = index + 1) {
         1 -> Deck(n, first = true, last = false, 0xFFBB0000)
         2 -> Deck(n, first = false, last = false, 0xFF00BB00)
-        3 -> Deck(n, first = false, last = false, 0xFF0000BB)
+        3 -> Deck(n, first = false, last = false, 0xFF00A2FF)
         4 -> Deck(n, first = false, last = true, 0xFFBBBB00)
         else -> null
     }

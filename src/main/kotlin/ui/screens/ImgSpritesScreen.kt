@@ -3,6 +3,7 @@ package ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -219,9 +220,27 @@ fun imgSpritesScreenNew() {
 //
 //                    }
                     Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
                             .height(40.dp)
                     ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(0.3f)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .width(150.dp)
+                            ) {
+                                Image(bitmap = sprite.image, contentDescription = sprite.path)
+                            }
+                            Text(sprite.id.toString())
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(sprite.name, modifier = Modifier.padding(16.dp, 0.dp))
+                        }
+
                         decks.forEach { deck ->
                             if (deck.N > decksEnabled) return@forEach
 
@@ -234,15 +253,9 @@ fun imgSpritesScreenNew() {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .height(36.dp)
-                                    .weight(0.2f)
+                                    .weight(0.1f)
+                                    .padding(horizontal = 20.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier.width(150.dp)
-                                ) {
-                                    Image(bitmap = sprite.image, contentDescription = sprite.path)
-                                }
-                                Text(sprite.id.toString())
                                 VerticalRadioButton(
                                     selected = current?.name == sprite.name,
                                     onClick = {
@@ -277,11 +290,8 @@ fun imgSpritesScreenNew() {
                                     ),
                                 )
 
-                                Spacer(modifier = Modifier.width(10.dp))
-
 //                        Text("${presetEntry.id}")
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(sprite.name)
+//                                Text(sprite.name)
                             }
                         }
                     }

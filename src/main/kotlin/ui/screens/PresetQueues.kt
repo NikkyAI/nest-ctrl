@@ -1,6 +1,7 @@
 package ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -193,36 +194,49 @@ fun searchSelectorScreen(
         Column {
             combinedSearches.forEachIndexed { searchIndex, search ->
                 Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .height(36.dp)
                 ) {
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .weight(0.4f)
+                    ) {
+                        Text(search.label, modifier = Modifier.weight(0.5f))
+                    }
                     decks.forEach { deck ->
                         if (deck.N > decksEnabled) return@forEach
 
                         val deckSearch = deckSearches.getValue(deck.N)
 
                         val selected = (deckSearch == search)
-                        VerticalRadioButton(
-                            selected = (deckSearch == search),
-                            onClick = {
-                                if (selected) {
-                                    deck.search.value = null
-                                } else {
-                                    deck.search.value = search
-                                }
-                            },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = deck.color,
-                                unselectedColor = deck.dimmedColor
-                            ),
-                            height = 36.dp,
-                            connectTop = searchIndex > 0,
-                            connectBottom = searchIndex < combinedSearches.size - 1,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .weight(0.1f)
+                        ) {
+                            VerticalRadioButton(
+                                selected = (deckSearch == search),
+                                onClick = {
+                                    if (selected) {
+                                        deck.search.value = null
+                                    } else {
+                                        deck.search.value = search
+                                    }
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = deck.color,
+                                    unselectedColor = deck.dimmedColor
+                                ),
+                                height = 36.dp,
+                                connectTop = searchIndex > 0,
+                                connectBottom = searchIndex < combinedSearches.size - 1,
 //                            modifier = Modifier.weight(0.2f)
-                        )
-
-                        Text(search.label, modifier = Modifier.weight(0.5f))
+                            )
+                        }
                     }
                 }
             }
