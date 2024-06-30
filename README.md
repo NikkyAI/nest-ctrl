@@ -30,7 +30,7 @@ https://github.com/sibprogrammer/xq/releases
 
 ## Configuring Nestdrop location
 
-create a `.emv` folder in the working directory (repo root when running via gradle)
+create a `.env` file in the working directory (repo root when running via gradle)
 
 `~/` is supported as a shorthand for user home path
 ```.env
