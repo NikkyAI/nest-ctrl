@@ -30,14 +30,13 @@ import ui.components.lazyList
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun spoutScreen() {
-
-
     val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {
         decks.maxOfOrNull {
             it.spoutQueue.value?.presets?.size ?: 0
         } ?: 0
     }
 
+    val decksEnabled by Deck.enabled.collectAsState()
     lazyList {
         stickyHeader(key = "header") {
             Row(
@@ -51,8 +50,7 @@ fun spoutScreen() {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
-                    val enabled by deck.enabled.collectAsState()
-                    if(!enabled) return@forEach
+                    if (deck.N > decksEnabled) return@forEach
 
                     val presetNullable by deck.spout.collectAsState()
                     val preset = presetNullable
@@ -97,8 +95,7 @@ fun spoutScreen() {
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
-                    val enabled by deck.enabled.collectAsState()
-                    if(!enabled) return@forEach
+                    if (deck.N > decksEnabled) return@forEach
 
                     val queue: Queue? by deck.spoutQueue.collectAsState()
                     val activeIndexState = deck.spout.index

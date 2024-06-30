@@ -29,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import decks
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import nestdrop.deck.Deck
 import ui.components.verticalScroll
 import ui.screens.autoChangeScreen
@@ -38,7 +40,7 @@ import ui.screens.debugScreen
 import ui.screens.deckSettingsScreen
 import ui.screens.editSearchesScreen
 import ui.screens.imgFxScreen
-import ui.screens.imgSpritesScreen
+import ui.screens.imgSpritesScreenNew
 import ui.screens.presetQueuesScreen
 import ui.screens.presetScreen
 import ui.screens.searchSelectorScreen
@@ -48,6 +50,7 @@ import ui.screens.tagEditScreen
 @Composable
 @Preview
 fun App() {
+    val nestdropDeckCount by Deck.enabled.collectAsState()
 
     MaterialTheme(colors = darkColors()) {
         Scaffold {
@@ -57,11 +60,8 @@ fun App() {
                 ) {
                     beatProgressScreen(decks)
                     decks.forEach { deck ->
-                        val enabled by deck.enabled.collectAsState()
-                        if (enabled) {
-//                            ColorControl(deck)
-                            autoChangeScreen(deck)
-                        }
+                        if (deck.N > nestdropDeckCount) return@forEach
+                        autoChangeScreen(deck)
                     }
                 }
 //                Column {
@@ -81,7 +81,7 @@ fun App() {
 
 enum class Tabs(
     val label: String,
-    val getName: ((Deck) -> StateFlow<String>)? = null
+    val getName: ((Deck) -> Flow<String>)? = null
 ) {
     PresetQueues(
         "Preset Queues",
@@ -91,9 +91,9 @@ enum class Tabs(
     ),
     SearchSelector(
         "Program",
-//        {
-//            it.presetQueue.name
-//        }
+        { deck ->
+            deck.search.map { s -> s?.label ?: "-" }
+        }
     ),
     ImgSprites(
         "IMG Sprites",
@@ -123,6 +123,7 @@ enum class Tabs(
 @Composable
 fun ColumnScope.tabScreen(
 ) {
+    val decksEnabled by Deck.enabled.collectAsState()
     var currentTab by remember { mutableStateOf(Tabs.PresetQueues) }
     val tabs = Tabs.entries
     Column(modifier = Modifier.fillMaxWidth().weight(0.6f)) {
@@ -142,24 +143,22 @@ fun ColumnScope.tabScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 decks.forEach { deck ->
-                                    val enabled by deck.enabled.collectAsState()
-                                    if(enabled) {
-                                        val nameMutableStateFlow = getName(deck)
-                                        val name by nameMutableStateFlow.collectAsState()
-                                        Row(
+                                    if (deck.N > decksEnabled) return@forEach
+                                    val nameMutableStateFlow = getName(deck)
+                                    val name by nameMutableStateFlow.collectAsState("unitialized")
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(deck.dimmedColor)
+                                            .padding(vertical = 4.dp)
+                                            .height(24.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = name,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .background(deck.dimmedColor)
-                                                .padding(vertical = 4.dp)
-                                                .height(24.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            Text(
-                                                text = name,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                            )
-                                        }
+                                        )
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -180,6 +179,7 @@ fun ColumnScope.tabScreen(
                     presetQueuesScreen()
                 }
             }
+
             Tabs.SearchSelector -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     searchSelectorScreen()
@@ -188,7 +188,7 @@ fun ColumnScope.tabScreen(
 
             Tabs.ImgSprites -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    imgSpritesScreen()
+                    imgSpritesScreenNew()
 //                        decks.forEach {
 //                        }
 

@@ -97,14 +97,14 @@ fun presetScreen() {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
     val tagMap by presetTagsMapping.collectAsState()
+    val decksEnabled by Deck.enabled.collectAsState()
     Row(
         modifier = Modifier.height(150.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         decks.forEach { deck ->
-            val enabled by deck.enabled.collectAsState()
-            if(!enabled) return@forEach
+            if (deck.N > decksEnabled) return@forEach
 
             Row(
                 modifier = Modifier

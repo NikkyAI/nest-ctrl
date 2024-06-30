@@ -31,6 +31,7 @@ val nestdropFolder = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {
 val nestdropConfig = nestdropFolder.resolve("DefaultUserProfile.xml")
 
 val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
+val spritesFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Sprites")
 
 val nestdropPerformanceLog = nestdropFolder.resolve("PerformanceHistory").canonicalFile
 val nestdropImgModes = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile

@@ -51,6 +51,7 @@ fun debugScreen() {
         mutableStateOf(Duration.ZERO)
     }
     val scope = rememberCoroutineScope()
+    val decksEnabled by Deck.enabled.collectAsState()
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -130,7 +131,6 @@ fun debugScreen() {
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             decks.forEach { deck ->
-                                val enabled by deck.enabled.collectAsState()
 
                                 Button(
                                     onClick = {
@@ -141,7 +141,7 @@ fun debugScreen() {
                                     colors = ButtonDefaults.buttonColors(
                                         backgroundColor = deck.dimmedColor
                                     ),
-                                    enabled = enabled
+                                    enabled = deck.N <= decksEnabled
                                 ) {
                                     Text("deck: ${deck.N}")
                                 }
@@ -167,7 +167,7 @@ fun debugScreen() {
 
 
 val presetsMap = MutableStateFlow<Map<String, PresetLocation.Milk>>(emptyMap())
-val spritesMap = MutableStateFlow<Map<String, PresetLocation.Img>>(emptyMap())
+val imgSpritesMap = MutableStateFlow<Map<String, PresetLocation.Img>>(emptyMap())
 
 data class AutoplayState(
     val presetQueue: Boolean,

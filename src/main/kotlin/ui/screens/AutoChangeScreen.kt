@@ -88,8 +88,8 @@ private fun autoChangeRow(
 fun autoChangeScreen(
     deck: Deck,
 ) {
-    val enabled by deck.enabled.collectAsState()
-    if (!enabled) return
+    val decksEnabled by Deck.enabled.collectAsState()
+    if (deck.N > decksEnabled) return
 
     // autochange
     // next

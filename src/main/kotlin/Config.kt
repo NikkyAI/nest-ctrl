@@ -53,7 +53,7 @@ data class DeckConfig(
     val presetQueue: PresetQueue = PresetQueue(),
     val preset: Preset = Preset(),
     val sprite: Sprite = Sprite(),
-    val spriteQueue: SpriteQueue = SpriteQueue(),
+//    val spriteQueue: SpriteQueue = SpriteQueue(),
     val spoutQueue: SpoutQueue = SpoutQueue(),
     val spout: Spout = Spout(),
     val spriteFX: SpriteFX = SpriteFX(),
@@ -90,12 +90,12 @@ data class DeckConfig(
         val autoChange: Boolean = false,
     )
 
-    @Serializable
-    data class SpriteQueue(
-//    val autoChange: Boolean = false,
-        val index: Int = -1,
-        val name: String? = null,
-    )
+//    @Serializable
+//    data class SpriteQueue(
+////    val autoChange: Boolean = false,
+//        val index: Int = -1,
+//        val name: String? = null,
+//    )
 
     @Serializable
     data class Sprite(

@@ -31,6 +31,7 @@ fun presetQueuesScreen(
 ) {
 //    val presetQueues = decks[0].presetQueues
     val queues by presetQueues.collectAsState()
+    val decksEnabled by Deck.enabled.collectAsState()
 
 //    Column {
 //        Row {
@@ -38,8 +39,7 @@ fun presetQueuesScreen(
 //        }
     Row {
         decks.forEach { deck ->
-            val enabled by deck.enabled.collectAsState()
-            if (!enabled) return@forEach
+            if (deck.N > decksEnabled) return@forEach
 
             val activeIndex by deck.presetQueue.index.collectAsState()
 
@@ -83,8 +83,7 @@ fun presetQueuesScreen(
             }
         }
         decks.forEach { deck ->
-            val enabled by deck.enabled.collectAsState()
-            if (!enabled) return@forEach
+            if (deck.N > decksEnabled) return@forEach
             Column {
                 queues.forEachIndexed { i, queue ->
                     val deckSwitch = presetQueues.deckSwitches.getOrNull(i) ?: return@forEachIndexed
@@ -150,7 +149,7 @@ fun presetQueuesScreen(
                         .height(36.dp)
                 ) {
                     decks.forEach { deck ->
-                        val enabled by deck.enabled.collectAsState()
+                        val enabled = (deck.N <= decksEnabled)
 //                            if(!enabled) return@forEach
                         HorizontalRadioButton(
                             selected = (deckNumber == deck.N),
@@ -179,6 +178,7 @@ fun presetQueuesScreen(
 @Composable
 fun searchSelectorScreen(
 ) {
+    val decksEnabled by Deck.enabled.collectAsState()
     val customSearches by customSearches.collectAsState()
     val nestdropQueueSearches by nestdropQueueSearches.collectAsState()
 
@@ -198,8 +198,7 @@ fun searchSelectorScreen(
                         .height(36.dp)
                 ) {
                     decks.forEach { deck ->
-                        val enabled by deck.enabled.collectAsState()
-                        if (!enabled) return@forEach
+                        if (deck.N > decksEnabled) return@forEach
 
                         val deckSearch = deckSearches.getValue(deck.N)
 

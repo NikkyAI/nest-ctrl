@@ -44,6 +44,7 @@ fun deckSettingsScreen() {
     val currentTab by selectedTab.collectAsState()
     val tabs = listOf("Time", "Color", "Strobe", "Audio", "Output")
 
+    val decksEnabled by Deck.enabled.collectAsState()
     verticalScroll {
         Column(modifier = Modifier.fillMaxWidth()) {
             TabRow(
@@ -64,8 +65,8 @@ fun deckSettingsScreen() {
                 0 -> {
                     Row {
                         decks.forEach { deck ->
-                            val enabled by deck.enabled.collectAsState()
-                            if (!enabled) return@forEach
+
+                            if (deck.N > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -87,8 +88,7 @@ fun deckSettingsScreen() {
                 1 -> {
                     Row {
                         decks.forEach { deck ->
-                            val enabled by deck.enabled.collectAsState()
-                            if (!enabled) return@forEach
+                            if (deck.N > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -112,8 +112,7 @@ fun deckSettingsScreen() {
                 2 -> {
                     Row {
                         decks.forEach { deck ->
-                            val enabled by deck.enabled.collectAsState()
-                            if (!enabled) return@forEach
+                            if (deck.N > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -158,8 +157,7 @@ fun deckSettingsScreen() {
                 3 -> {
                     Row {
                         decks.forEach { deck ->
-                            val enabled by deck.enabled.collectAsState()
-                            if (!enabled) return@forEach
+                            if (deck.N > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -175,8 +173,7 @@ fun deckSettingsScreen() {
                 4 -> {
                     Row {
                         decks.forEach { deck ->
-                            val enabled by deck.enabled.collectAsState()
-                            if (!enabled) return@forEach
+                            if (deck.N > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -206,12 +203,6 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
         )
-        Text(
-            text = "value\n%6.3f".format(value),
-            modifier = Modifier
-                .weight(0.3f)
-                .padding(8.dp, 0.dp)
-        )
 //        Text("min\n${range.start}")
         Text("${range.start}", color = deck.color)
         Slider(
@@ -231,6 +222,12 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
         )
 //        Text("max\n${range.endInclusive}")
         Text("${range.endInclusive}", color = deck.color)
+        Text(
+            text = "value\n%6.3f".format(value),
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(8.dp, 0.dp)
+        )
         IconButton(
             onClick = {
                 scope.launch {
@@ -262,12 +259,6 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
         )
-        Text(
-            text = "value\n%6.3f".format(value),
-            modifier = Modifier
-                .weight(0.3f)
-                .padding(8.dp, 0.dp)
-        )
 //        Text("min\n${range.start}")
         Text("${range.start}", color = deck.color)
         Slider(
@@ -287,6 +278,12 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
         )
 //        Text("max\n${range.endInclusive}")
         Text("${range.endInclusive}", color = deck.color)
+        Text(
+            text = "value\n%6.3f".format(value),
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(8.dp, 0.dp)
+        )
         IconButton(
             onClick = {
                 scope.launch {
@@ -314,13 +311,6 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
     ) {
         Text(
             this@asSlider.propertyName,
-            modifier = Modifier
-                .weight(0.3f)
-                .padding(8.dp, 0.dp)
-        )
-
-        Text(
-            text = "value\n%5.2f - %5.2f".format(minValue, maxValue),
             modifier = Modifier
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
@@ -372,10 +362,15 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
                 )
             }
         }
-
-
 //        Text("max\n${range.endInclusive}")
         Text("${range.endInclusive}", color = deck.color)
+
+        Text(
+            text = "value\n%5.2f - %5.2f".format(minValue, maxValue),
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(8.dp, 0.dp)
+        )
         IconButton(
             onClick = {
                 scope.launch {

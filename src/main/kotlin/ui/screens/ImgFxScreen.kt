@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import decks
+import nestdrop.deck.Deck
 import nestdrop.imgFxMap
 import ui.components.VerticalRadioButton
 import ui.components.lazyList
@@ -33,6 +34,7 @@ import ui.components.lazyList
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun imgFxScreen() {
+    val decksEnabled by Deck.enabled.collectAsState()
     lazyList {
         stickyHeader(key = "header") {
             Row(
@@ -47,8 +49,7 @@ fun imgFxScreen() {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
-                    val enabled by deck.enabled.collectAsState()
-                    if(!enabled) return@forEach
+                    if (deck.N > decksEnabled) return@forEach
 
                     val blendModeState = deck.imgSpriteFx.blendMode
                     val blendMode by blendModeState.collectAsState()
@@ -102,8 +103,7 @@ fun imgFxScreen() {
                     }
             ) {
                 decks.forEach { deck ->
-                    val enabled by deck.enabled.collectAsState()
-                    if(!enabled) return@forEach
+                    if (deck.N > decksEnabled) return@forEach
 
                     val selectedIndexState = deck.imgSpriteFx.index
                     val selectedIndex by selectedIndexState.collectAsState()

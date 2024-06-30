@@ -1,10 +1,6 @@
 package nestdrop
 
-import flowScope
 import io.klogging.logger
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import logging.errorF
 import logging.infoF
 import nestdrop.deck.Deck
@@ -16,7 +12,7 @@ import java.io.File
 
 private val logger = logger("nestdrop.loadQueuesKt")
 
-val nestdropDeckCount = MutableStateFlow(1)
+
 
 suspend fun loadNumberOfDecks(): Int {
     return runCommandCaptureOutput(
@@ -33,10 +29,7 @@ suspend fun loadNestdropConfig(
 //    deck2: Deck,
 ) {
     val numberOfDecks = loadNumberOfDecks()
-    nestdropDeckCount.value = numberOfDecks
-    decks.forEach { deck ->
-        deck.enabled.value = deck.N <= numberOfDecks
-    }
+    Deck.enabled.value = numberOfDecks
 
     logger.infoF { "loading queues from $nestdropConfig" }
     try {

@@ -16,7 +16,7 @@ data class HistoryNotNull<T>(val current: T, val previous: T)
 //        operation = { accumulator, new -> History(new, accumulator?.current) }
 //    )
 // emits History(1,1), History(2, 1)...
-fun <T> Flow<T>.runningHistory(initialValue: T): Flow<History<T>> =
+fun <T> Flow<T>.runningHistory(): Flow<History<T>> =
     runningFold(
         initial = null as History<T>?,
         operation = { accumulator, new -> History(current = new, previous = accumulator?.current) }

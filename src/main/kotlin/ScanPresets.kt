@@ -1,11 +1,15 @@
+import io.klogging.noCoLogger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import nestdrop.PresetLocation
 import tags.Tag
 import tags.nestdropCategoryTagsSet
 import ui.screens.presetsMap
-import ui.screens.spritesMap
+import ui.screens.imgSpritesMap
+import java.io.File
 
-fun scanPresets() {
-    val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
+suspend fun scanPresets() {
 
     val categoryTagsSet = mutableSetOf<Tag>()
 
@@ -62,10 +66,9 @@ fun scanPresets() {
         categoryPresets + subCategoryEntries
     }.associateBy { it.name }
 
-    val spritesFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Sprites")
 
-    val imgPresets = spritesFolder.listFiles().orEmpty().filter { it.isDirectory }.flatMap { categoryFolder ->
-        val categoryFiles = categoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "png" || it.extension == "jpg" }
+    val imgPresets = spritesFolder.listFiles().orEmpty().filter { it.isDirectory }.sortFileNames().flatMap { categoryFolder ->
+        val categoryFiles = categoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "png" || it.extension == "jpg" }.sortFileNames()
         val categoryPresets = categoryFiles.filterNotNull().map { file ->
             val name = file.name
             val path = file.toRelativeString(presetsFolder)
@@ -77,10 +80,10 @@ fun scanPresets() {
                 category = categoryFolder.name,
             )
         }
-        val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }
+        val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }.sortFileNames()
 
         val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
-            val subCategoryFiles = subCategoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "milk" }
+            val subCategoryFiles = subCategoryFolder.listFiles().orEmpty().filter { it.extension == "png" || it.extension == "jpg" }.sortFileNames()
             if (subCategoryFiles.isNotEmpty()) {
                 if (index == 0) {
                     if (categoryPresets.isNotEmpty()) {
@@ -99,6 +102,7 @@ fun scanPresets() {
                     id = id++,
                     path = path,
                     category = categoryFolder.name,
+                    subCategory = subCategoryFolder.name,
                 )
             }
         }
@@ -109,5 +113,21 @@ fun scanPresets() {
     nestdropCategoryTagsSet.value = categoryTagsSet
 
     presetsMap.value = milkPresets
-    spritesMap.value = imgPresets
+    imgSpritesMap.value = imgPresets
+
+    coroutineScope {
+        imgPresets.values.forEach { sprite ->
+            launch(Dispatchers.IO) {
+                sprite.image.let { img ->
+                    logger.info { "loaded ${sprite.name} ${img.width}x${img.height}" }
+                }
+            }
+        }
+    }
+}
+
+private val logger = noCoLogger("ScanPresets")
+
+private fun List<File>.sortFileNames() = sortedBy { file ->
+    file.nameWithoutExtension.lowercase().replace("_", "#")
 }

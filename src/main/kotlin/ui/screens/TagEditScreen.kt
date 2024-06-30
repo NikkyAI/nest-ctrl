@@ -26,15 +26,18 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import tags.customTagsMapping
 import decks
+import nestdrop.deck.Deck
 import tags.Tag
 import ui.components.lazyList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun tagEditScreen(
-) {
+fun tagEditScreen() {
 
     val customTagsCollected by customTagsMapping.collectAsState()
+
+    val sortedTags = customTagsCollected.keys.sortedBy { it.encode() }
+    val groupedByNamespace = customTagsCollected.keys.sortedBy { it.encode() }.groupBy { it.namespace }
 
 //    val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {
 //        decks.maxOfOrNull {
@@ -42,6 +45,7 @@ fun tagEditScreen(
 //        } ?: 0
 //    }
 
+    val decksEnabled by Deck.enabled.collectAsState()
     lazyList {
         stickyHeader(key = "header") {
             Row(
@@ -55,8 +59,7 @@ fun tagEditScreen(
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
-                    val enabled by deck.enabled.collectAsState()
-                    if(!enabled) return@forEach
+                    if (deck.N > decksEnabled) return@forEach
 
                     var newTagName by remember { mutableStateOf(TextFieldValue("")) }
 
@@ -108,15 +111,14 @@ fun tagEditScreen(
         }
 
 
-        items(customTagsCollected.keys.toList()) { tag ->
+        items(sortedTags) { tag ->
             val entries = customTagsCollected[tag] ?: emptySet()
             Row(
                 modifier = Modifier
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
-                    val enabled by deck.enabled.collectAsState()
-                    if(!enabled) return@forEach
+                    if (deck.N > decksEnabled) return@forEach
 
                     val preset by deck.preset.name.collectAsState()
                     val isTagged = preset.substringBeforeLast(".milk") in entries

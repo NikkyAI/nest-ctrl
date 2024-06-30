@@ -1,13 +1,10 @@
 package nestdrop.deck
 
 import DeckConfig
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import io.klogging.logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -18,6 +15,7 @@ import logging.infoF
 import presetQueues
 import tags.nestdropQueueSearches
 import ui.screens.customSearches
+import ui.screens.imgSpritesMap
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -63,30 +61,16 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                 logger.errorF { "failed to load sprite queues on $deckName" }
                 emptyList()
             }
-            val spriteQueueValue = spriteQueuesValue.firstOrNull() { it.name == spriteQueue.name }
+//            val spriteQueueValue = spriteQueuesValue.firstOrNull() { it.name == spriteQueue.name }
 
             run {
-                this@applyConfig.spriteQueue.index.value = spriteQueuesValue
-                    .indexOf(spriteQueueValue)
-                    .takeUnless { it == -1 }
-                    ?: deckConfig.spriteQueue.index
-                        .takeUnless { it == -1 }
-                            ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("sprite") }
-
-                val sprites = withTimeoutOrNull(500.milliseconds) {
-                    logger.infoF { "loading presets from queue" }
-                    spriteQueueValue?.presets.orEmpty()
-                }.orEmpty()
-                logger.infoF { "loaded $deckName $sprites" }
                 this@applyConfig.imgSprite.autoChange.value = sprite.autoChange
-                val spriteToggleIndices = sprite.toggles.map { name ->
-                    sprites.indexOfFirst { it.name == name }
-                }.toSet()
-                this@applyConfig.imgSprite.toggles.forEachIndexed { index, toggle ->
-                    toggle.value = index in spriteToggleIndices
+                this@applyConfig.imgSprite.toggles.value = sprite.toggles
+                sprite.name?.let {
+                    imgSpritesMap.value[it]
+                }?.let {
+                    this@applyConfig.imgSprite.spriteImgLocation.value = it
                 }
-                this@applyConfig.imgSprite.index.value = sprites.indexOfFirst { it.name == sprite.name }
-                    .takeUnless { it == -1 } ?: sprite.index
             }
             run {
                 logger.debugF { "loading spout queue ${deckConfig.spoutQueue.name} from $spriteQueuesValue" }
@@ -164,25 +148,13 @@ private val Deck.presetQueueFlow
 private val Deck.spriteFlow
     get() = combine(
         imgSprite.name,
-        imgSprite.index,
+//        imgSprite.index,
         imgSprite.autoChange,
-        combine(imgSprite.toggles) {
-            it.mapIndexed { i, b ->
-                i to b
-            }.toMap()
-        }.combine(spriteQueue.filterNotNull()) { toggleStates, spriteQueue ->
-            toggleStates
-                .filterValues { it }
-                .mapKeys { (index, _) ->
-                    spriteQueue.presets.getOrNull(index)?.name ?: ""
-                }
-                .filterKeys { it.isNotBlank() }
-                .keys
-        }
-    ) { spriteName, spriteIndex, autoChange, toggles ->
+        imgSprite.toggles,
+    ) { spriteName, autoChange, toggles ->
         DeckConfig.Sprite(
             name = spriteName,
-            index = spriteIndex,
+//            index = spriteIndex,
             autoChange = autoChange,
             toggles = toggles,
         )
@@ -240,21 +212,21 @@ val Deck.configFlow: Flow<DeckConfig>
             ) { config, preset ->
                 config.copy(preset = preset)
             }
-            .combine(
-                combine(
-                    spriteQueue.name,
-                    spriteQueue.index,
-                ) { spriteQueueName, spriteQueueIndex ->
-                    DeckConfig.SpriteQueue(
-                        index = spriteQueueIndex,
-                        name = spriteQueueName,
-                    )
-                }
-            ) { config, spriteQueue ->
-                config.copy(
-                    spriteQueue = spriteQueue
-                )
-            }
+//            .combine(
+//                combine(
+//                    spriteQueue.name,
+//                    spriteQueue.index,
+//                ) { spriteQueueName, spriteQueueIndex ->
+//                    DeckConfig.SpriteQueue(
+//                        index = spriteQueueIndex,
+//                        name = spriteQueueName,
+//                    )
+//                }
+//            ) { config, spriteQueue ->
+//                config.copy(
+//                    spriteQueue = spriteQueue
+//                )
+//            }
             .combine(spriteFlow) { config, sprite ->
                 config.copy(
                     sprite = sprite

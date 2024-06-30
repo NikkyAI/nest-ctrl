@@ -66,12 +66,12 @@ fun beatProgressScreen(
         Stroke(width = (strokeWidth / 8).toPx(), cap = StrokeCap.Butt)
     }
 
+    val decksEnabled by Deck.enabled.collectAsState()
     val triggerTimes = decks.mapNotNull { deck ->
-        val enabled by deck.enabled.collectAsState()
+        val enabled = (deck.N <= decksEnabled)
         val triggerTime by deck.triggerTime.collectAsState()
 
-        if(enabled)
-        {
+        if(enabled) {
             deck.color to triggerTime
         } else {
             null
@@ -178,10 +178,8 @@ fun beatProgressScreen(
             }
 
             decks.forEach { deck ->
-                val enabled by deck.enabled.collectAsState()
-                if(!enabled) {
-                    return@forEach
-                }
+                if (deck.N > decksEnabled) return@forEach
+
                 val triggerTime by deck.triggerTime.collectAsState()
 
                 Row(
