@@ -27,7 +27,7 @@ import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.ConsistencyCheckJobConfig
 
 workflow(
-    name = "Test workflow",
+    name = "package distributable",
     on = listOf(
         Push(branches = listOf("main"))
     ),
@@ -39,7 +39,7 @@ workflow(
 
     }
 ) {
-    job(id = "build_nightly", runsOn = RunnerType.Windows2022) {
+    job(id = "build_and_package", runsOn = RunnerType.Windows2022) {
         uses(name = "Check out", action = CheckoutV4())
 
         uses(
@@ -59,7 +59,6 @@ workflow(
         )
 
         run(command = "./gradlew packageDistributable --no-daemon")
-//        run(command = "ls build")
 
         uses(
             name = "update tag",

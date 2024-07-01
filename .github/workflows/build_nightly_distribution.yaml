@@ -2,7 +2,7 @@
 # If you want to modify the workflow, please change the Kotlin file and regenerate this YAML file.
 # Generated with https://github.com/typesafegithub/github-workflows-kt
 
-name: 'Test workflow'
+name: 'package distributable'
 on:
   push:
     branches:
@@ -21,7 +21,7 @@ jobs:
     - id: 'step-2'
       name: 'Consistency check'
       run: 'git diff --exit-code ''.github/workflows/build_nightly_distribution.yaml'''
-  build_nightly:
+  package_distributable:
     runs-on: 'windows-2022'
     needs:
     - 'check_yaml_consistency'

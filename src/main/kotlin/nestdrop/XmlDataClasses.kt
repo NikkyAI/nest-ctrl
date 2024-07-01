@@ -43,13 +43,13 @@ class XmlDataClasses {
         @SerialName("Name")
         val name: String,
         @SerialName("Top")
-        val top: Int,
+        val top: Double,
         @SerialName("Left")
-        val left: Int,
+        val left: Double,
         @SerialName("Width")
-        val width: Int,
+        val width: Double,
         @SerialName("Height")
-        val height: Int,
+        val height: Double,
         @SerialName("Type")
         val type: Int,
         @SerialName("Deck")
