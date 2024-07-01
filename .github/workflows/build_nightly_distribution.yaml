@@ -21,7 +21,7 @@ jobs:
     - id: 'step-2'
       name: 'Consistency check'
       run: 'git diff --exit-code ''.github/workflows/build_nightly_distribution.yaml'''
-  package_distributable:
+  build_and_package:
     runs-on: 'windows-2022'
     needs:
     - 'check_yaml_consistency'
