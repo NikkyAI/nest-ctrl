@@ -1,0 +1,62 @@
+# This file was generated using Kotlin DSL (.github/workflows/build_nightly_distribution.main.kts).
+# If you want to modify the workflow, please change the Kotlin file and regenerate this YAML file.
+# Generated with https://github.com/typesafegithub/github-workflows-kt
+
+name: 'Test workflow'
+on:
+  push:
+    branches:
+    - 'main'
+jobs:
+  check_yaml_consistency:
+    name: 'Check YAML consistency'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - id: 'step-0'
+      name: 'Check out'
+      uses: 'actions/checkout@v4'
+    - id: 'step-1'
+      name: 'Execute script'
+      run: 'rm ''.github/workflows/build_nightly_distribution.yaml'' && ''.github/workflows/build_nightly_distribution.main.kts'''
+    - id: 'step-2'
+      name: 'Consistency check'
+      run: 'git diff --exit-code ''.github/workflows/build_nightly_distribution.yaml'''
+  build_nightly:
+    runs-on: 'windows-2022'
+    needs:
+    - 'check_yaml_consistency'
+    steps:
+    - id: 'step-0'
+      name: 'Check out'
+      uses: 'actions/checkout@v4'
+    - id: 'step-1'
+      name: 'setup jdk'
+      uses: 'actions/setup-java@v3'
+      with:
+        java-version: '18'
+        distribution: 'adopt'
+        java-package: 'jdk'
+        architecture: 'x64'
+        cache: 'gradle'
+    - id: 'step-2'
+      name: 'setup gradle'
+      uses: 'gradle/actions/setup-gradle@v3'
+    - id: 'step-3'
+      run: './gradlew packageDistributable --no-daemon'
+    - id: 'step-4'
+      name: 'update tag'
+      uses: 'jimeh/update-tags-action@v1.0.1'
+      with:
+        tags: 'nightly'
+    - id: 'step-5'
+      name: 'create release'
+      uses: 'softprops/action-gh-release@v2.0.6'
+      with:
+        body: 'Nightly Build'
+        name: 'Nightly'
+        tag_name: 'nightly'
+        draft: 'false'
+        prerelease: 'true'
+        files: 'build/nestctrl.zip'
+        fail_on_unmatched_files: 'true'
+        generate_release_notes: 'true'
