@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -139,20 +140,21 @@ fun ColumnScope.tabScreen(
                         val getName = tab.getName
                         if (getName != null) {
                             Column(
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 decks.forEach { deck ->
                                     if (deck.N > decksEnabled) return@forEach
                                     val nameMutableStateFlow = getName(deck)
                                     val name by nameMutableStateFlow.collectAsState("unitialized")
                                     Row(
+                                        verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .background(deck.dimmedColor)
-                                            .padding(vertical = 4.dp)
-                                            .height(24.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
+                                            .padding(vertical = 0.dp, horizontal = 0.dp)
+                                            .defaultMinSize(minHeight = 36.dp)
+//                                            .height(24.dp),
                                     ) {
                                         Text(
                                             text = name,

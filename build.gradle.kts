@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
+import org.jetbrains.compose.desktop.application.tasks.AbstractRunDistributableTask
 
 plugins {
     kotlin("jvm")
@@ -76,6 +78,13 @@ compose.desktop {
 
 project.afterEvaluate {
     tasks {
+        val createDistributable by getting(AbstractJPackageTask::class) {
+            destinationDir.set(project.file("bin"))
+//            appImageRootDir.
+        }
+        val runDistributable by getting(AbstractRunDistributableTask::class) {
+//            appImageRootDir.
+        }
         val packageJar by creating {
             group = "package"
             dependsOn(getByName("packageUberJarForCurrentOS"))

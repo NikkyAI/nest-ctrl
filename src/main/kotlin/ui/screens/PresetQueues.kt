@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.Checkbox
@@ -17,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import decks
 import nestdrop.deck.Deck
@@ -202,10 +205,16 @@ fun searchSelectorScreen(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .weight(0.4f)
+                            .weight(0.3f)
+                            .defaultMinSize(300.dp)
                     ) {
-                        Text(search.label, modifier = Modifier.weight(0.5f))
+                        Text(
+                            text = search.label,
+//                            textAlign = TextAlign.End,
+                            modifier = Modifier.weight(0.5f)
+                        )
                     }
                     decks.forEach { deck ->
                         if (deck.N > decksEnabled) return@forEach
@@ -238,6 +247,7 @@ fun searchSelectorScreen(
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.weight(0.5f))
                 }
             }
         }
