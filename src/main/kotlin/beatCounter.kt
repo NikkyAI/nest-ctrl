@@ -1,4 +1,4 @@
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import logging.traceF
 import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
@@ -27,7 +26,7 @@ val bpmRounded = MutableStateFlow(120f)
 //}
 val bpmRoundedInt = MutableStateFlow(120)
 
-private val logger = logger("beatCounter")
+private val logger = KotlinLogging.logger { }
 
 suspend fun startBeatCounter(
 //    vararg decks: Deck
@@ -45,7 +44,7 @@ suspend fun startBeatCounter(
         .launchIn(flowScope)
     beatProgress
         .onEach { beatProgress ->
-            logger.traceF { "beat progress: $beatProgress" }
+            logger.trace { "beat progress: $beatProgress" }
         }
         .launchIn(flowScope)
     beatFrame
@@ -63,7 +62,7 @@ suspend fun startBeatCounter(
 //                beats -= totalBeats
 //                    start += ((bpmFromLink.value / 60_000.0) * totalBeats).milliseconds
 
-                logger.traceF { "reached $totalBeats beats, resetting to ${beats % totalBeats}" }
+                logger.trace { "reached $totalBeats beats, resetting to ${beats % totalBeats}" }
 //                    var newBeatCounter = beatCounter.value
                 beatCounter.value %= totalBeats
 

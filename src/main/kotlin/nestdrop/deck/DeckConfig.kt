@@ -1,7 +1,7 @@
 package nestdrop.deck
 
 import DeckConfig
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
-import logging.debugF
-import logging.errorF
-import logging.infoF
 import presetQueues
 import tags.nestdropQueueSearches
 import ui.screens.customSearches
@@ -19,7 +16,7 @@ import ui.screens.imgSpritesMap
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-private val logger = logger("nestcontrol.deck.DeckConfigKt")
+private val logger = KotlinLogging.logger { }
 
 suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
     deckConfig.apply {
@@ -36,7 +33,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             val presetQueuesToggleIndices = presetQueue.toggles.map { queue ->
                 presetQueuesV.indexOfFirst { it.name == queue }
             }.filterNot { it == -1 }.toSet()
-            logger.infoF { "presetQueues toggleIndices: $presetQueuesToggleIndices" }
+            logger.info { "presetQueues toggleIndices: $presetQueuesToggleIndices" }
             this@applyConfig.presetQueue.toggles.forEachIndexed { index, toggle ->
                 toggle.value = index in presetQueuesToggleIndices
             }
@@ -54,11 +51,11 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             val spriteQueuesValue = withTimeoutOrNull(5.seconds) {
                 spriteQueues.first {
                     it
-                        .also { logger.debugF { it } }
+                        .also { logger.debug { it } }
                         .isNotEmpty()
                 }
             } ?: run {
-                logger.errorF { "failed to load sprite queues on $deckName" }
+                logger.error { "failed to load sprite queues on $deckName" }
                 emptyList()
             }
 //            val spriteQueueValue = spriteQueuesValue.firstOrNull() { it.name == spriteQueue.name }
@@ -73,12 +70,13 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                 }
             }
             run {
-                logger.debugF { "loading spout queue ${deckConfig.spoutQueue.name} from $spriteQueuesValue" }
+                logger.debug { "loading spout queue ${deckConfig.spoutQueue.name} from $spriteQueuesValue" }
                 val spoutQueueValue = spriteQueuesValue.firstOrNull() { it.name == deckConfig.spoutQueue.name }
                 this@applyConfig.spoutQueue.index.value = spriteQueuesValue.indexOf(spoutQueueValue)
-                    .takeUnless { it == -1 } ?: deckConfig.spoutQueue.index.takeUnless { it == -1 } ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
+                    .takeUnless { it == -1 } ?: deckConfig.spoutQueue.index.takeUnless { it == -1 }
+                        ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
                 val spouts = withTimeoutOrNull(500.milliseconds) {
-                    logger.infoF { "loading presets from queue" }
+                    logger.info { "loading presets from queue" }
                     spoutQueueValue?.presets.orEmpty()
                 }.orEmpty()
                 this@applyConfig.spout.index.value = spouts.indexOfFirst { it.label == spout.label }

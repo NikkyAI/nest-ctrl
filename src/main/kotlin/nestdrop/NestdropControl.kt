@@ -1,7 +1,7 @@
 package nestdrop
 
 import flowScope
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -13,7 +13,7 @@ import kotlin.math.roundToInt
 
 sealed interface NestdropControl {
     companion object {
-        private val logger = logger(NestdropControl::class.qualifiedName!!)
+        private val logger = KotlinLogging.logger { }
 
         fun valueToSlider(range: ClosedFloatingPointRange<Float>, value: Float) =
             (value - range.start) / (range.endInclusive - range.start)

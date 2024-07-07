@@ -1,8 +1,6 @@
 package nestdrop
 
-import io.klogging.logger
-import logging.errorF
-import logging.infoF
+import io.github.oshai.kotlinlogging.KotlinLogging
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdropConfig
@@ -10,8 +8,7 @@ import utils.runCommandCaptureOutput
 import utils.xml
 import java.io.File
 
-private val logger = logger("nestdrop.loadQueuesKt")
-
+private val logger = KotlinLogging.logger { }
 
 
 suspend fun loadNumberOfDecks(): Int {
@@ -31,7 +28,7 @@ suspend fun loadNestdropConfig(
     val numberOfDecks = loadNumberOfDecks()
     Deck.enabled.value = numberOfDecks
 
-    logger.infoF { "loading queues from $nestdropConfig" }
+    logger.info { "loading queues from $nestdropConfig" }
     try {
         val queueCount = runCommandCaptureOutput(
             "xq", "-x", "count(/NestDropSettings/QueueWindows/*)",
@@ -40,8 +37,11 @@ suspend fun loadNestdropConfig(
         ).trim().toInt()
 
         val queues = (0 until queueCount).mapNotNull {
+            logger.info { "loading queue $it" }
             loadQueue(it)
         }
+
+        logger.info { "loaded ${queues.size} queues from xml" }
 
         presetQueues.allQueues.value = queues.filter { /*it.open &&*/ it.type == QueueType.Preset }
         presetQueues.queues.value = queues.filter { it.open && it.type == QueueType.Preset }
@@ -49,7 +49,7 @@ suspend fun loadNestdropConfig(
             deck.spriteQueues.value = queues.filter { it.open && it.deck == deck.N && it.type == QueueType.Sprite }
         }
     } catch (e: Exception) {
-        logger.errorF(e) { "failed to load queues" }
+        logger.error(e) { "failed to load queues" }
     }
 }
 
@@ -64,10 +64,10 @@ suspend fun loadQueue(index: Int): Queue? {
             XmlDataClasses.QueueWindow.serializer(), queueWindowsXml
         )
     } catch (e: NumberFormatException) {
-        logger.errorF(e) { "failed to parse queue $index" }
+        logger.error(e) { "failed to parse queue $index" }
         return null
     } catch (e: Exception) {
-        logger.errorF(e) { "failed to parse queue $index" }
+        logger.error(e) { "failed to parse queue $index" }
         return null
     }
 

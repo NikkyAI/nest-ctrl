@@ -2,21 +2,18 @@ package osc
 
 import com.illposed.osc.*
 import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import logging.debugF
-import logging.errorF
-import logging.infoF
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 
-private val logger = logger(OscSynced::class.qualifiedName!!)
+private val logger = KotlinLogging.logger { }
 
 
 sealed interface OscSynced {
@@ -49,7 +46,7 @@ sealed interface OscSynced {
                 @Suppress("UNCHECKED_CAST")
                 setValue(value as T)
             } catch (e: TypeCastException) {
-                logger.errorF(e) { "failed to sync value $value to $address (${value::class.qualifiedName})" }
+                logger.error(e) { "failed to sync value $value to $address (${value::class.qualifiedName})" }
             }
         }
 
@@ -77,9 +74,9 @@ sealed interface OscSynced {
                 @Suppress("UNCHECKED_CAST")
                 setValue(value1 as T, value2 as Q)
 
-            } catch(e: TypeCastException) {
-                logger.errorF(e) { "unexpected type in osc message arguments $value1 $value2" }
-               logger.errorF(e) { "failed to sync value $value1, $value2 to $address (${value1::class.qualifiedName} ${value2::class.qualifiedName})" }
+            } catch (e: TypeCastException) {
+                logger.error(e) { "unexpected type in osc message arguments $value1 $value2" }
+                logger.error(e) { "failed to sync value $value1, $value2 to $address (${value1::class.qualifiedName} ${value2::class.qualifiedName})" }
             }
         }
 
@@ -159,7 +156,7 @@ sealed interface OscSynced {
             syncedValues += this
 //            label(address)
             runBlocking {
-                logger.infoF { "creating synced value for $address" }
+                logger.info { "creating synced value for $address" }
             }
         }
     }
@@ -187,15 +184,15 @@ sealed interface OscSynced {
             val index = address.substringAfterLast('/').toInt()
             val bool = try {
                 args.first() as Boolean
-            } catch(e: TypeCastException) {
-                logger.errorF(e) { "unexpected type in osc message ${event.message}" }
+            } catch (e: TypeCastException) {
+                logger.error(e) { "unexpected type in osc message ${event.message}" }
                 return
             }
-            if(bool) {
-                logger.debugF { "$addressPrefix switches to $index" }
+            if (bool) {
+                logger.debug { "$addressPrefix switches to $index" }
                 stateFlow.value = index
-            } else if(index == stateFlow.value) {
-                logger.debugF { "$addressPrefix switches off" }
+            } else if (index == stateFlow.value) {
+                logger.debug { "$addressPrefix switches off" }
                 stateFlow.value = -1
             }
 //            toggleStates.value += (index to bool)
@@ -315,8 +312,8 @@ sealed interface OscSynced {
             if(now - lastTime > timeout) {
                 val value = try {
                     event.message.arguments[0] as T
-                } catch(e: TypeCastException) {
-                    logger.errorF(e) { "unexpected type in osc message ${event.message}" }
+                } catch (e: TypeCastException) {
+                    logger.error(e) { "unexpected type in osc message ${event.message}" }
                     return
                 }
                 trigger(value)

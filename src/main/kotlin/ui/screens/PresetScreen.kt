@@ -120,7 +120,6 @@ fun presetScreen() {
 
                 if (presetEntry != null) {
                     val image = remember(presetEntry) { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
-//                        System.err.println("loaded image ${presetEntry.previewPath}")
                     Image(
                         bitmap = image,
                         contentDescription = presetEntry.previewPath,
@@ -131,11 +130,9 @@ fun presetScreen() {
                     )
                 }
 
-//                    val path = presetEntry?.path?.substringBeforeLast('\\')?.split('\\')
 
                 Column(
                     horizontalAlignment = Alignment.Start,
-//                            verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .padding(4.dp)
                         .weight(0.3f)
@@ -143,9 +140,7 @@ fun presetScreen() {
                     verticalScroll {
                         Column(
                             horizontalAlignment = Alignment.Start,
-//                            verticalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-//                                .padding(4.dp)
                         ) {
                             val tags = tagMap[currentPreset] ?: emptySet()
                             tags.forEach {
@@ -157,7 +152,6 @@ fun presetScreen() {
 
                 Column(
                     horizontalAlignment = Alignment.Start,
-//                            verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .padding(4.dp)
                         .weight(0.3f)
@@ -174,8 +168,6 @@ fun presetScreen() {
                                 text = currentPreset,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier
-//                                    .padding(horizontal = 4.dp, vertical = 4.dp)
-//                                    .weight(0.6f)
                             )
                         }
                     }

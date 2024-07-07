@@ -1,4 +1,4 @@
-import io.klogging.noCoLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -126,7 +126,7 @@ suspend fun scanPresets() {
     }
 }
 
-private val logger = noCoLogger("ScanPresets")
+private val logger = KotlinLogging.logger {}
 
 private fun List<File>.sortFileNames() = sortedBy { file ->
     file.nameWithoutExtension.lowercase().replace("_", "#")

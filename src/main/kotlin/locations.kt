@@ -10,7 +10,7 @@ val tagsFolder = File("tags")
 
 val userHome = File(System.getProperty("user.home"))
 
-val nestdropFolder = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {
+val nestdropFolder get() = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {
     if (it.startsWith("~/") || it.startsWith("~\\")) {
         System.getProperty("user.home") + it.substring(1)
     } else {

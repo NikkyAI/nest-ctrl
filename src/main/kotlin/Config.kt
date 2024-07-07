@@ -1,5 +1,5 @@
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.xn32.json5k.Json5
-import io.klogging.logger
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.plus
 import kotlinx.serialization.Serializable
-import logging.infoF
 import nestdrop.deck.Deck
 import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
@@ -19,7 +18,7 @@ import ui.screens.customSearches
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
-private val logger = logger("Config")
+private val logger = KotlinLogging.logger { }
 
 val configScope = CoroutineScope(
     Dispatchers.IO
@@ -175,7 +174,7 @@ suspend fun loadConfig() {
         .sample(1.seconds)
 //        .dropWhile { it == Config() }
         .onEach { config ->
-            logger.infoF { "saving config $config" }
+            logger.info { "saving config $config" }
             saveConfig(config)
         }
 //        .runningHistory(config.value)
@@ -186,7 +185,7 @@ suspend fun loadConfig() {
         .launchIn(configScope)
 
     config.value.also { config ->
-        logger.infoF { "loaded $config" }
+        logger.info { "loaded $config" }
         beatFrame.value = config.beats
         customSearches.value = config.searches
         decks.forEach { deck ->

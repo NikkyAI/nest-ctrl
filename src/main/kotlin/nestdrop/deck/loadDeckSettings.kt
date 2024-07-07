@@ -1,19 +1,17 @@
 package nestdrop.deck
 
-import io.klogging.logger
-import logging.debugF
-import logging.infoF
+import io.github.oshai.kotlinlogging.KotlinLogging
 import nestdrop.XmlDataClasses
 import nestdropConfig
 import utils.runCommandCaptureOutput
 import utils.xml
 import java.io.File
 
-private val logger = logger("nestdrop.deck.loadDeckSettingsKt")
+private val logger = KotlinLogging.logger { }
 
 suspend fun loadDeckSettings(decks: List<Deck>) {
     decks.forEach { deck ->
-        logger.infoF { "loading settings from ${deck.deckName}" }
+        logger.info { "loading settings from ${deck.deckName}" }
         val deckSettings = parseDeckConfig(deck.N)
 
         deck.ndTime.transitionTime.value = deckSettings.transitTime.value
@@ -57,19 +55,19 @@ suspend fun loadDeckSettings(decks: List<Deck>) {
 }
 
 private suspend fun parseDeckConfig(deck: Int): XmlDataClasses.DeckSettings {
-    logger.debugF { "querying /NestDropSettings/MainWindow/Settings_Deck${deck}" }
+    logger.debug { "querying /NestDropSettings/MainWindow/Settings_Deck${deck}" }
     val deckConfigXml = runCommandCaptureOutput(
         "xq", "-n", "-x", "/NestDropSettings/MainWindow/Settings_Deck${deck}",
         workingDir = File("."),
         input = nestdropConfig
     ).trim()
 
-    logger.debugF { "parsing" }
+    logger.debug { "parsing" }
 //    logger.debugF { "$deckConfigXml" }
 
     return xml.decodeFromString(
         XmlDataClasses.DeckSettings.serializer(), deckConfigXml
     ).also {
-        logger.infoF { it }
+        logger.info { it }
     }
 }

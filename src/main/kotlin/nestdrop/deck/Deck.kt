@@ -6,7 +6,8 @@ import androidx.compose.ui.graphics.compositeOver
 import beatFrame
 import com.illposed.osc.OSCMessage
 import flowScope
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +21,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import logging.debugF
-import logging.infoF
 import nestdrop.NestdropControl
 import nestdrop.NestdropSpriteQueue
 import nestdrop.PerformanceLogRow
@@ -58,16 +58,21 @@ class Deck(
 ) {
     companion object {
         val enabled = MutableStateFlow(1)
-//        val enabledDecks = mutableStateMapOf<Int, Boolean>()
-        private val logger = logger(Deck::class.qualifiedName!!)
+
+        //        val enabledDecks = mutableStateMapOf<Int, Boolean>()
+        private val logger = KotlinLogging.logger { }
     }
+
     val color = Color(hexColor)
     val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
 
     @Deprecated("disable bpm sync")
-    val bpmSyncEnabled = MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
+    val bpmSyncEnabled =
+        MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
+
     @Deprecated("disable bpm sync")
-    val bpmSyncMultiplier = MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
+    val bpmSyncMultiplier =
+        MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
 
     inner class NdTime {
 
@@ -101,7 +106,8 @@ class Deck(
     // color
     inner class NdColor {
         val negative = NestdropControl.Slider(N, "Negative", 0f..1f, 0f)
-//        val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.5f, 1.0f)
+
+        //        val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.5f, 1.0f)
         val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.0f, 1.0f)
         val contrast = NestdropControl.SliderWithResetButton(N, "Contrast", 0.5f..1.5f, 1.0f)
         val gamma = NestdropControl.SliderWithResetButton(N, "Gamma", 0.5f..1.5f, 1.0f)
@@ -133,12 +139,30 @@ class Deck(
     //strobe / lfo
     inner class NdStrobe {
 
-        val effect = NestdropControl.Dropdown(N, "StrobeEffect", Effect.entries, {Effect.entries.indexOf(it)}, Effect.AnimationSpeed)
-        val effectSpan = NestdropControl.RangeSliderWithResetButton(N, "StrobeEffectSpan", 0f..1f, 0f,  1f)
-        val trigger = NestdropControl.Dropdown(N, "StrobeTrigger", Trigger.entries, {Trigger.entries.indexOf(it)}, Trigger.TimesPerSecond)
+        val effect = NestdropControl.Dropdown(
+            N,
+            "StrobeEffect",
+            Effect.entries,
+            { Effect.entries.indexOf(it) },
+            Effect.AnimationSpeed
+        )
+        val effectSpan = NestdropControl.RangeSliderWithResetButton(N, "StrobeEffectSpan", 0f..1f, 0f, 1f)
+        val trigger = NestdropControl.Dropdown(
+            N,
+            "StrobeTrigger",
+            Trigger.entries,
+            { Trigger.entries.indexOf(it) },
+            Trigger.TimesPerSecond
+        )
         val effectSpeed = NestdropControl.Slider(N, "StrobeSpeed", 0.01f..30f, 3f)
         val pulseWidth = NestdropControl.SliderWithResetButton(N, "StrobePulseWidth", 0f..1f, 1f)
-        val waveForm = NestdropControl.Dropdown(N, "StrobeRamp", Waveform.entries, {Waveform.entries.indexOf(it)}, Waveform.Square)
+        val waveForm = NestdropControl.Dropdown(
+            N,
+            "StrobeRamp",
+            Waveform.entries,
+            { Waveform.entries.indexOf(it) },
+            Waveform.Square
+        )
         val enabled = NestdropControl.ToggleButton(N, "StrobeOnOff", false)
 
         suspend fun startFlows() {
@@ -197,12 +221,13 @@ class Deck(
 
     val ndOutput = NdOutput()
 
-    val transitionTime = MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
+    val transitionTime =
+        MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
     val triggerTime = MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
     val currentPreset = MutableStateFlow<PerformanceLogRow?>(null)
 
     suspend fun startFlows() {
-        logger.infoF { "initializing $deckName" }
+        logger.info { "initializing $deckName" }
 
         ndTime.startFlows()
         ndColor.startFlows()
@@ -272,6 +297,7 @@ class Deck(
         }
 //        val search = MutableStateFlow<TagScoreEval?>(null)
     }
+
     val search = Search()
 
 //    @Deprecated("use new preset queues")
@@ -296,13 +322,13 @@ class Deck(
         val autoChange = MutableStateFlow(false)
 
         suspend fun next() {
-            logger.infoF { "$deckName.presetQueue.next()" }
+            logger.info { "$deckName.presetQueue.next()" }
             // change preset queue
 //            logger.debugF { "available queues: ${presetQueues.value}" }
             val enabledQueues = presetQueues.value.filterIndexed { index, queue ->
                 queue.deck == N && toggles[index].value
             }
-            logger.debugF { "enabled queues: $enabledQueues" }
+            logger.debug { "enabled queues: $enabledQueues" }
             if (enabledQueues.isNotEmpty()) {
                 val next = enabledQueues.random()
                 index.value = presetQueues.value.indexOfFirst {
@@ -311,7 +337,7 @@ class Deck(
                 withTimeout(100.milliseconds) {
                     // block until new queue is loaded
                     this@PresetQueue.filterNotNull().first { it.name == next.name }.also { newQueue ->
-                        logger.debugF { "queue loaded: ${newQueue.name}" }
+                        logger.debug { "queue loaded: ${newQueue.name}" }
                     }
 
                 }
@@ -319,7 +345,7 @@ class Deck(
         }
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName preset queue" }
+            logger.info { "initializing $deckName preset queue" }
 
 //            presetQueues
 //                .onEach {
@@ -372,7 +398,7 @@ class Deck(
                 .runningHistory()
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .onEach { (queue, previousQueue) ->
-                    logger.infoF { "$deckName queue: ${queue?.name}" }
+                    logger.info { "$deckName queue: ${queue?.name}" }
                     this.name.value = queue?.name ?: "error"
                     if (queue != null && previousQueue?.name != queue.name) {
                         nestdropPortSend(
@@ -400,12 +426,12 @@ class Deck(
         val name = MutableStateFlow("uninitialized")
 
         suspend fun next() {
-            logger.infoF { "$deckName.preset.next()" }
+            logger.info { "$deckName.preset.next()" }
             // TODO: trigger this by emitting a history event (queue, deck, index or such)
             presetQueue.value?.also { queue ->
                 val index = Random.nextInt(queue.presets.size)
                 val preset1 = queue.presets.getOrNull(index) // ?: return
-                logger.infoF { "switching ${queue.name} to $index '$preset1'" }
+                logger.info { "switching ${queue.name} to $index '$preset1'" }
                 nestdropPortSend(
                     OSCMessage(
                         "/PresetID/${queue.name}/$index",
@@ -419,7 +445,7 @@ class Deck(
 
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName preset" }
+            logger.info { "initializing $deckName preset" }
 
             trigger
                 .drop(1)
@@ -434,7 +460,7 @@ class Deck(
 
     inner class SpriteQueues : MutableStateFlow<List<Queue>> by MutableStateFlow(emptyList()) {
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName sprite queues" }
+            logger.info { "initializing $deckName sprite queues" }
         }
     }
 
@@ -446,7 +472,7 @@ class Deck(
         val name = MutableStateFlow("uninitialized")
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName sprite queue" }
+            logger.info { "initializing $deckName sprite queue" }
 
 
             this
@@ -471,7 +497,8 @@ class Deck(
     inner class ImgSprite {
         //TODO: replace with a map ?
         val toggles = MutableStateFlow<Set<String>>(emptySet())
-//        private val trigger = MutableStateFlow(0)
+
+        //        private val trigger = MutableStateFlow(0)
         val autoChange = MutableStateFlow(false)
 
         val spriteImgLocation = MutableStateFlow<PresetLocation.Img?>(null)
@@ -502,7 +529,7 @@ class Deck(
 //        }
 
         suspend fun next() {
-            logger.infoF { "$deckName.sprite.next()" }
+            logger.info { "$deckName.sprite.next()" }
 
             //TODO: load all available sprite locations
 
@@ -511,7 +538,7 @@ class Deck(
             val enabledKeys = this.toggles.value
             val nextRandom = imgSpritesMap.value.filterKeys { it in enabledKeys }.values.randomOrNull()
 
-            if(nextRandom != null) {
+            if (nextRandom != null) {
                 spriteImgLocation.value = nextRandom
             }
 
@@ -533,7 +560,7 @@ class Deck(
         }
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName sprite" }
+            logger.info { "initializing $deckName sprite" }
 
 //            nestdropSprite.startFlows()
 
@@ -550,9 +577,9 @@ class Deck(
                 .sample(50.milliseconds)
                 .onEach { (next, previous) ->
                     name.value = next?.name ?: "-"
-                    if(next == null && previous != null) {
+                    if (next == null && previous != null) {
                         nestdropSetSprite(previous.id, N)
-                    } else if(next != null) {
+                    } else if (next != null) {
                         nestdropSetSprite(next.id, N)
                     }
 //                    nestdropSprite.send(
@@ -630,7 +657,7 @@ class Deck(
         private val trigger = MutableStateFlow(0)
 
         suspend fun next() {
-            logger.infoF { "$deckName.spriteFX.next()" }
+            logger.info { "$deckName.spriteFX.next()" }
             val enabledFx = imgFxMap.value.filterKeys { key ->
                 toggles.getOrNull(key)?.value ?: false
             }.toList()
@@ -642,13 +669,13 @@ class Deck(
 
         suspend fun setSpriteFx(index: Int, blendMode: Boolean) {
             val fx = if (blendMode) index + 50 else index
-            logger.infoF { "setting $deckName FX to $fx" }
+            logger.info { "setting $deckName FX to $fx" }
             val arg = fx / 99.0f
             nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpriteFx"), arg))
         }
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName sprite fx" }
+            logger.info { "initializing $deckName sprite fx" }
 
             trigger
                 .drop(1)
@@ -663,7 +690,7 @@ class Deck(
                     ?.let { "FX $fx: $it" }
                     ?: if (fx == -1) "uninitialized" else "unknown FX $fx"
                 shortLabel.value = fx.takeIf { spriteFXMap.containsKey(fx) }?.let {
-                    if (blendMode){
+                    if (blendMode) {
                         "FX: $fx ($index + 50)"
                     } else {
                         "FX: $fx"
@@ -692,7 +719,7 @@ class Deck(
         val name = MutableStateFlow("uninitialized")
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName spout queue" }
+            logger.info { "initializing $deckName spout queue" }
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spriteQueues) { index, queues ->
@@ -727,7 +754,7 @@ class Deck(
         )
 
         suspend fun startFlows() {
-            logger.infoF { "initializing $deckName spout" }
+            logger.info { "initializing $deckName spout" }
             nestdropSpout.startFlows()
 
             index
@@ -736,7 +763,7 @@ class Deck(
                     queue?.presets?.getOrNull(index)
                 }.onEach { spoutPreset ->
                     this.value = spoutPreset
-                    logger.infoF { "$deckName spout name $spoutPreset" }
+                    logger.info { "$deckName spout name $spoutPreset" }
                     fx.value = spoutPreset?.effects ?: 0
                     name.value = spoutPreset?.label ?: "-"
                 }
@@ -745,12 +772,12 @@ class Deck(
             // do spout change
             index
                 .onEach {
-                    logger.infoF { "$deckName spout index changed: $it" }
+                    logger.info { "$deckName spout index changed: $it" }
                 }
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spoutQueue
                     .onEach {
-                        logger.infoF { "$deckName spout queue changed: ${it?.name}" }
+                        logger.info { "$deckName spout queue changed: ${it?.name}" }
                     }) { index, queue ->
                     index to queue
                 }
@@ -758,13 +785,13 @@ class Deck(
                     sync
 //                        .drop(1)
                         .onEach {
-                            logger.infoF { "spout sync triggered" }
+                            logger.info { "spout sync triggered" }
                         }
                 ) { a, _ -> a }
 //                .runningHistory()
                 .sample(100.milliseconds)
                 .onEach { (index, queue) ->
-                    logger.infoF { "$deckName spout change: $index in ${queue?.name}" }
+                    logger.info { "$deckName spout change: $index in ${queue?.name}" }
                     nestdropSpout.send(
                         when {
                             queue != null && index != -1 -> PresetIdState.Data(index, queue, true)
@@ -880,8 +907,8 @@ class Deck(
             Triple(currentBeat, lastBeat, triggerAt)
         }.onEach { (currentBeat, lastBeat, triggerAt) ->
             if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-                logger.infoF { "triggered at $currentBeat, $triggerAt" }
                 hasSwitched.value = true
+                logger.info { "triggered at $currentBeat, $triggerAt" }
                 doSwitch()
             }
         }
@@ -903,7 +930,7 @@ class Deck(
         if (imgSpriteFx.autoChange.value) {
             imgSpriteFx.next()
         }
-        if(search.autochange.value) {
+        if (search.autochange.value) {
             search.next()
         }
     }

@@ -1,18 +1,33 @@
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogState
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.awaitApplication
+import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
@@ -33,12 +48,6 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import logging.debugF
-import logging.errorF
-import logging.fatalF
-import logging.infoF
-import logging.setupLogging
-import logging.warnF
 import nestdrop.PerformanceLogRow
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
@@ -57,6 +66,7 @@ import osc.runResolumeSend
 import osc.startResolumeListener
 import tags.startTagsFileWatcher
 import ui.App
+import ui.components.verticalScroll
 import ui.splashScreen
 import utils.KWatchChannel
 import utils.KWatchEvent
@@ -69,12 +79,12 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 
-private val logger = logger(Main::class.qualifiedName!!)
+private val logger = KotlinLogging.logger { }
 //val decks = MutableStateFlow<List<Deck>>(emptyList())
 
 val presetQueues = PresetQueues()
 val decks = List(4) { index ->
-    when(val n = index + 1) {
+    when (val n = index + 1) {
         1 -> Deck(n, first = true, last = false, 0xFFBB0000)
         2 -> Deck(n, first = false, last = false, 0xFF00BB00)
         3 -> Deck(n, first = false, last = false, 0xFF00A2FF)
@@ -91,11 +101,10 @@ object Main {
 //        deck1: Deck,
 //        deck2: Deck,
     ) {
-        setupLogging()
+//        setupLogging()
         println("testing logging")
-        logger.warnF { "WARN" }
-        logger.errorF { "ERROR" }
-        logger.fatalF { "FATAL" }
+        logger.warn { "WARN" }
+        logger.error { "ERROR" }
 
         flowScope.launch {
             var delayCounter = 1L
@@ -106,18 +115,18 @@ object Main {
                 } else {
                     delayCounter = 1
                 }
-                logger.warnF { "reconnecting to carabiner $delayCounter" }
+                logger.warn { "reconnecting to carabiner $delayCounter" }
                 delay(delayCounter * 250)
             }
         }
         withTimeoutOrNull(5000) {
             while (!Link.isConnected.value) {
-                logger.warnF { "waiting for link to connect" }
+                logger.warn { "waiting for link to connect" }
                 delay(500)
             }
         } ?: run {
-            logger.error("failed to connect to link protocol")
-            exitProcess(-1)
+            logger.error("failed to connect to carabiner socket / (ableton link)")
+            error("failed to connect to carabiner socket / (ableton link)")
         }
 
         setupSpriteFX()
@@ -212,7 +221,8 @@ object Main {
 //                arenaSendChannel.send(OSCMessage(it.address, "?"))
                 it.dropFirst = 1
             }
-            val motionExtractionEnabled = MutableStateFlow(false) // OscSynced.Value("/resolume/$group/motion_extraction/enabled", false)
+            val motionExtractionEnabled =
+                MutableStateFlow(false) // OscSynced.Value("/resolume/$group/motion_extraction/enabled", false)
             motionExtractionEnabled
                 .sample(100.milliseconds)
                 .onEach {
@@ -225,7 +235,8 @@ object Main {
                     motionExtractionEnabled.value = it == 0
                 }
                 .launchIn(flowScope)
-            val motionExtractionDelay = MutableStateFlow(0.5f) // OscSynced.Value("/resolume/$group/motion_extraction/delay", 0.5f)
+            val motionExtractionDelay =
+                MutableStateFlow(0.5f) // OscSynced.Value("/resolume/$group/motion_extraction/delay", 0.5f)
             motionExtractionDelay
                 .sample(100.milliseconds)
                 .onEach {
@@ -259,7 +270,7 @@ object Main {
         resetResolumeTrigger
             .drop(1)
             .onEach {
-                logger.errorF { "executing resolume reset now" }
+                logger.error { "executing resolume reset now" }
                 resolumeClipConnect(1, 1, 1)
                 groupSyncedValues[1]?.let { (motionExtraction, delay, automask) ->
                     motionExtraction.value = false
@@ -363,7 +374,7 @@ object Main {
 
 //                logger.debugF { "watch-event: ${event.kind} ${event.file}" }
                     event.tag?.also {
-                        logger.debugF { "watch-event.tag: $it" }
+                        logger.debug { "watch-event.tag: $it" }
                     }
                     when (event.kind) {
                         KWatchEvent.Kind.Initialized -> {}
@@ -444,13 +455,13 @@ object Main {
         }
 
 
-        withTimeoutOrNull(10.seconds) {
+        withTimeoutOrNull(30.seconds) {
 
             while (presetQueues.queues.value.isEmpty()) {
                 delay(500)
             }
             true
-        } ?: error ("failed to load queues")
+        } ?: error("failed to load queues")
 //        while(deck1.spriteQueues.value.isEmpty()) {
 //            delay(500)
 //        }
@@ -487,10 +498,10 @@ object Main {
 //        deck2.imgSprite.index.value++
 //        deck2.imgSprite.index.value--
 
-        logger.infoF { "initializing OSC" }
+        logger.info { "initializing OSC" }
         initializeSyncedValues()
         delay(500)
-        logger.infoF { "re-emitting all values" }
+        logger.info { "re-emitting all values" }
     }
 
     @JvmStatic
@@ -513,12 +524,102 @@ object Main {
 //            val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
 
             var isSplashScreenShowing by remember { mutableStateOf(true) }
+            var showException by remember { mutableStateOf<Throwable?>(null) }
             LaunchedEffect(Unit) {
-                initApplication(presetQueues)
-                logger.info { "await application" }
-                isSplashScreenShowing = false
+                try {
+                    initApplication(presetQueues)
+                    logger.info { "await application" }
+                    isSplashScreenShowing = false
+                } catch (e: Exception) {
+                    logger.error(e) { "unhandled error: TODO: show error" }
+//                    error("unhandled exception ${e.message}")
+                    showException = e
+                } catch (e: ExceptionInInitializerError) {
+                    logger.error(e) { "unhandled error: TODO: show error" }
+//                    error("unhandled exception ${e.exception.message}")
+                    showException = e
+
+                }
             }
-            if (isSplashScreenShowing) {
+            if (showException != null) {
+                val e = showException!!
+                DialogWindow(
+                    onCloseRequest = ::exitApplication,
+//                    undecorated = true,
+                    title = "Error",
+                    state = rememberDialogState(
+                        position = WindowPosition(Alignment.Center),
+                        width = 1200.dp,
+                        height = 800.dp
+                    )
+                ) {
+                    MaterialTheme(colors = darkColors()) {
+                        Scaffold {
+                            verticalScroll {
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    val message = when (e) {
+                                        is ExceptionInInitializerError -> {
+                                            e.exception.message
+                                        }
+
+                                        is Exception -> e.message
+
+//                                    null -> "this should never happen"
+                                        else -> "unhandled exception type: ${e::class.qualifiedName} ${e.message}"
+                                    } ?: "no message provided, please check the logs"
+
+                                    Text("NEST CTRL failed to initialize")
+//                                    Column {
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "message",
+                                            modifier = Modifier
+                                                .weight(0.2f)
+                                        )
+
+                                        Text(
+                                            text = message,
+                                            modifier = Modifier
+                                                .weight(0.8f)
+                                        )
+                                    }
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "stacktrace",
+                                            modifier = Modifier
+                                                .weight(0.2f)
+                                        )
+
+                                        Text(
+                                            text = e.stackTraceToString().replace("\t", "  "),
+                                            modifier = Modifier
+                                                .weight(0.8f)
+                                        )
+                                    }
+//                                    }
+                                    Row {
+                                        Button(
+                                            onClick = ::exitApplication
+                                        ) {
+                                            Text("Close")
+                                        }
+                                    }
+                                }
+
+//                                Spacer(modifier = Modifier.weight(10.0f))
+                            }
+                        }
+                    }
+                }
+            } else if (isSplashScreenShowing) {
                 Window(
                     onCloseRequest = ::exitApplication,
                     title = "Splash",

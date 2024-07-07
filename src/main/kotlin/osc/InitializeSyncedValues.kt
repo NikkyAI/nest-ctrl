@@ -2,7 +2,7 @@ package osc
 
 
 import flowScope
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,11 +13,9 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import logging.debugF
-import logging.traceF
 import kotlin.time.Duration.Companion.milliseconds
 
-private val logger = logger("osc.initializeSyncedValuesKt")
+private val logger = KotlinLogging.logger { }
 suspend fun initializeSyncedValues() {
     OscSynced.syncedValues.filter {
         it.target == OscSynced.Target.ResolumeArena
@@ -51,9 +49,9 @@ suspend fun initializeSyncedValues() {
                 val oscMessages = oscSyncedValue.generateOscMessages(value!!)
                 oscMessages.forEach {
                     if (oscSyncedValue.logSending) {
-                        logger.debugF { "Arena OUT: ${it.stringify()}" }
+                        logger.debug { "Arena OUT: ${it.stringify()}" }
                     } else {
-                        logger.traceF { "Arena OUT: ${it.stringify()}" }
+                        logger.trace { "Arena OUT: ${it.stringify()}" }
                     }
                     arenaSendChannel.send(it)
                 }

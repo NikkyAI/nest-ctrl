@@ -1,8 +1,8 @@
 package nestdrop.deck
 
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val logger = logger("moe.nikky.nestcontrol.deck.DeckFlows")
+private val logger = KotlinLogging.logger { }
 
 fun Deck.startFlows() {
 //    transitionTime

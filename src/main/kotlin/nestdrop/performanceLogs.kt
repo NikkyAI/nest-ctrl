@@ -3,7 +3,7 @@ package nestdrop
 import com.github.doyaaaaaken.kotlincsv.dsl.context.ExcessFieldsRowBehaviour
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.util.CSVParseFormatException
-import io.klogging.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
@@ -13,14 +13,13 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
-import logging.errorF
 import java.io.File
 
 val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = 20, extraBufferCapacity = 8 )
 //val performanceLogsMap = MutableStateFlow<Map<String, List<PerformanceLogRow>>>(emptyMap())
 //val performanceLogs = MutableStateFlow<List<PerformanceLogRow>>(emptyList())
 
-private val logger = logger("nestcontrol.performanceLogKt")
+private val logger = KotlinLogging.logger { }
 
 val csvReader = csvReader {
     excessFieldsRowBehaviour = ExcessFieldsRowBehaviour.TRIM
@@ -45,7 +44,7 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
             )
         )
     } catch (e: NumberFormatException) {
-        logger.errorF(e) { "failed to parse '${file.nameWithoutExtension}'" }
+        logger.error(e) { "failed to parse '${file.nameWithoutExtension}'" }
         null
     } ?: return null
 
@@ -83,7 +82,7 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
                                     )
                                 )
                             } catch (e: NumberFormatException) {
-                                logger.errorF(e) { "failed to parse $time" }
+                                logger.error(e) { "failed to parse $time" }
                                 null
                             } ?: error("failed to parse datetime"),
                             row["Preset"] ?: error("no key 'Preset' in $row"),
@@ -97,7 +96,7 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
                             }
                         )
                     } catch (e: Exception) {
-                        logger.errorF(e) { "failed to parse history row '$row'" }
+                        logger.error(e) { "failed to parse history row '$row'" }
                         throw e
                     }
 
@@ -105,7 +104,7 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
 //                logger.warnF { row }
 
                 }.catch { e ->
-                    logger.errorF(e) { "failed to parse" }
+                    logger.error(e) { "failed to parse" }
                     throw e
                 }.onEach {
 //                    logger.infoF { it }
@@ -113,7 +112,7 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
                 .toList()
         }
     } catch (e: CSVParseFormatException) {
-        logger.errorF(e) { "failed to parse file $file" }
+        logger.error(e) { "failed to parse file $file" }
         return null
     }
     return rows

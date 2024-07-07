@@ -45,8 +45,9 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:_")
 
     implementation("io.github.oshai:kotlin-logging:_")
-    implementation("io.klogging:klogging-jvm:_")
-    implementation("io.klogging:slf4j-klogging:_")
+//    implementation("io.klogging:klogging-jvm:_")
+//    implementation("io.klogging:slf4j-klogging:_")
+    implementation("ch.qos.logback:logback-classic:_")
 
     // Include the Test API
     testImplementation(compose.desktop.uiTestJUnit4)
