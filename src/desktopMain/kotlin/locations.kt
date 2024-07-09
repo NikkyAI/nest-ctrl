@@ -21,17 +21,18 @@ val nestdropFolder get() = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.le
     ?.replace("\\", File.separator)
     ?.let {
 //        System.err.println(it)
-        File(it)
+        File(it).canonicalFile
     }
     ?: userHome.resolve("VJ").resolve("NestDropProV2") // File("C:\\Users\\nikky\\VJ\\NestDropProV2")
 
-//val nestdropFolder = nestdropPath?.let {
-//    File(it)
-//} ?: userHome.resolve("VJ").resolve("NestDropProV2") // File("C:\\Users\\nikky\\VJ\\NestDropProV2")
-val nestdropConfig = nestdropFolder.resolve("DefaultUserProfile.xml")
+val nestdropConfig: File
+    get() {
+        val filename = (dotenv["NESTDROP_PROFILE"] ?: System.getenv("NESTDROP_PROFILE")) ?: "DefaultUserProfile.xml"
+        return nestdropFolder.resolve(filename).canonicalFile
+    }
 
-val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
-val spritesFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Sprites")
+val presetsFolder: File = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets").canonicalFile
+val spritesFolder: File = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Sprites").canonicalFile
 
-val nestdropPerformanceLog = nestdropFolder.resolve("PerformanceHistory").canonicalFile
-val nestdropImgModes = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile
+val nestdropPerformanceLog: File = nestdropFolder.resolve("PerformanceHistory").canonicalFile
+val nestdropImgModes: File = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile

@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.deepsymmetry.libcarabiner.Message
+import us.bpsm.edn.Symbol
 import java.net.ConnectException
 import java.net.SocketException
 
@@ -41,21 +42,37 @@ object Link {
                                 val message = Message(line)
                                 logger.trace { "carabiner message: ${message.messageType} ${message.details}" }
 //                                logger.debugF { "carabiner message: ${message.messageType} ${message.details}" }
-                                if (message.details != null) {
-//                                    message.details.forEach { (k, v) ->
-//                                        logger.debugF { "$k: $v ${v::class.qualifiedName}" }
-//                                    }
-                                    val newBpm = message.details["bpm"] as? Double
-                                    if (newBpm != null) {
-                                        bpm.value = newBpm.toFloat()
+
+                                when (message.messageType) {
+                                    "status", "beat-at-time", "phase-at-time" -> {
+                                        val details = message.details as Map<*, *>
+
+                                        val newBpm = details["bpm"] as? Double
+                                        if (newBpm != null) {
+                                            bpm.value = newBpm.toFloat()
+                                        }
+                                        val newPeers = details["peers"] as? Long
+                                        if (newPeers != null) {
+                                            peers.value = newPeers.toInt()
+                                        }
+                                        val newBeats = details["beat"] as? Double
+                                        if (newBeats != null) {
+                                            beat.value = newBeats
+                                        }
                                     }
-                                    val newPeers = message.details["peers"] as? Long
-                                    if (newPeers != null) {
-                                        peers.value = newPeers.toInt()
+
+                                    "version" -> {
+                                        val version = message.details as String
+                                        logger.info { "Carabiner version: $version" }
                                     }
-                                    val newBeats = message.details["beat"] as? Double
-                                    if (newBeats != null) {
-                                        beat.value = newBeats
+
+                                    "unsupported" -> {
+                                        val symbol = message.details as Symbol
+                                        logger.info { "Carabiner unsupported: $symbol" }
+                                    }
+
+                                    else -> {
+                                        error("unhandled message type: ${message.messageType}")
                                     }
                                 }
                             } catch (e: Exception) {

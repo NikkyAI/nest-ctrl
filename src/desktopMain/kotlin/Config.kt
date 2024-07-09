@@ -174,7 +174,8 @@ suspend fun loadConfig() {
         .sample(1.seconds)
 //        .dropWhile { it == Config() }
         .onEach { config ->
-            logger.info { "saving config $config" }
+            logger.info { "saving config" }
+            logger.trace { config }
             saveConfig(config)
         }
 //        .runningHistory(config.value)

@@ -16,9 +16,9 @@ tested with `V2.x.0.12`
 
 https://github.com/Deep-Symmetry/carabiner/releases
 
-tested with `v1.1.6`
+tested with `v1.2.0`
 
-launch `Carabiner_Win_x64.exe` in a terminal before running the controlpanel
+launch `Carabiner.exe` in a terminal before running the controlpanel
 
 ## xq
 
@@ -35,6 +35,7 @@ create a `.env` file in the working directory (repo root when running via gradle
 `~/` is supported as a shorthand for user home path
 ```.env
 NESTDROP=~/VJ/NestDropProV2
+NESTDROP_PROFILE=DefaultUserProfile.xml
 ```
 ## IMG sprites
 
