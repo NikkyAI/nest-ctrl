@@ -48,7 +48,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
 
         run {
 //            //TODO: find a way to load queue by name without blocking here
-            val spriteQueuesValue = withTimeoutOrNull(5.seconds) {
+            val spriteQueuesValue = withTimeoutOrNull(10.seconds) {
                 spriteQueues.first {
                     it
                         .also { logger.debug { it } }

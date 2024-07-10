@@ -1,7 +1,6 @@
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -19,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
@@ -33,9 +32,13 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
@@ -74,7 +77,6 @@ import utils.asWatchChannel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -125,7 +127,7 @@ object Main {
                 delay(500)
             }
         } ?: run {
-            logger.error("failed to connect to carabiner socket / (ableton link)")
+            logger.error {"failed to connect to carabiner socket / (ableton link)" }
             error("failed to connect to carabiner socket / (ableton link)")
         }
 
@@ -164,35 +166,19 @@ object Main {
             val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Date())
             val historyFile = historyFolder.resolve("$timestamp.ndjson")
 
-            //TODO: write history to file again
-
-//            decks.flatMapConcat { it ->
-//                it.asFlow().map {
-//                    it.currentState.debounce(1.seconds)
-//                }
-//            }.flattenConcat()
-//                .onEach {
-//                    historyFile.appendText(
-//                        json.encodeToString(
-//                            Deck.DeckState.serializer(), it
-//                        ) + "\n"
-//                    )
-//                }
-
-//            listOf(
-//                deck1.currentState.debounce(3.seconds),
-//                deck2.currentState.debounce(3.seconds),
-//            )
-//                .merge()
-//                .onEach {
-//                    historyFile.appendText(
-//                        json.encodeToString(
-//                            Deck.DeckState.serializer(), it
-//                        ) + "\n"
-//                    )
-//                }
-//                .flowOn(Dispatchers.IO)
-//                .launchIn(flowScope)
+            decks.map { it ->
+                it.currentState.debounce(3.seconds)
+            }
+                .merge()
+                .onEach {
+                    historyFile.appendText(
+                        json.encodeToString(
+                            Deck.DeckState.serializer(), it
+                        ) + "\n"
+                    )
+                }
+                .flowOn(Dispatchers.IO)
+                .launchIn(flowScope)
         }
 
         // motion extraction toggles and sliders
@@ -404,6 +390,7 @@ object Main {
 
                 }
         }
+//        OSCMessage("thiswillfail", "string", 'c', "" to "")
 
 //        performanceLogsFlow
 //            .sample(500.milliseconds)
@@ -585,6 +572,7 @@ object Main {
 
                                         Text(
                                             text = message,
+                                            fontFamily = FontFamily.Monospace,
                                             modifier = Modifier
                                                 .weight(0.8f)
                                         )
@@ -600,6 +588,7 @@ object Main {
 
                                         Text(
                                             text = e.stackTraceToString().replace("\t", "  "),
+                                            fontFamily = FontFamily.Monospace,
                                             modifier = Modifier
                                                 .weight(0.8f)
                                         )

@@ -13,19 +13,20 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import utils.checkNotNullDebug
+import utils.errorDebug
 import java.io.File
 
-val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = 20, extraBufferCapacity = 8 )
-//val performanceLogsMap = MutableStateFlow<Map<String, List<PerformanceLogRow>>>(emptyMap())
-//val performanceLogs = MutableStateFlow<List<PerformanceLogRow>>(emptyList())
+val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = 20, extraBufferCapacity = 8)
 
 private val logger = KotlinLogging.logger { }
 
 val csvReader = csvReader {
     excessFieldsRowBehaviour = ExcessFieldsRowBehaviour.TRIM
 }
+
 suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
-    val dateTime = try {
+    val fileDateTime = try {
         val (day, month, year) = file.nameWithoutExtension.substringBefore(' ')
             .split('-')
             .map { it.toInt() }
@@ -59,50 +60,52 @@ suspend fun parsePerformanceLog(file: File): List<PerformanceLogRow>? {
                 }
                 .map { row ->
                     try {
-                        val time = row["Time"] ?: error("no key 'Time' in $row")
+                        val time = checkNotNullDebug(row["Time"]) // .checkNotNullCustom()
+                        val dateTime = try {
+                            val (month, day, year) = time.substringBefore(' ')
+                                .split('/')
+                                .map { it.toInt() }
+                            val (hour, minute, second) = time.substringAfter(' ')
+                                .split(':')
+                                .map { it.toInt() }
+                            LocalDateTime(
+                                LocalDate(
+                                    year = year,
+                                    monthNumber = month,
+                                    dayOfMonth = day,
+                                ),
+                                LocalTime(
+                                    hour = hour,
+                                    minute = minute,
+                                    second = second,
+                                )
+                            )
+                        } catch (e: NumberFormatException) {
+                            logger.error(e) { "failed to parse $time" }
+                            null
+                        } ?: error("failed to parse datetime")
+
+                        val deck = checkNotNullDebug(row["Deck"])
+                        require(deck in (1..4).map { "Deck$it" })
+                        val deckNumber = when (deck) {
+                            "Deck1" -> 1
+                            "Deck2" -> 2
+                            "Deck3" -> 3
+                            "Deck4" -> 4
+
+                            else -> errorDebug("unknown deck '$deck'")
+                        }
 
                         PerformanceLogRow(
-                            try {
-                                val (month, day, year) = time.substringBefore(' ')
-                                    .split('/')
-                                    .map { it.toInt() }
-                                val (hour, minute, second) = time.substringAfter(' ')
-                                    .split(':')
-                                    .map { it.toInt() }
-                                LocalDateTime(
-                                    LocalDate(
-                                        year = year,
-                                        monthNumber = month,
-                                        dayOfMonth = day,
-                                    ),
-                                    LocalTime(
-                                        hour = hour,
-                                        minute = minute,
-                                        second = second,
-                                    )
-                                )
-                            } catch (e: NumberFormatException) {
-                                logger.error(e) { "failed to parse $time" }
-                                null
-                            } ?: error("failed to parse datetime"),
-                            row["Preset"] ?: error("no key 'Preset' in $row"),
-                            deck = when (val deck = row["Deck"] ?: error("no key 'Deck' in $row")) {
-                                "Deck1" -> 1
-                                "Deck2" -> 2
-                                "Deck3" -> 3
-                                "Deck4" -> 4
-
-                                else -> error("unknown deck '$deck'")
-                            }
+                            dateTime = dateTime,
+                            preset = checkNotNullDebug(row["Preset"]),
+//                            spriteLinked = row["Sprite linked"]?.takeUnless { it.isEmpty() },
+                            deck = deckNumber
                         )
                     } catch (e: Exception) {
                         logger.error(e) { "failed to parse history row '$row'" }
                         throw e
                     }
-
-                    //Do something
-//                logger.warnF { row }
-
                 }.catch { e ->
                     logger.error(e) { "failed to parse" }
                     throw e

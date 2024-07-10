@@ -52,10 +52,10 @@ data class TagMatcher(
         }
         return matchInclude && matchExclude
     }
-
 }
 
 fun <T> pickItemToGenerate(options: Map<T, Double>): T {
+    require(options.isNotEmpty())
     val randomNumber = Math.random() * options.values.sumOf { it }
 
     var probabilityIterator = 0.0
@@ -65,7 +65,7 @@ fun <T> pickItemToGenerate(options: Map<T, Double>): T {
             return item
         }
     }
-    error("no options")
+    error("no option picked")
 }
 
 /*
