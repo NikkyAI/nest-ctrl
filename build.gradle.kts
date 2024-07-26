@@ -107,6 +107,8 @@ compose.desktop {
             windows {
                 iconFile.set(project.file("src/desktopMain/resources/drawable/blobhai_trans.ico"))
             }
+            modules("java.naming")
+//            includeAllModules = true
         }
     }
 }
