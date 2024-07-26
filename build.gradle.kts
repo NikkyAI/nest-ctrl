@@ -62,11 +62,19 @@ kotlin {
 //    implementation("io.klogging:slf4j-klogging:_")
             implementation("ch.qos.logback:logback-classic:_")
 
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:_")
+            implementation("dev.reformator.stacktracedecoroutinator:stacktrace-decoroutinator-jvm-legacy:_")
+
             // Include the Test API
 //    testImplementation(compose.desktop.uiTestJUnit4)
         }
     }
+    compilerOptions {
+        // coroutine debugging, disables optimizing away unused variables in coroutines
+//        freeCompilerArgs.add("-Xdebug")
+    }
 }
+
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 powerAssert {
@@ -105,6 +113,9 @@ compose.desktop {
 
 project.afterEvaluate {
     tasks {
+        val run by getting(JavaExec::class) {
+            jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+        }
         val createDistributable by getting(AbstractJPackageTask::class) {
             destinationDir.set(project.file("bin"))
 //            appImageRootDir.

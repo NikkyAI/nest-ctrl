@@ -227,7 +227,70 @@ fun imgSpritesScreenNew() {
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(0.3f)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .weight(0.4f)
+                        ) {
+                            decks.forEach { deck ->
+                                if (deck.N > decksEnabled) return@forEach
+
+                                val (current, enabledSprites) = spriteStuff.getValue(deck.N)
+//                        val current by deck.imgSprite.spriteImgLocation.collectAsState()
+//                        val enabledSprites by deck.imgSprite.enabledSprites.collectAsState()
+
+//                        val image = remember { imageFromFile(spritesFolder.resolve(sprite.path)) }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .weight(0.1f)
+                                        .padding(horizontal = 20.dp)
+                                ) {
+                                    VerticalRadioButton(
+                                        selected = current?.name == sprite.name,
+                                        onClick = {
+                                            if (current?.name == sprite.name) {
+                                                deck.imgSprite.spriteImgLocation.value = null
+                                            } else {
+                                                deck.imgSprite.spriteImgLocation.value = sprite
+                                            }
+                                        },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = deck.color,
+                                            unselectedColor = deck.dimmedColor
+                                        ),
+                                        height = 40.dp,
+//                                connectTop = spriteLocations.indexOf(sprite) > 0, // i > 0,
+//                                connectBottom = spriteLocations.indexOf(sprite) < spriteLocations.size - 1, // i < queueLength - 1,
+                                    )
+                                    Checkbox(
+                                        checked = sprite.name in enabledSprites,
+                                        onCheckedChange = {
+                                            if (sprite.name in enabledSprites) {
+                                                deck.imgSprite.toggles.value -= sprite.name
+                                            } else {
+                                                deck.imgSprite.toggles.value += sprite.name
+                                            }
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            checkmarkColor = deck.dimmedColor,
+                                            uncheckedColor = deck.color,
+                                            checkedColor = deck.color,
+                                            disabledColor = Color.DarkGray
+                                        ),
+                                    )
+
+//                        Text("${presetEntry.id}")
+//                                Text(sprite.name)
+                                }
+                            }
+                        }
+
+//                        Spacer(modifier = Modifier.width(200.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(0.6f)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -241,59 +304,6 @@ fun imgSpritesScreenNew() {
                             Text(sprite.name, modifier = Modifier.padding(16.dp, 0.dp))
                         }
 
-                        decks.forEach { deck ->
-                            if (deck.N > decksEnabled) return@forEach
-
-                            val (current, enabledSprites) = spriteStuff.getValue(deck.N)
-//                        val current by deck.imgSprite.spriteImgLocation.collectAsState()
-//                        val enabledSprites by deck.imgSprite.enabledSprites.collectAsState()
-
-//                        val image = remember { imageFromFile(spritesFolder.resolve(sprite.path)) }
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .weight(0.1f)
-                                    .padding(horizontal = 20.dp)
-                            ) {
-                                VerticalRadioButton(
-                                    selected = current?.name == sprite.name,
-                                    onClick = {
-                                        if (current?.name == sprite.name) {
-                                            deck.imgSprite.spriteImgLocation.value = null
-                                        } else {
-                                            deck.imgSprite.spriteImgLocation.value = sprite
-                                        }
-                                    },
-                                    colors = RadioButtonDefaults.colors(
-                                        selectedColor = deck.color,
-                                        unselectedColor = deck.dimmedColor
-                                    ),
-                                    height = 40.dp,
-//                                connectTop = spriteLocations.indexOf(sprite) > 0, // i > 0,
-//                                connectBottom = spriteLocations.indexOf(sprite) < spriteLocations.size - 1, // i < queueLength - 1,
-                                )
-                                Checkbox(
-                                    checked = sprite.name in enabledSprites,
-                                    onCheckedChange = {
-                                        if (sprite.name in enabledSprites) {
-                                            deck.imgSprite.toggles.value -= sprite.name
-                                        } else {
-                                            deck.imgSprite.toggles.value += sprite.name
-                                        }
-                                    },
-                                    colors = CheckboxDefaults.colors(
-                                        checkmarkColor = deck.dimmedColor,
-                                        uncheckedColor = deck.color,
-                                        checkedColor = deck.color,
-                                        disabledColor = Color.DarkGray
-                                    ),
-                                )
-
-//                        Text("${presetEntry.id}")
-//                                Text(sprite.name)
-                            }
-                        }
                     }
                 }
             }

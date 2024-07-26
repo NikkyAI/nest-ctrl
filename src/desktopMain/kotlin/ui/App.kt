@@ -31,10 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import decks
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import nestdrop.deck.Deck
-import ui.components.verticalScroll
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
 import ui.screens.debugScreen
@@ -42,7 +40,6 @@ import ui.screens.deckSettingsScreen
 import ui.screens.editSearchesScreen
 import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreenNew
-import ui.screens.presetQueuesScreen
 import ui.screens.presetScreen
 import ui.screens.searchSelectorScreen
 import ui.screens.spoutScreen
@@ -84,13 +81,13 @@ enum class Tabs(
     val label: String,
     val getName: ((Deck) -> Flow<String>)? = null
 ) {
-    PresetQueues(
-        "Preset Queues",
-        {
-            it.presetQueue.name
-        }
-    ),
-    SearchSelector(
+//    PresetQueues(
+//        "Preset Queues",
+//        {
+//            it.presetQueue.name
+//        }
+//    ),
+    PresetPlaylist(
         "Preset Playlists",
         { deck ->
             deck.search.map { s -> s?.label ?: "-" }
@@ -125,13 +122,13 @@ enum class Tabs(
 fun ColumnScope.tabScreen(
 ) {
     val decksEnabled by Deck.enabled.collectAsState()
-    var currentTab by remember { mutableStateOf(Tabs.PresetQueues) }
+    var currentTab by remember { mutableStateOf(Tabs.PresetPlaylist) }
     val tabs = Tabs.entries
     Column(modifier = Modifier.fillMaxWidth().weight(0.6f)) {
         TabRow(
             selectedTabIndex = Tabs.entries.indexOf(currentTab),
             modifier = Modifier
-                .height(decks.size * 36.dp + 20.dp)
+                .height(decksEnabled * 40.dp + 20.dp)
                 .padding(PaddingValues())
         ) {
             tabs.forEach { tab ->
@@ -176,13 +173,13 @@ fun ColumnScope.tabScreen(
             }
         }
         when (currentTab) {
-            Tabs.PresetQueues -> {
-                verticalScroll {
-                    presetQueuesScreen()
-                }
-            }
+//            Tabs.PresetQueues -> {
+//                verticalScroll {
+//                    presetQueuesScreen()
+//                }
+//            }
 
-            Tabs.SearchSelector -> {
+            Tabs.PresetPlaylist -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     searchSelectorScreen()
                 }

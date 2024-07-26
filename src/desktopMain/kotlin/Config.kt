@@ -129,8 +129,6 @@ data class DeckConfig(
 
 val config = MutableStateFlow(Config())
 
-val configFile = File("config.json5")
-
 val json5 = Json5 {
     prettyPrint = true
     encodeDefaults = true
@@ -217,6 +215,7 @@ suspend fun loadConfig() {
 }
 
 suspend fun saveConfig(config: Config) {
+    configFile.parentFile.mkdirs()
     configFile.writeText(
         json5.encodeToString(Config.serializer(), config)
     )

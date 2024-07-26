@@ -203,19 +203,6 @@ fun searchSelectorScreen(
                         .height(36.dp)
                 ) {
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .weight(0.3f)
-                            .defaultMinSize(300.dp)
-                    ) {
-                        Text(
-                            text = search.label,
-//                            textAlign = TextAlign.End,
-                            modifier = Modifier.weight(0.5f)
-                        )
-                    }
                     decks.forEach { deck ->
                         if (deck.N > decksEnabled) return@forEach
 
@@ -247,7 +234,20 @@ fun searchSelectorScreen(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.weight(0.5f))
+                    Spacer(modifier = Modifier.weight(0.1f))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .weight(0.3f)
+                            .defaultMinSize(300.dp)
+                    ) {
+                        Text(
+                            text = search.label,
+//                            textAlign = TextAlign.End,
+                            modifier = Modifier.weight(0.5f)
+                        )
+                    }
                 }
             }
         }

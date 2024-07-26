@@ -102,17 +102,30 @@ fun autoChangeScreen(
         modifier = Modifier
             .fillMaxWidth(0.9f)
     ) {
-        Row(
-            horizontalArrangement = horizontal,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            autoChangeRow(
-                deck, "Preset Queue", deck.presetQueue.autoChange
-            ) {
-                deck.presetQueue.next()
-            }
-        }
+        // deprecated
+//        Row(
+//            horizontalArrangement = horizontal,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//        ) {
+//            autoChangeRow(
+//                deck, "Preset Queue", deck.presetQueue.autoChange
+//            ) {
+//                deck.presetQueue.next()
+//            }
+//        }
+//
+//        Row(
+//            horizontalArrangement = horizontal,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//        ) {
+//            autoChangeRow(
+//                deck, "Preset", deck.preset.autoChange
+//            ) {
+//                deck.preset.next()
+//            }
+//        }
 
         Row(
             horizontalArrangement = horizontal,
@@ -120,19 +133,7 @@ fun autoChangeScreen(
                 .fillMaxWidth()
         ) {
             autoChangeRow(
-                deck, "Preset", deck.preset.autoChange
-            ) {
-                deck.preset.next()
-            }
-        }
-
-        Row(
-            horizontalArrangement = horizontal,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            autoChangeRow(
-                deck, "Search", deck.search.autochange
+                deck, "Preset", deck.search.autochange
             ) {
                 deck.search.next()
             }

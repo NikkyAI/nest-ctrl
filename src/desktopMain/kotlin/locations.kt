@@ -2,7 +2,17 @@ import io.github.cdimascio.dotenv.dotenv
 import java.io.File
 
 val dotenv = dotenv {
-    File(".env").takeIf { !it.exists() }?.createNewFile()
+    if(File(".env").exists()) {
+        directory = "./"
+        filename = ".env"
+    } else {
+        val dotenvFile = File(System.getProperty("user.home")).resolve(".nestctrl").resolve(".env")
+        directory = dotenvFile.parentFile.path
+        filename = dotenvFile.name
+        dotenvFile.parentFile.mkdirs()
+        dotenvFile.takeUnless { it.exists() }?.createNewFile()
+    }
+//    File(".env").takeIf { !it.exists() }?.createNewFile()
     ignoreIfMissing = true
 }
 
@@ -36,3 +46,5 @@ val spritesFolder: File = nestdropFolder.resolve("Plugins").resolve("Milkdrop2")
 
 val nestdropPerformanceLog: File = nestdropFolder.resolve("PerformanceHistory").canonicalFile
 val nestdropImgModes: File = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile
+
+val configFile = userHome.resolve(".nestctrl").resolve("config.json5")

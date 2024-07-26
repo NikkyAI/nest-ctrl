@@ -26,6 +26,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
+import dev.reformator.stacktracedecoroutinator.runtime.DecoroutinatorRuntime
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -59,6 +60,7 @@ import nestdrop.loadNestdropConfig
 import nestdrop.parsePerformanceLog
 import nestdrop.performanceLogsFlow
 import nestdrop.setupSpriteFX
+import osc.OSCMessage
 import osc.OscSynced
 import osc.initializeSyncedValues
 import osc.resolumeClipConnect
@@ -90,7 +92,7 @@ val decks = List(4) { index ->
         1 -> Deck(n, first = true, last = false, 0xFFBB0000)
         2 -> Deck(n, first = false, last = false, 0xFF00BB00)
         3 -> Deck(n, first = false, last = false, 0xFF00A2FF)
-        4 -> Deck(n, first = false, last = true, 0xFFBBBB00)
+        4 -> Deck(n, first = false, last = true, 0xFFF9F900)
         else -> null
     }
 }.filterNotNull()
@@ -293,6 +295,7 @@ object Main {
                 }
                 resolumeLayerClear(4, 2)
                 resolumeLayerClear(4, 3)
+
             }
             .launchIn(flowScope)
 
@@ -492,157 +495,163 @@ object Main {
     }
 
     @JvmStatic
-    fun main(args: Array<String>) = runBlocking {
-//        val presetQueues = PresetQueues()
-        awaitApplication {
-//            nestdropDeckCount.onEach { deckCount ->
-//                val newDecks = List(deckCount) { index ->
-//                    when(val n = index + 1) {
-//                        1 -> Deck(n, first = true, last = n == deckCount, 0xFFBB0000, presetQueues)
-//                        2 -> Deck(n, first = false, last = n == deckCount, 0xFF00BB00, presetQueues)
-//                        3 -> Deck(n, first = false, last = n == deckCount, 0xFF0000BB, presetQueues)
-//                        4 -> Deck(n, first = false, last = n == deckCount, 0xFFBBBB00, presetQueues)
-//                        else -> null
-//                    }
-//                }.filterNotNull()
-//                decks.value = newDecks
-//            }.launchIn(flowScope)
-//            val deck1 = Deck(1, first = true, last = false, 0xFFBB0000, presetQueues)
-//            val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
+    fun main(args: Array<String>) {
+        if(false) {
+            DecoroutinatorRuntime.load()
+        }
+        runBlocking {
+            //TODO: detect debug flags and such ?
+            //        val presetQueues = PresetQueues()
+            awaitApplication {
+                //            nestdropDeckCount.onEach { deckCount ->
+                //                val newDecks = List(deckCount) { index ->
+                //                    when(val n = index + 1) {
+                //                        1 -> Deck(n, first = true, last = n == deckCount, 0xFFBB0000, presetQueues)
+                //                        2 -> Deck(n, first = false, last = n == deckCount, 0xFF00BB00, presetQueues)
+                //                        3 -> Deck(n, first = false, last = n == deckCount, 0xFF0000BB, presetQueues)
+                //                        4 -> Deck(n, first = false, last = n == deckCount, 0xFFBBBB00, presetQueues)
+                //                        else -> null
+                //                    }
+                //                }.filterNotNull()
+                //                decks.value = newDecks
+                //            }.launchIn(flowScope)
+                //            val deck1 = Deck(1, first = true, last = false, 0xFFBB0000, presetQueues)
+                //            val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
 
-            var isSplashScreenShowing by remember { mutableStateOf(true) }
-            var showException by remember { mutableStateOf<Throwable?>(null) }
-            LaunchedEffect(Unit) {
-                try {
-                    initApplication(presetQueues)
-                    logger.info { "await application" }
-                    isSplashScreenShowing = false
-                } catch (e: Exception) {
-                    logger.error(e) { "unhandled error: TODO: show error" }
-//                    error("unhandled exception ${e.message}")
-                    showException = e
-                } catch (e: ExceptionInInitializerError) {
-                    logger.error(e) { "unhandled error: TODO: show error" }
-//                    error("unhandled exception ${e.exception.message}")
-                    showException = e
+                var isSplashScreenShowing by remember { mutableStateOf(true) }
+                var showException by remember { mutableStateOf<Throwable?>(null) }
+                LaunchedEffect(Unit) {
+                    try {
+                        initApplication(presetQueues)
+                        logger.info { "await application" }
+                        isSplashScreenShowing = false
+                    } catch (e: Exception) {
+                        logger.error(e) { "unhandled error: TODO: show error" }
+                        //                    error("unhandled exception ${e.message}")
+                        showException = e
+                    } catch (e: ExceptionInInitializerError) {
+                        logger.error(e) { "unhandled error: TODO: show error" }
+                        //                    error("unhandled exception ${e.exception.message}")
+                        showException = e
 
+                    }
                 }
-            }
-            if (showException != null) {
-                val e = showException!!
-                DialogWindow(
-                    onCloseRequest = ::exitApplication,
-//                    undecorated = true,
-                    title = "Error",
-                    state = rememberDialogState(
-                        position = WindowPosition(Alignment.Center),
-                        width = 1200.dp,
-                        height = 800.dp
-                    )
-                ) {
-                    MaterialTheme(colors = darkColors()) {
-                        Scaffold {
-                            verticalScroll {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    val message = when (e) {
-                                        is ExceptionInInitializerError -> {
-                                            e.exception.message
-                                        }
-
-                                        is Exception -> e.message
-
-//                                    null -> "this should never happen"
-                                        else -> "unhandled exception type: ${e::class.qualifiedName} ${e.message}"
-                                    } ?: "no message provided, please check the logs"
-
-                                    Text("NEST CTRL failed to initialize")
-//                                    Column {
-                                    Row(
-                                        horizontalArrangement = Arrangement.SpaceBetween
+                if (showException != null) {
+                    val e = showException!!
+                    DialogWindow(
+                        onCloseRequest = ::exitApplication,
+                        //                    undecorated = true,
+                        title = "Error",
+                        state = rememberDialogState(
+                            position = WindowPosition(Alignment.Center),
+                            width = 1200.dp,
+                            height = 800.dp
+                        )
+                    ) {
+                        MaterialTheme(colors = darkColors()) {
+                            Scaffold {
+                                verticalScroll {
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.fillMaxSize()
                                     ) {
-                                        Text(
-                                            "message",
-                                            modifier = Modifier
-                                                .weight(0.2f)
-                                        )
+                                        val message = when (e) {
+                                            is ExceptionInInitializerError -> {
+                                                e.exception.message
+                                            }
 
-                                        Text(
-                                            text = message,
-                                            fontFamily = FontFamily.Monospace,
-                                            modifier = Modifier
-                                                .weight(0.8f)
-                                        )
-                                    }
-                                    Row(
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            "stacktrace",
-                                            modifier = Modifier
-                                                .weight(0.2f)
-                                        )
+                                            is Exception -> e.message
 
-                                        Text(
-                                            text = e.stackTraceToString().replace("\t", "  "),
-                                            fontFamily = FontFamily.Monospace,
-                                            modifier = Modifier
-                                                .weight(0.8f)
-                                        )
-                                    }
-//                                    }
-                                    Row {
-                                        Button(
-                                            onClick = ::exitApplication
+                                            //                                    null -> "this should never happen"
+                                            else -> "unhandled exception type: ${e::class.qualifiedName} ${e.message}"
+                                        } ?: "no message provided, please check the logs"
+
+                                        Text("NEST CTRL failed to initialize")
+                                        //                                    Column {
+                                        Row(
+                                            horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            Text("Close")
+                                            Text(
+                                                "message",
+                                                modifier = Modifier
+                                                    .weight(0.2f)
+                                            )
+
+                                            Text(
+                                                text = message,
+                                                fontFamily = FontFamily.Monospace,
+                                                modifier = Modifier
+                                                    .weight(0.8f)
+                                            )
+                                        }
+                                        Row(
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                "stacktrace",
+                                                modifier = Modifier
+                                                    .weight(0.2f)
+                                            )
+
+                                            Text(
+                                                text = e.stackTraceToString().replace("\t", "  "),
+                                                fontFamily = FontFamily.Monospace,
+                                                modifier = Modifier
+                                                    .weight(0.8f)
+                                            )
+                                        }
+                                        //                                    }
+                                        Row {
+                                            Button(
+                                                onClick = ::exitApplication
+                                            ) {
+                                                Text("Close")
+                                            }
                                         }
                                     }
-                                }
 
-//                                Spacer(modifier = Modifier.weight(10.0f))
+                                    //                                Spacer(modifier = Modifier.weight(10.0f))
+                                }
                             }
                         }
                     }
-                }
-            } else if (isSplashScreenShowing) {
-                Window(
-                    onCloseRequest = ::exitApplication,
-                    title = "Splash",
-                    state = rememberWindowState(
-                        position = WindowPosition(BiasAlignment(0f, 0f)),
-                        width = 300.dp, height = 200.dp
-                    ),
-                    undecorated = true,
-//                    transparent = true,
-                    focusable = false,
-                    alwaysOnTop = true,
-                    icon = BitmapPainter(
-                        useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
-                    )
-                ) {
-                    splashScreen()
-                }
-            } else {
-                Window(
-                    onCloseRequest = ::exitApplication,
-                    title = "Nest Ctrl",
-                    state = rememberWindowState(width = 1600.dp, height = 1200.dp),
-                    icon = BitmapPainter(
-                        useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
-                    )
-                ) {
-                    App()
-                }
+                } else if (isSplashScreenShowing) {
+                    Window(
+                        onCloseRequest = ::exitApplication,
+                        title = "Splash",
+                        state = rememberWindowState(
+                            position = WindowPosition(BiasAlignment(0f, 0f)),
+                            width = 300.dp, height = 200.dp
+                        ),
+                        undecorated = true,
+                        //                    transparent = true,
+                        focusable = false,
+                        alwaysOnTop = true,
+                        icon = BitmapPainter(
+                            useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
+                        )
+                    ) {
+                        splashScreen()
+                    }
+                } else {
+                    Window(
+                        onCloseRequest = ::exitApplication,
+                        title = "Nest Ctrl",
+                        state = rememberWindowState(width = 1600.dp, height = 1200.dp),
+                        icon = BitmapPainter(
+                            useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
+                        )
+                    ) {
+                        App()
+                    }
 
 
-//        fader(
-//            notches = 9,
-//            color = Color.Red,
-//        )
+    //              fader(
+    //                  notches = 9,
+    //                  color = Color.Red,
+    //              )
+                }
             }
         }
     }
