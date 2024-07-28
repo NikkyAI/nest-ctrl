@@ -16,9 +16,8 @@ val dotenv = dotenv {
     ignoreIfMissing = true
 }
 
-val tagsFolder = File("tags")
-
 val userHome = File(System.getProperty("user.home"))
+val tagsFolder = userHome.resolve(".nestctrl").resolve("tags")
 
 val nestdropFolder get() = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {
     if (it.startsWith("~/") || it.startsWith("~\\")) {
@@ -44,7 +43,7 @@ val nestdropConfig: File
 val presetsFolder: File = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets").canonicalFile
 val spritesFolder: File = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Sprites").canonicalFile
 
-val nestdropPerformanceLog: File = nestdropFolder.resolve("PerformanceHistory").canonicalFile
+val nestdropPerformanceLogFolder: File = nestdropFolder.resolve("PerformanceHistory").canonicalFile
 val nestdropImgModes: File = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile
 
 val configFile = userHome.resolve(".nestctrl").resolve("config.json5")

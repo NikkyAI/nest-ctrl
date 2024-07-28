@@ -35,6 +35,7 @@ import ui.components.lazyList
 @Composable
 fun imgFxScreen() {
     val decksEnabled by Deck.enabled.collectAsState()
+    val imgFxMap by imgFxMap.collectAsState()
     lazyList {
         stickyHeader(key = "header") {
             Row(
@@ -93,9 +94,10 @@ fun imgFxScreen() {
             var heightDp by remember {
                 mutableStateOf(0.dp)
             }
+            val fxText = imgFxMap[fxIndex] ?: return@loop
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .onGloballyPositioned { coordinates ->
                         // Set column height using the LayoutCoordinates
@@ -107,19 +109,15 @@ fun imgFxScreen() {
 
                     val selectedIndexState = deck.imgSpriteFx.index
                     val selectedIndex by selectedIndexState.collectAsState()
-                    val imgFxMap by imgFxMap.collectAsState()
-
-                    val fx = imgFxMap[fxIndex] ?: return@loop
 
                     val toggleState = deck.imgSpriteFx.toggles.getOrNull(fxIndex) ?: return@loop
                     val toggled by toggleState.collectAsState()
 
                     Row(
                         modifier = Modifier
-                            .weight(0.2f)
+//                            .weight(0.2f)
+                            .padding(horizontal = 20.dp)
                     ) {
-
-
                         VerticalRadioButton(
                             selected = (selectedIndex == fxIndex),
                             onClick = {
@@ -146,12 +144,16 @@ fun imgFxScreen() {
                                 disabledColor = Color.DarkGray
                             ),
                         )
-
-                        Text(fx, modifier = Modifier.padding(vertical = 4.dp).weight(0.1f))
-
                     }
                 }
 
+                Text(
+                    text = fxText,
+                    modifier = Modifier
+                    .padding(vertical = 4.dp)
+                        .padding(horizontal = 10.dp)
+//                    .weight(0.4f)
+                )
             }
         }
 

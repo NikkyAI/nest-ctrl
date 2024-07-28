@@ -33,7 +33,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -48,9 +47,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.nullable
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import nestdrop.PerformanceLogRow
 import nestdrop.deck.Deck
@@ -60,12 +56,10 @@ import nestdrop.loadNestdropConfig
 import nestdrop.parsePerformanceLog
 import nestdrop.performanceLogsFlow
 import nestdrop.setupSpriteFX
-import osc.OSCMessage
 import osc.OscSynced
 import osc.initializeSyncedValues
 import osc.resolumeClipConnect
 import osc.resolumeLayerClear
-import osc.resolumeLayerStates
 import osc.runNestDropSend
 import osc.runResolumeSend
 import osc.startResolumeListener
@@ -301,23 +295,23 @@ object Main {
 
         startResolumeListener()
 
-        run {
-            val file = File("resolume_layers.json")
-            val json = Json {
-                prettyPrint = true
-            }
-            resolumeLayerStates
-                .sample(1.seconds)
-                .onEach {
-                    file.writeText(
-                        json.encodeToString(
-                            MapSerializer(Int.serializer(), Int.serializer().nullable),
-                            it
-                        )
-                    )
-                }
-                .launchIn(flowScope)
-        }
+//        run {
+//            val file = File("resolume_layers.json")
+//            val json = Json {
+//                prettyPrint = true
+//            }
+//            resolumeLayerStates
+//                .sample(1.seconds)
+//                .onEach {
+//                    file.writeText(
+//                        json.encodeToString(
+//                            MapSerializer(Int.serializer(), Int.serializer().nullable),
+//                            it
+//                        )
+//                    )
+//                }
+//                .launchIn(flowScope)
+//        }
 
         startBeatCounter()
 
@@ -344,7 +338,7 @@ object Main {
 
             val performanceLogRows = mutableSetOf<PerformanceLogRow>()
 
-            nestdropPerformanceLog
+            nestdropPerformanceLogFolder
                 .listFiles()
                 .orEmpty()
                 .mapNotNull { file ->
@@ -357,7 +351,7 @@ object Main {
                     performanceLogRows.add(it)
                 }
 
-            nestdropPerformanceLog
+            nestdropPerformanceLogFolder
                 .asWatchChannel(KWatchChannel.Mode.SingleDirectory)
                 .consumeEach { event ->
 
@@ -369,11 +363,11 @@ object Main {
                         KWatchEvent.Kind.Initialized -> {}
                         KWatchEvent.Kind.Created, KWatchEvent.Kind.Modified -> {
                             parsePerformanceLog(event.file)?.let { rows ->
-//                                logger.infoF { "received ${rows.size} rows" }
+//                                logger.info { "watch-event ${event.kind} ${event.file}" }
                                 val lastTimestamp = performanceLogRows.maxOfOrNull { it.dateTime }
                                     ?: Instant.DISTANT_PAST.toLocalDateTime(TimeZone.currentSystemDefault())
                                 val newRows = rows.toSet() - performanceLogRows
-//                                logger.infoF { "received ${newRows.size} new rows" }
+//                                logger.info { "received ${newRows.size} new rows" }
                                 newRows
 //                                    .filter { it.dateTime > lastTimestamp }
                                     .sortedBy { it.dateTime }

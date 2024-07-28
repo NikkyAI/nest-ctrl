@@ -907,8 +907,8 @@ class Deck(
             Triple(currentBeat, lastBeat, triggerAt)
         }.onEach { (currentBeat, lastBeat, triggerAt) ->
             if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
+                logger.info { "triggered at ${(currentBeat * 1000) .roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
                 hasSwitched.value = true
-                logger.info { "triggered at $currentBeat, $triggerAt" }
                 doSwitch()
             }
         }

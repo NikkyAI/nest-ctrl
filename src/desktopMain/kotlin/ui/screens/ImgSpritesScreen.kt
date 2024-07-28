@@ -20,10 +20,15 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import decks
 import nestdrop.deck.Deck
@@ -219,17 +224,25 @@ fun imgSpritesScreenNew() {
 //                    ) {
 //
 //                    }
+
+                    val localDensity = LocalDensity.current
+                    var heightDp by remember {
+                        mutableStateOf(0.dp)
+                    }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .height(40.dp)
+                            .onGloballyPositioned { coordinates ->
+                                // Set column height using the LayoutCoordinates
+                                heightDp = with(localDensity) { coordinates.size.height.toDp() }
+                            }
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-                                .weight(0.4f)
+//                                .weight(0.4f)
                         ) {
                             decks.forEach { deck ->
                                 if (deck.N > decksEnabled) return@forEach
@@ -243,7 +256,7 @@ fun imgSpritesScreenNew() {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
-                                        .weight(0.1f)
+//                                        .weight(0.1f)
                                         .padding(horizontal = 20.dp)
                                 ) {
                                     VerticalRadioButton(
@@ -259,7 +272,7 @@ fun imgSpritesScreenNew() {
                                             selectedColor = deck.color,
                                             unselectedColor = deck.dimmedColor
                                         ),
-                                        height = 40.dp,
+                                        height = heightDp,
 //                                connectTop = spriteLocations.indexOf(sprite) > 0, // i > 0,
 //                                connectBottom = spriteLocations.indexOf(sprite) < spriteLocations.size - 1, // i < queueLength - 1,
                                     )
@@ -286,11 +299,13 @@ fun imgSpritesScreenNew() {
                             }
                         }
 
-//                        Spacer(modifier = Modifier.width(200.dp))
+//                        Spacer(modifier = Modifier.width(40.dp))
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(0.6f)
+                            modifier = Modifier
+                                .padding(horizontal = 50.dp)
+//                                .weight(0.6f)
                         ) {
                             Column(
                                 modifier = Modifier
