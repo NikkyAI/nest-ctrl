@@ -41,7 +41,7 @@ import ui.screens.editSearchesScreen
 import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreenNew
 import ui.screens.presetScreen
-import ui.screens.searchSelectorScreen
+import ui.screens.playtlistSelectorScreen
 import ui.screens.spoutScreen
 import ui.screens.tagEditScreen
 
@@ -181,7 +181,7 @@ fun ColumnScope.tabScreen(
 
             Tabs.PresetPlaylist -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    searchSelectorScreen()
+                    playtlistSelectorScreen()
                 }
             }
 
