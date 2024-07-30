@@ -66,13 +66,13 @@ class Deck(
     val color = Color(hexColor)
     val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
 
-    @Deprecated("disable bpm sync")
-    val bpmSyncEnabled =
-        MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
-
-    @Deprecated("disable bpm sync")
-    val bpmSyncMultiplier =
-        MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
+//    @Deprecated("disable bpm sync")
+//    val bpmSyncEnabled =
+//        MutableStateFlow(false) // OscSynced.Value<Boolean>("/deck$N/bpmSync", false, target = Target.TouchOSC)
+//
+//    @Deprecated("disable bpm sync")
+//    val bpmSyncMultiplier =
+//        MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
 
     inner class NdTime {
 
@@ -174,22 +174,22 @@ class Deck(
             waveForm.startFlows()
             enabled.startFlows()
 
-            Link.bpm
-                .combine(bpmSyncMultiplier) { bpm, multiplier ->
-                    val beatsPerSecond = bpm / 60.0f
-                    beatsPerSecond / multiplier
-                }
-                .map {
-                    (it * 100).roundToInt() / 100f
-                }
-                .combine(bpmSyncEnabled) { a, b -> a to b }
-                .distinctUntilChanged()
-                .onEach { (value, toggle) ->
-                    if (toggle) {
-                        effectSpeed.value = value
-                    }
-                }
-                .launchIn(flowScope)
+//            Link.bpm
+//                .combine(bpmSyncMultiplier) { bpm, multiplier ->
+//                    val beatsPerSecond = bpm / 60.0f
+//                    beatsPerSecond / multiplier
+//                }
+//                .map {
+//                    (it * 100).roundToInt() / 100f
+//                }
+//                .combine(bpmSyncEnabled) { a, b -> a to b }
+//                .distinctUntilChanged()
+//                .onEach { (value, toggle) ->
+//                    if (toggle) {
+//                        effectSpeed.value = value
+//                    }
+//                }
+//                .launchIn(flowScope)
         }
     }
 

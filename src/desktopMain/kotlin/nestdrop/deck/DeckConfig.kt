@@ -108,10 +108,10 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             this@applyConfig.search.autochange.value = search.autoChange
             this@applyConfig.search.value = combinedSearches.firstOrNull { it.label == search.name }
         }
-        run {
-            this@applyConfig.bpmSyncEnabled.value = bpmSync.enabled
-            this@applyConfig.bpmSyncMultiplier.value = bpmSync.multiplier
-        }
+//        run {
+//            this@applyConfig.bpmSyncEnabled.value = bpmSync.enabled
+//            this@applyConfig.bpmSyncMultiplier.value = bpmSync.multiplier
+//        }
     }
 }
 
@@ -265,21 +265,21 @@ val Deck.configFlow: Flow<DeckConfig>
                     spout = spout
                 )
             }
-            .combine(
-                combine(
-                    bpmSyncEnabled,
-                    bpmSyncMultiplier
-                ) { syncBpm, multiplier ->
-                    DeckConfig.BpmSync(
-                        enabled = syncBpm,
-                        multiplier = multiplier,
-                    )
-                }
-            ) { config, bpmSync ->
-                config.copy(
-                    bpmSync = bpmSync
-                )
-            }
+//            .combine(
+//                combine(
+//                    bpmSyncEnabled,
+//                    bpmSyncMultiplier
+//                ) { syncBpm, multiplier ->
+//                    DeckConfig.BpmSync(
+//                        enabled = syncBpm,
+//                        multiplier = multiplier,
+//                    )
+//                }
+//            ) { config, bpmSync ->
+//                config.copy(
+//                    bpmSync = bpmSync
+//                )
+//            }
             .combine(
                 ndStrobe.enabled,
             ) { config, strobeEnabled ->

@@ -157,7 +157,7 @@ object Main {
                 prettyPrint = false
             }
 
-            val historyFolder = File("history")
+            val historyFolder = configFolder.resolve("history")
             historyFolder.mkdirs()
             val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Date())
             val historyFile = historyFolder.resolve("$timestamp.ndjson")
