@@ -1,4 +1,5 @@
 import io.github.cdimascio.dotenv.dotenv
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 
 val dotenv = dotenv {
@@ -16,8 +17,17 @@ val dotenv = dotenv {
     ignoreIfMissing = true
 }
 
-val userHome = File(System.getProperty("user.home"))
-val tagsFolder = userHome.resolve(".nestctrl").resolve("tags")
+private val logger = KotlinLogging.logger { }
+val userHome = File(System.getProperty("user.home")).also {
+    logger.info { "user.home: $it" }
+}
+val configFolder = userHome.resolve(".nestctrl")
+val tagsFolder = configFolder.resolve("tags").also {
+    logger.info { "tags folder: $it" }
+}
+val configFile = configFolder.resolve("config.json5").also {
+    logger.info { "config file: $it" }
+}
 
 val nestdropFolder get() = (dotenv["NESTDROP"] ?: System.getenv("NESTDROP"))?.let {
     if (it.startsWith("~/") || it.startsWith("~\\")) {
@@ -45,5 +55,3 @@ val spritesFolder: File = nestdropFolder.resolve("Plugins").resolve("Milkdrop2")
 
 val nestdropPerformanceLogFolder: File = nestdropFolder.resolve("PerformanceHistory").canonicalFile
 val nestdropImgModes: File = nestdropFolder.resolve("Plugins\\milk2_img.ini").canonicalFile
-
-val configFile = userHome.resolve(".nestctrl").resolve("config.json5")

@@ -160,12 +160,17 @@ suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
 }
 
 suspend fun loadConfig() {
+    logger.info { "load config" }
     if (configFile.exists()) {
-        configFile.readText()
+        logger.info { "loading: $configFile" }
+//        configFile.readText()
         config.value = json5.decodeFromString(
             Config.serializer(),
             configFile.readText(),
         )
+    } else {
+
+        logger.info { "does not exist: $configFile" }
     }
 
     config
