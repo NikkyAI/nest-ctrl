@@ -10,7 +10,7 @@
         </encoder>
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file> logs/latest.log </file>
+        <file> ${user.home}/.nestctrl/logs/latest.log </file>
         <append>false</append>
         <encoder>
             <pattern>

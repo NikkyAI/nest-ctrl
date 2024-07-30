@@ -163,5 +163,27 @@ project.afterEvaluate {
 //                }
 //            }
         }
+        val deployDistributable by creating(Copy::class) {
+            group = "package"
+            doFirst {
+                File("C:\\Users\\User\\VJ\\nestctrl").deleteRecursively()
+            }
+            from(getByName("createDistributable"))
+            this.destinationDir = File("C:\\Users\\User\\VJ")
+//            doLast {
+////            val file = compose.desktop.application.mainJar.asFile.get()
+////            file.copyTo(
+////                project.file("build").resolve("nestctrl.jar"),
+////                overwrite = true
+////            )
+//                copy {
+//                    from(getByName("packageUberJarForCurrentOS"))
+//                    into(project.file("build"))
+//                    rename {
+//                        "nestctrl.jar"
+//                    }
+//                }
+//            }
+        }
     }
 }

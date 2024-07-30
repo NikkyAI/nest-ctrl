@@ -1,25 +1,21 @@
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.xn32.json5k.Json5
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.plus
 import kotlinx.serialization.Serializable
 import nestdrop.deck.Deck
 import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
 import tags.TagScoreEval
 import ui.screens.customSearches
-import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger { }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 val configScope = CoroutineScope(
     Dispatchers.IO
         .limitedParallelism(32)
@@ -159,13 +155,19 @@ suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
     }
 }
 
+@OptIn(FlowPreview::class)
 suspend fun loadConfig() {
+    logger.info { "load config" }
     if (configFile.exists()) {
-        configFile.readText()
+        logger.info { "loading: $configFile" }
+//        configFile.readText()
         config.value = json5.decodeFromString(
             Config.serializer(),
             configFile.readText(),
         )
+    } else {
+
+        logger.info { "does not exist: $configFile" }
     }
 
     config
@@ -214,7 +216,7 @@ suspend fun loadConfig() {
     }.launchIn(configScope)
 }
 
-suspend fun saveConfig(config: Config) {
+fun saveConfig(config: Config) {
     configFile.parentFile.mkdirs()
     configFile.writeText(
         json5.encodeToString(Config.serializer(), config)
