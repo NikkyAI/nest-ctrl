@@ -30,7 +30,7 @@ import ui.components.lazyList
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun spoutScreen() {
-    val maxQueueLength = remember(decks.map { it.spriteQueue.name }) {
+    val maxQueueLength = remember(decks.map { it.spoutQueue.name }) {
         decks.maxOfOrNull {
             it.spoutQueue.value?.presets?.size ?: 0
         } ?: 0

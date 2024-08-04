@@ -1,7 +1,9 @@
 package tags
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 data class TagScoreEval(
     val label: String = "",
@@ -34,10 +36,11 @@ private fun <E> List<E>.startsWith(subset: List<E>): Boolean {
     }
 }
 
+@Immutable
 @Serializable
 data class TagMatcher(
-    val include: Set<@Serializable(with = TagSerializer::class) Tag> = emptySet(),
-    val exclude: Set<@Serializable(with = TagSerializer::class) Tag> = emptySet(),
+    val include: Set<Tag> = emptySet(),
+    val exclude: Set<Tag> = emptySet(),
 ) {
     fun matches(tags: Set<Tag>): Boolean {
         val matchInclude = include.all { includeTag ->

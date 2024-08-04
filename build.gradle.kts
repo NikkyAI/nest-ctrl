@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
 import org.jetbrains.compose.desktop.application.tasks.AbstractRunDistributableTask
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -50,6 +49,8 @@ kotlin {
 
             implementation("com.illposed.osc:javaosc-core:_")
 
+//            implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:_")
+
             implementation("io.github.pdvrieze.xmlutil:serialization:_")
             implementation("io.github.xn32:json5k:_")
 
@@ -69,12 +70,25 @@ kotlin {
 //    testImplementation(compose.desktop.uiTestJUnit4)
         }
     }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()  {
     compilerOptions {
         // coroutine debugging, disables optimizing away unused variables in coroutines
 //        freeCompilerArgs.add("-Xdebug")
+
+        freeCompilerArgs .addAll(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
+                    project.layout.buildDirectory.file("compose_metrics").get().asFile.also { logger.lifecycle("metrics: $it") }
+        )
+        freeCompilerArgs .addAll(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
+                    project.layout.buildDirectory.file("compose_metrics").get().asFile
+        )
     }
 }
-
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 powerAssert {
@@ -94,6 +108,7 @@ compose.desktop {
         mainJar.set(
             project.file("build").resolve("nestctrl.jar")
         )
+        jvmArgs += listOf("-Xmx1G")
         nativeDistributions {
 //            targetFormats(
 //                TargetFormat.Dmg,
@@ -166,10 +181,10 @@ project.afterEvaluate {
         val deployDistributable by creating(Copy::class) {
             group = "package"
             doFirst {
-                File("C:\\Users\\User\\VJ\\nestctrl").deleteRecursively()
+                File(System.getProperty("user.home")).resolve("VJ").resolve("nestctrl").deleteRecursively()
             }
             from(getByName("createDistributable"))
-            this.destinationDir = File("C:\\Users\\User\\VJ")
+            this.destinationDir = File(System.getProperty("user.home")).resolve("VJ")
 //            doLast {
 ////            val file = compose.desktop.application.mainJar.asFile.get()
 ////            file.copyTo(

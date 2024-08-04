@@ -3,7 +3,6 @@ package ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -181,7 +180,7 @@ fun presetQueuesScreen(
 
 
 @Composable
-fun playtlistSelectorScreen(
+fun PlaytlistSelectorScreen(
 ) {
     val decksEnabled by Deck.enabled.collectAsState()
     val customSearches by customSearches.collectAsState()

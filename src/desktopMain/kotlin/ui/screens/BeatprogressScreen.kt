@@ -69,7 +69,7 @@ fun beatProgressScreen(
     val decksEnabled by Deck.enabled.collectAsState()
     val triggerTimes = decks.mapNotNull { deck ->
         val enabled = (deck.N <= decksEnabled)
-        val triggerTime by deck.triggerTime.collectAsState()
+        val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 
         if(enabled) {
             deck.color to triggerTime
@@ -180,7 +180,7 @@ fun beatProgressScreen(
             decks.forEach { deck ->
                 if (deck.N > decksEnabled) return@forEach
 
-                val triggerTime by deck.triggerTime.collectAsState()
+                val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 
                 Row(
                     modifier = Modifier.width(200.dp),
@@ -194,7 +194,7 @@ fun beatProgressScreen(
                     Slider(
                         value = triggerTime,
                         onValueChange = {
-                            deck.triggerTime.value = it
+                            deck.presetSwitching.triggerTime.value = it
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = deck.color,

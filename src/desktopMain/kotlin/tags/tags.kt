@@ -1,5 +1,6 @@
 package tags
 
+import androidx.compose.runtime.Immutable
 import flowScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
@@ -48,6 +49,7 @@ object TagSerializer : KSerializer<Tag> {
     }
 }
 
+@Immutable
 @Serializable(with = TagSerializer::class)
 data class Tag(
     val name: String,

@@ -23,7 +23,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         this@applyConfig.ndTime.transitionTime.value = transitionTime
         this@applyConfig.ndStrobe.enabled.value = strobe.enabled
 
-        this@applyConfig.triggerTime.value = triggerTime
+        this@applyConfig.presetSwitching.triggerTime.value = triggerTime
         val presetQueuesV = presetQueues.queues.value
 
         run {
@@ -189,8 +189,8 @@ val Deck.configFlow: Flow<DeckConfig>
             .let { configFlow ->
                 combine(
                     configFlow,
-                    triggerTime,
-                    transitionTime,
+                    presetSwitching.triggerTime,
+                    presetSwitching.transitionTime,
                 ) { config, triggerTime, transitionTime ->
                     config.copy(
                         triggerTime = triggerTime,

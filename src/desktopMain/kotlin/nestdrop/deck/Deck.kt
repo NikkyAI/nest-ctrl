@@ -1,6 +1,7 @@
 package nestdrop.deck
 
 import Link
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import beatFrame
@@ -74,6 +75,8 @@ class Deck(
 //    val bpmSyncMultiplier =
 //        MutableStateFlow(4) // OscSynced.Value<Int>("/deck$N/bpmSyncMultiplier", 4, target = Target.TouchOSC)
 
+
+    @Immutable
     inner class NdTime {
 
         // time
@@ -104,6 +107,7 @@ class Deck(
     val ndTime = NdTime()
 
     // color
+    @Immutable
     inner class NdColor {
         val negative = NestdropControl.Slider(N, "Negative", 0f..1f, 0f)
 
@@ -137,6 +141,7 @@ class Deck(
     val ndColor = NdColor()
 
     //strobe / lfo
+    @Immutable
     inner class NdStrobe {
 
         val effect = NestdropControl.Dropdown(
@@ -196,6 +201,7 @@ class Deck(
     val ndStrobe = NdStrobe()
 
     // audio
+    @Immutable
     inner class NdAudio {
 
         val bass = NestdropControl.Slider(N, "Bass", 0f..1f, 1f)
@@ -211,6 +217,7 @@ class Deck(
     val ndAudio = NdAudio()
 
     // output
+    @Immutable
     inner class NdOutput {
         val ndDeckPinToTop = NestdropControl.ToggleButton(N, "TopMost", false)
 
@@ -221,10 +228,60 @@ class Deck(
 
     val ndOutput = NdOutput()
 
-    val transitionTime =
-        MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
-    val triggerTime = MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
-    val currentPreset = MutableStateFlow<PerformanceLogRow?>(null)
+    @Immutable
+    inner class PresetSwitching() {
+        val transitionTime =
+            MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
+        val triggerTime = MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
+        val currentPreset = MutableStateFlow<PerformanceLogRow?>(null)
+        private val hasSwitched = MutableStateFlow(false)
+
+
+        suspend fun resetLatch() {
+            hasSwitched.value = false
+        }
+
+        suspend fun beatFlow(
+            flow: Flow<HistoryNotNull<Double>>
+        ) = flow
+            .combine(
+                triggerTime.combine(beatFrame) { triggerTime, b ->
+                    triggerTime * b
+                }
+            ) { (currentBeat, lastBeat), triggerAt ->
+                Triple(currentBeat, lastBeat, triggerAt)
+            }.onEach { (currentBeat, lastBeat, triggerAt) ->
+                if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
+                    logger.info { "triggered at ${(currentBeat * 1000) .roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
+                    hasSwitched.value = true
+                    doSwitch()
+                }
+            }
+
+        private suspend fun doSwitch() {
+            // change preset queue
+            if (presetQueue.autoChange.value) {
+                presetQueue.next()
+            }
+            // change preset
+            if (preset.autoChange.value) {
+                preset.next()
+            }
+            // change sprite
+            if (imgSprite.autoChange.value) {
+                imgSprite.next()
+            }
+
+            if (imgSpriteFx.autoChange.value) {
+                imgSpriteFx.next()
+            }
+            if (search.autochange.value) {
+                search.next()
+            }
+        }
+    }
+    val presetSwitching = PresetSwitching()
+
 
     suspend fun startFlows() {
         logger.info { "initializing $deckName" }
@@ -245,7 +302,7 @@ class Deck(
 //                )
 //            }.launchIn(flowScope)
 
-        currentPreset
+        presetSwitching.currentPreset
             .onEach {
                 preset.name.value = it?.preset ?: "unset"
             }
@@ -255,13 +312,14 @@ class Deck(
         presetQueue.startFlows()
         preset.startFlows()
         spriteQueues.startFlows()
-        spriteQueue.startFlows()
+//        spriteQueue.startFlows()
         imgSprite.startFlows()
         imgSpriteFx.startFlows()
         spoutQueue.startFlows()
         spout.startFlows()
     }
 
+    @Immutable
     inner class Search : MutableStateFlow<TagScoreEval?> by MutableStateFlow(null) {
 
         val autochange = MutableStateFlow(false)
@@ -310,6 +368,7 @@ class Deck(
 
 //    val presetQueues = PresetQueues()
 
+    @Immutable
     inner class PresetQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
         private val trigger = MutableStateFlow(0) // OscSynced.Trigger("/deck$N/preset_queue/next")
         val name = MutableStateFlow("uninitialized")
@@ -420,6 +479,7 @@ class Deck(
     val presetQueue = PresetQueue()
 
 
+    @Immutable
     inner class Preset {
         private val trigger = MutableStateFlow(0)
         val autoChange = MutableStateFlow(false)
@@ -458,6 +518,7 @@ class Deck(
 
     val preset = Preset()
 
+    @Immutable
     inner class SpriteQueues : MutableStateFlow<List<Queue>> by MutableStateFlow(emptyList()) {
         suspend fun startFlows() {
             logger.info { "initializing $deckName sprite queues" }
@@ -466,34 +527,36 @@ class Deck(
 
     val spriteQueues = SpriteQueues()
 
-    @Deprecated("switch to using scanned sprite img location")
-    inner class SpriteQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
-        val index = MutableStateFlow(-1)
-        val name = MutableStateFlow("uninitialized")
+//    @Deprecated("switch to using scanned sprite img location")
+//    @Immutable
+//    inner class SpriteQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
+//        val index = MutableStateFlow(-1)
+//        val name = MutableStateFlow("uninitialized")
+//
+//        suspend fun startFlows() {
+//            logger.info { "initializing $deckName sprite queue" }
+//
+//
+//            this
+//                .onEach {
+//                    name.value = it?.name ?: "unset"
+//                }
+//                .launchIn(flowScope)
+//
+//            index
+//                .combine(spriteQueues) { index, queues ->
+//                    queues.getOrNull(index)
+//                }
+//                .onEach {
+//                    spriteQueue.value = it
+//                }.launchIn(flowScope)
+//        }
+//    }
 
-        suspend fun startFlows() {
-            logger.info { "initializing $deckName sprite queue" }
+//    @Deprecated("switch to using scanned sprite img location")
+//    val spriteQueue = SpriteQueue()
 
-
-            this
-                .onEach {
-                    name.value = it?.name ?: "unset"
-                }
-                .launchIn(flowScope)
-
-            index
-                .combine(spriteQueues) { index, queues ->
-                    queues.getOrNull(index)
-                }
-                .onEach {
-                    spriteQueue.value = it
-                }.launchIn(flowScope)
-        }
-    }
-
-    @Deprecated("switch to using scanned sprite img location")
-    val spriteQueue = SpriteQueue()
-
+    @Immutable
     inner class ImgSprite {
         //TODO: replace with a map ?
         val toggles = MutableStateFlow<Set<String>>(emptySet())
@@ -641,6 +704,7 @@ class Deck(
 
     val imgSprite = ImgSprite()
 
+    @Immutable
     inner class ImgSpriteFX {
         val autoChange = MutableStateFlow(true)
         val blendMode = MutableStateFlow(false)
@@ -714,6 +778,7 @@ class Deck(
 
     val imgSpriteFx = ImgSpriteFX()
 
+    @Immutable
     inner class SpoutQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
         val index = MutableStateFlow(-1)
         val name = MutableStateFlow("uninitialized")
@@ -737,6 +802,7 @@ class Deck(
 
     val spoutQueue = SpoutQueue()
 
+    @Immutable
     inner class Spout : MutableStateFlow<nestdrop.Preset?> by MutableStateFlow(null) {
 //        val toggles = List(20) {
 //            MutableStateFlow(false)
@@ -833,7 +899,7 @@ class Deck(
     val spout = Spout()
 
 
-    val skipHistory = MutableStateFlow(false)
+//    val skipHistory = MutableStateFlow(false)
 
 
     @Serializable
@@ -880,60 +946,14 @@ class Deck(
                 spoutSprite = spoutSprite,
                 spoutFx = spoutFx
             )
-        }.filter {
-            !skipHistory.value
         }
+//            .filter { !skipHistory.value }
 //            .combine(skipHistory) { state, skipHistory ->
 //                state.takeUnless { skipHistory }
 //            }.filterNotNull()
 
     fun nestdropDeckAddress(address: String) = "/Controls/Deck$N/$address"
 
-
-    private val hasSwitched = MutableStateFlow(false)
-
-    suspend fun resetLatch() {
-        hasSwitched.value = false
-    }
-
-    suspend fun beatFlow(
-        flow: Flow<HistoryNotNull<Double>>
-    ) = flow
-        .combine(
-            triggerTime.combine(beatFrame) { triggerTime, b ->
-                triggerTime * b
-            }
-        ) { (currentBeat, lastBeat), triggerAt ->
-            Triple(currentBeat, lastBeat, triggerAt)
-        }.onEach { (currentBeat, lastBeat, triggerAt) ->
-            if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-                logger.info { "triggered at ${(currentBeat * 1000) .roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
-                hasSwitched.value = true
-                doSwitch()
-            }
-        }
-
-    private suspend fun doSwitch() {
-        // change preset queue
-        if (presetQueue.autoChange.value) {
-            presetQueue.next()
-        }
-        // change preset
-        if (preset.autoChange.value) {
-            preset.next()
-        }
-        // change sprite
-        if (imgSprite.autoChange.value) {
-            imgSprite.next()
-        }
-
-        if (imgSpriteFx.autoChange.value) {
-            imgSpriteFx.next()
-        }
-        if (search.autochange.value) {
-            search.next()
-        }
-    }
 
 
     val deckName: String = "Deck $N"

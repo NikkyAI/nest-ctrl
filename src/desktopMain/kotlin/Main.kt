@@ -317,12 +317,12 @@ object Main {
 
         decks.forEach { deck ->
             performanceLogsFlow
-                .sample(500.milliseconds)
                 .filter {
                     it.deck == deck.N
                 }
+                .sample(500.milliseconds)
                 .onEach {
-                    deck.currentPreset.value = it
+                    deck.presetSwitching.currentPreset.value = it
                 }
                 .launchIn(flowScope)
         }
@@ -346,7 +346,9 @@ object Main {
                 }
                 .flatten()
                 .sortedBy { it.dateTime }
+                .takeLast(50)
                 .forEach {
+//                    delay(1)
                     performanceLogsFlow.emit(it)
                     performanceLogRows.add(it)
                 }

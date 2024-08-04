@@ -67,7 +67,7 @@ suspend fun startBeatCounter(
                 beatCounter.value %= totalBeats
 
                 decks.forEach {
-                    it.resetLatch()
+                    it.presetSwitching.resetLatch()
                 }
             }
         }
@@ -81,7 +81,7 @@ suspend fun startBeatCounter(
             .launchIn(flowScope)
 
         decks.forEach { deck ->
-            deck.beatFlow(beatCounter.runningHistoryNotNull())
+            deck.presetSwitching.beatFlow(beatCounter.runningHistoryNotNull())
                 .launchIn(flowScope)
         }
 

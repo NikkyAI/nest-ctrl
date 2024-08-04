@@ -1,3 +1,4 @@
+import androidx.compose.runtime.Immutable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.xn32.json5k.Json5
 import kotlinx.coroutines.*
@@ -21,6 +22,7 @@ val configScope = CoroutineScope(
         .limitedParallelism(32)
 ) + CoroutineName("flows")
 
+@Immutable
 @Serializable
 data class Config(
     val beats: Int = 32,
@@ -39,6 +41,7 @@ data class Config(
     val searches: List<TagScoreEval> = emptyList()
 )
 
+@Immutable
 @Serializable
 data class DeckConfig(
     val triggerTime: Float = 1.0f,
@@ -55,11 +58,13 @@ data class DeckConfig(
     val bpmSync: BpmSync = BpmSync(),
     val strobe: Strobe = Strobe()
 ) {
+    @Immutable
     @Serializable
     data class SearchConfig(
         val autoChange: Boolean = false,
         val name: String? = null,
     )
+    @Immutable
     @Serializable
     data class PresetQueue(
         val index: Int = -1,
@@ -69,17 +74,20 @@ data class DeckConfig(
 //    val toggles: Set<String> = emptySet(),
     )
 
+    @Immutable
     @Serializable
     data class BpmSync(
         val enabled: Boolean = false,
         val multiplier: Int = 4
     )
 
+    @Immutable
     @Serializable
     data class Strobe(
         val enabled: Boolean = false,
     )
 
+    @Immutable
     @Serializable
     data class Preset(
         val autoChange: Boolean = false,
@@ -92,6 +100,7 @@ data class DeckConfig(
 //        val name: String? = null,
 //    )
 
+    @Immutable
     @Serializable
     data class Sprite(
         val autoChange: Boolean = false,
@@ -100,12 +109,14 @@ data class DeckConfig(
         val toggles: Set<String> = emptySet(),
     )
 
+    @Immutable
     @Serializable
     data class SpoutQueue(
         val index: Int = -1,
         val name: String? = null,
     )
 
+    @Immutable
     @Serializable
     data class Spout(
 //    val autoChange: Boolean = false,
@@ -114,6 +125,7 @@ data class DeckConfig(
 //    val toggles: Set<String> = emptySet(),
     )
 
+    @Immutable
     @Serializable
     data class SpriteFX(
         val autoChange: Boolean = false,
