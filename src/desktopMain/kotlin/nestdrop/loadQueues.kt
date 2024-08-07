@@ -45,6 +45,7 @@ suspend fun loadNestdropConfig(
 
         presetQueues.allQueues.value = queues.filter { /*it.open &&*/ it.type == QueueType.Preset }
         presetQueues.queues.value = queues.filter { it.open && it.type == QueueType.Preset }
+        presetQueues.queuesInitialized.value = true
         decks.forEach { deck ->
             deck.spriteQueues.value = queues.filter { it.open && it.deck == deck.N && it.type == QueueType.Sprite }
         }

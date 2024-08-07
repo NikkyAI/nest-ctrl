@@ -50,7 +50,19 @@ suspend fun loadDeckSettings(decks: List<Deck>) {
         deck.ndAudio.mid.value = deckSettings.audio.bass
         deck.ndAudio.treble.value = deckSettings.audio.bass
 
-        deck.ndOutput.ndDeckPinToTop.value = deckSettings.videoDeck.topMost
+        deck.ndOutput.pinToTop.value = deckSettings.videoDeck.topMost
+        deck.ndOutput.spoutPreview.value = deckSettings.videoDeck.preview.let {
+            when(it) {
+                1 -> SpoutPreviewSize.`1_1`
+                2 -> SpoutPreviewSize.`1_2`
+                4 -> SpoutPreviewSize.`1_4`
+                8 -> SpoutPreviewSize.`1_8`
+                else -> {
+                    logger.error { "${deck.deckName}: cannot parse preview size $it" }
+                    SpoutPreviewSize.`1_4`
+                }
+            }
+        }
     }
 }
 

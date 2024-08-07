@@ -1,6 +1,5 @@
 package nestdrop.deck
 
-import Link
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
@@ -8,21 +7,16 @@ import beatFrame
 import com.illposed.osc.OSCMessage
 import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -219,10 +213,18 @@ class Deck(
     // output
     @Immutable
     inner class NdOutput {
-        val ndDeckPinToTop = NestdropControl.ToggleButton(N, "TopMost", false)
+        val pinToTop = NestdropControl.ToggleButton(N, "TopMost", false)
+        val spoutPreview = NestdropControl.Dropdown(
+            N,
+            "SpoutPreview",
+            SpoutPreviewSize.entries,
+            { SpoutPreviewSize.entries.indexOf(it) },
+            SpoutPreviewSize.`1_4`
+        )
 
         suspend fun startFlows() {
-            ndDeckPinToTop.startFlows()
+            pinToTop.startFlows()
+            spoutPreview.startFlows()
         }
     }
 

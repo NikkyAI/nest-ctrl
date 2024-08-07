@@ -11,7 +11,6 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
@@ -178,7 +177,9 @@ fun deckSettingsScreen() {
                                 modifier = Modifier
                                     .weight(0.2f),
                             ) {
-                                deck.ndOutput.ndDeckPinToTop.asCheckbox(deck)
+                                Text("these are currently broken on nestdrop? annoy their support to fix /Controls/Deck\$N/cbSpoutPreview and /Controls/Deck\$N/btTopMost")
+                                deck.ndOutput.pinToTop.asCheckbox(deck)
+                                deck.ndOutput.spoutPreview.asDropdown(deck)
                             }
                         }
                     }

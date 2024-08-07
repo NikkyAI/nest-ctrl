@@ -1,6 +1,7 @@
 import androidx.compose.runtime.Immutable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.xn32.json5k.Json5
+import io.github.xn32.json5k.SerialComment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -112,6 +113,7 @@ data class DeckConfig(
     @Immutable
     @Serializable
     data class SpoutQueue(
+        @SerialComment("deprecated, will be removed")
         val index: Int = -1,
         val name: String? = null,
     )
@@ -119,10 +121,8 @@ data class DeckConfig(
     @Immutable
     @Serializable
     data class Spout(
-//    val autoChange: Boolean = false,
         val index: Int = -1,
         val label: String? = null,
-//    val toggles: Set<String> = emptySet(),
     )
 
     @Immutable

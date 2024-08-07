@@ -72,14 +72,19 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             run {
                 logger.debug { "loading spout queue ${deckConfig.spoutQueue.name} from $spriteQueuesValue" }
                 val spoutQueueValue = spriteQueuesValue.firstOrNull() { it.name == deckConfig.spoutQueue.name }
+                    ?: spriteQueuesValue.firstOrNull { it.deck == this@applyConfig.N && it.name.contains("spout") }
                 this@applyConfig.spoutQueue.index.value = spriteQueuesValue.indexOf(spoutQueueValue)
-                    .takeUnless { it == -1 } ?: deckConfig.spoutQueue.index.takeUnless { it == -1 }
-                        ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
-                val spouts = withTimeoutOrNull(500.milliseconds) {
-                    logger.info { "loading presets from queue" }
+                    .takeUnless { it == -1 }  // ?: deckConfig.spoutQueue.index.takeUnless { it == -1 }
+                    ?: run {
+                        logger.error { "$deckName failed to find matching spout queue" }
+                        -1
+                          //   ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
+                    }
+                val spoutSprites = withTimeoutOrNull(500.milliseconds) {
+                    logger.info { "loading spout sprites from queue" }
                     spoutQueueValue?.presets.orEmpty()
                 }.orEmpty()
-                this@applyConfig.spout.index.value = spouts.indexOfFirst { it.label == spout.label }
+                this@applyConfig.spout.index.value = spoutSprites.indexOfFirst { it.label == spout.label }
                     .takeUnless { it == -1 } ?: spout.index
             }
         }
@@ -237,7 +242,7 @@ val Deck.configFlow: Flow<DeckConfig>
             }
             .combine(
                 combine(
-                    spoutQueue.index,
+                    spoutQueue.index, //TODO: remove ?
                     spoutQueue.name,
                 ) { index, name ->
                     DeckConfig.SpoutQueue(
@@ -297,7 +302,7 @@ val Deck.configFlow: Flow<DeckConfig>
                     )
                 }
             ) { config, searchConfig ->
-                config.copy (
+                config.copy(
                     search = searchConfig
                 )
             }

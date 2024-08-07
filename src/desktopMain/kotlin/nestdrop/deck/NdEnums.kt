@@ -39,3 +39,10 @@ enum class Waveform {
     Sawtooth,
     Sine,
 }
+
+enum class SpoutPreviewSize {
+    `1_8`,
+    `1_4`,
+    `1_2`,
+    `1_1`,
+}

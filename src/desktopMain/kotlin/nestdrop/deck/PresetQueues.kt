@@ -20,6 +20,7 @@ class PresetQueues(
 ) : StateFlow<List<Queue>> by mutableQueues {
     val allQueues = MutableStateFlow<List<Queue>>(emptyList())
     val queues = MutableStateFlow<List<Queue>>(emptyList())
+    val queuesInitialized = MutableStateFlow(false)
     private val logger = KotlinLogging.logger { }
 
     val deckSwitches = List(20) { MutableStateFlow(0) }

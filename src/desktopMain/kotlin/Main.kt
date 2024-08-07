@@ -443,7 +443,7 @@ object Main {
 
         withTimeoutOrNull(30.seconds) {
 
-            while (presetQueues.queues.value.isEmpty()) {
+            while (!presetQueues.queuesInitialized.value) {
                 delay(500)
             }
             true
