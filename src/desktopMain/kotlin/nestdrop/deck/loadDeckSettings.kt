@@ -80,6 +80,6 @@ private suspend fun parseDeckConfig(deck: Int): XmlDataClasses.DeckSettings {
     return xml.decodeFromString(
         XmlDataClasses.DeckSettings.serializer(), deckConfigXml
     ).also {
-        logger.info { it }
+//        logger.debug { it }
     }
 }

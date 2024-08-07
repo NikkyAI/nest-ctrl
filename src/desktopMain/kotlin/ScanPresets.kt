@@ -1,5 +1,8 @@
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import nestdrop.PresetLocation
@@ -8,6 +11,7 @@ import tags.nestdropCategoryTagsSet
 import ui.screens.presetsMap
 import ui.screens.imgSpritesMap
 import java.io.File
+import kotlin.time.measureTimedValue
 
 suspend fun scanPresets() {
 
@@ -115,13 +119,18 @@ suspend fun scanPresets() {
     presetsMap.value = milkPresets
     imgSpritesMap.value = imgPresets
 
-    coroutineScope {
-        imgPresets.values.forEach { sprite ->
-            launch(Dispatchers.IO) {
-                sprite.image.let { img ->
-                    logger.info { "loaded ${sprite.name} ${img.width}x${img.height}" }
+    flowScope.launch {
+        measureTimedValue {
+            imgPresets.values.map { sprite ->
+                async (Dispatchers.IO) {
+                    sprite.image
+//                        .also { img ->
+//                    logger.info { "loaded ${sprite.name} ${img.width}x${img.height}" }
+//                    }
                 }
-            }
+            }.awaitAll()
+        }.run {
+            logger.info { "IMG sprites preloaded (${value.size}) in $duration" }
         }
     }
 }

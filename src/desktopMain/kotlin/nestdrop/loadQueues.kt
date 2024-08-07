@@ -1,12 +1,16 @@
 package nestdrop
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdropConfig
 import utils.runCommandCaptureOutput
 import utils.xml
 import java.io.File
+import kotlin.time.measureTimedValue
 
 private val logger = KotlinLogging.logger { }
 
@@ -22,8 +26,6 @@ suspend fun loadNumberOfDecks(): Int {
 suspend fun loadNestdropConfig(
     presetQueues: PresetQueues,
     decks: List<Deck>,
-//    deck1: Deck,
-//    deck2: Deck,
 ) {
     val numberOfDecks = loadNumberOfDecks()
     Deck.enabled.value = numberOfDecks
@@ -36,16 +38,25 @@ suspend fun loadNestdropConfig(
             input = nestdropConfig
         ).trim().toInt()
 
-        val queues = (0 until queueCount).mapNotNull {
-            logger.info { "loading queue $it" }
-            loadQueue(it)
-        }
+        val queues = coroutineScope {
+            (0 until queueCount).map {
+                logger.debug { "loading queue $it" }
+                async {
+                    measureTimedValue {
+                        loadQueue(it)
+                    }.run { ->
+                        logger.info { "loaded queue $it in $duration" }
+                        value
+                    }
+                }
+            }
+        }.awaitAll().filterNotNull()
 
         logger.info { "loaded ${queues.size} queues from xml" }
 
         presetQueues.allQueues.value = queues.filter { /*it.open &&*/ it.type == QueueType.Preset }
         presetQueues.queues.value = queues.filter { it.open && it.type == QueueType.Preset }
-        presetQueues.queuesInitialized.value = true
+        presetQueues.isInitialized.value = true
         decks.forEach { deck ->
             deck.spriteQueues.value = queues.filter { it.open && it.deck == deck.N && it.type == QueueType.Sprite }
         }

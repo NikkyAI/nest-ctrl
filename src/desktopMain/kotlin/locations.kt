@@ -2,21 +2,6 @@ import io.github.cdimascio.dotenv.dotenv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 
-val dotenv = dotenv {
-    if(File(".env").exists()) {
-        directory = "./"
-        filename = ".env"
-    } else {
-        val dotenvFile = File(System.getProperty("user.home")).resolve(".nestctrl").resolve(".env")
-        directory = dotenvFile.parentFile.path
-        filename = dotenvFile.name
-        dotenvFile.parentFile.mkdirs()
-        dotenvFile.takeUnless { it.exists() }?.createNewFile()
-    }
-//    File(".env").takeIf { !it.exists() }?.createNewFile()
-    ignoreIfMissing = true
-}
-
 private val logger = KotlinLogging.logger { }
 val userHome = File(System.getProperty("user.home")).also {
     logger.info { "user.home: $it" }

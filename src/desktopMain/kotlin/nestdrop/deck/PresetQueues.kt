@@ -20,13 +20,13 @@ class PresetQueues(
 ) : StateFlow<List<Queue>> by mutableQueues {
     val allQueues = MutableStateFlow<List<Queue>>(emptyList())
     val queues = MutableStateFlow<List<Queue>>(emptyList())
-    val queuesInitialized = MutableStateFlow(false)
+    val isInitialized = MutableStateFlow(false)
     private val logger = KotlinLogging.logger { }
 
-    val deckSwitches = List(20) { MutableStateFlow(0) }
+    private val deckSwitches = List(20) { MutableStateFlow(0) }
 
     suspend fun startFlows() {
-        logger.info { "initializing preset queues" }
+        logger.info { "starting coroutines for preset-queues" }
 
         queues
             .combine(
@@ -40,7 +40,7 @@ class PresetQueues(
                     }
                 }
             ) { queues, switchSates ->
-                logger.info { "combining queues with deck switches" }
+//                logger.info { "combining queues with deck switches" }
                 queues.mapIndexed { i, queue ->
                     val deckOverride = switchSates[i]?.takeUnless { it < 0 }
                     if (deckOverride != null) {
@@ -54,7 +54,7 @@ class PresetQueues(
                 mutableQueues.value = it
                 logger.info {
                     "preset queues updated: ${
-                        it.joinToString {
+                        it.joinToString(", ", "[", "]") {
                             "name: ${it.name} deck: ${it.deck} presets: ${it.presets.size}"
                         }
                     }"

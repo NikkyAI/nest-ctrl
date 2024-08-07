@@ -108,7 +108,10 @@ compose.desktop {
         mainJar.set(
             project.file("build").resolve("nestctrl.jar")
         )
-        jvmArgs += listOf("-Xmx1G")
+        jvmArgs += listOf(
+            "-Xmx1G",
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED"
+        )
         nativeDistributions {
 //            targetFormats(
 //                TargetFormat.Dmg,
@@ -122,7 +125,12 @@ compose.desktop {
             windows {
                 iconFile.set(project.file("src/desktopMain/resources/drawable/blobhai_trans.ico"))
             }
-            modules("java.naming")
+            modules(
+                "java.naming",
+//                "java.instrument",
+//                "java.management",
+//                "jdk.unsupported",
+            )
 //            includeAllModules = true
         }
     }

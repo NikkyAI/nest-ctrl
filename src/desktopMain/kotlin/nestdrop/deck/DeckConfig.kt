@@ -27,23 +27,23 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         val presetQueuesV = presetQueues.queues.value
 
         run {
-            this@applyConfig.presetQueue.autoChange.value = presetQueue.autoChange
+//            this@applyConfig.presetQueue.autoChange.value = presetQueue.autoChange
 //            logger.infoF { "presetQueues toggleNames: ${presetQueue.toggles}" }
 //            logger.infoF { "presetQueues: ${presetQueuesV.map { it.name }}" }
-            val presetQueuesToggleIndices = presetQueue.toggles.map { queue ->
-                presetQueuesV.indexOfFirst { it.name == queue }
-            }.filterNot { it == -1 }.toSet()
-            logger.info { "presetQueues toggleIndices: $presetQueuesToggleIndices" }
-            this@applyConfig.presetQueue.toggles.forEachIndexed { index, toggle ->
-                toggle.value = index in presetQueuesToggleIndices
-            }
+//            val presetQueuesToggleIndices = presetQueue.toggles.map { queue ->
+//                presetQueuesV.indexOfFirst { it.name == queue }
+//            }.filterNot { it == -1 }.toSet()
+//            logger.info { "presetQueues toggleIndices: $presetQueuesToggleIndices" }
+//            this@applyConfig.presetQueue.toggles.forEachIndexed { index, toggle ->
+//                toggle.value = index in presetQueuesToggleIndices
+//            }
         }
         run {
-            this@applyConfig.preset.autoChange.value = preset.autoChange
-            this@applyConfig.presetQueue.index.value = presetQueuesV
-                .indexOfFirst { it.name == deckConfig.presetQueue.name }
-                .takeUnless { it == -1 }
-                ?: deckConfig.presetQueue.index
+//            this@applyConfig.preset.autoChange.value = preset.autoChange
+//            this@applyConfig.presetQueue.index.value = presetQueuesV
+//                .indexOfFirst { it.name == deckConfig.presetQueue.name }
+//                .takeUnless { it == -1 }
+//                ?: deckConfig.presetQueue.index
         }
 
         run {
@@ -81,7 +81,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                           //   ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
                     }
                 val spoutSprites = withTimeoutOrNull(500.milliseconds) {
-                    logger.info { "loading spout sprites from queue" }
+                    logger.info { "loading spout sprites from queue for $deckName" }
                     spoutQueueValue?.presets.orEmpty()
                 }.orEmpty()
                 this@applyConfig.spout.index.value = spoutSprites.indexOfFirst { it.label == spout.label }
@@ -120,32 +120,32 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
     }
 }
 
-private val Deck.presetQueueFlow
-    get() = combine(
-        presetQueue.name,
-        presetQueue.index,
-        presetQueue.autoChange,
-        combine(presetQueue.toggles) {
-            it.mapIndexed { i, b ->
-                i to b
-            }.toMap()
-        }.combine(presetQueues) { toggleStates, presetQueues ->
-            toggleStates
-                .filterValues { it }
-                .mapKeys { (index, _) ->
-                    presetQueues.getOrNull(index)?.name ?: ""
-                }
-                .filterKeys { it.isNotBlank() }
-                .keys
-        },
-    ) { presetQueueName, presetQueueIndex, autoChange, toggles ->
-        DeckConfig.PresetQueue(
-            index = presetQueueIndex,
-            name = presetQueueName,
-            autoChange = autoChange,
-            toggles = toggles
-        )
-    }
+//private val Deck.presetQueueFlow
+//    get() = combine(
+//        presetQueue.name,
+//        presetQueue.index,
+//        presetQueue.autoChange,
+//        combine(presetQueue.toggles) {
+//            it.mapIndexed { i, b ->
+//                i to b
+//            }.toMap()
+//        }.combine(presetQueues) { toggleStates, presetQueues ->
+//            toggleStates
+//                .filterValues { it }
+//                .mapKeys { (index, _) ->
+//                    presetQueues.getOrNull(index)?.name ?: ""
+//                }
+//                .filterKeys { it.isNotBlank() }
+//                .keys
+//        },
+//    ) { presetQueueName, presetQueueIndex, autoChange, toggles ->
+//        DeckConfig.PresetQueue(
+//            index = presetQueueIndex,
+//            name = presetQueueName,
+//            autoChange = autoChange,
+//            toggles = toggles
+//        )
+//    }
 
 
 private val Deck.spriteFlow
@@ -203,18 +203,18 @@ val Deck.configFlow: Flow<DeckConfig>
                     )
                 }
             }
-            .combine(presetQueueFlow) { config, presetQueue ->
-                config.copy(
-                    presetQueue = presetQueue,
-                )
-            }
-            .combine(
-                preset.autoChange.map { autoChange ->
-                    DeckConfig.Preset(autoChange = autoChange)
-                }
-            ) { config, preset ->
-                config.copy(preset = preset)
-            }
+//            .combine(presetQueueFlow) { config, presetQueue ->
+//                config.copy(
+//                    presetQueue = presetQueue,
+//                )
+//            }
+//            .combine(
+//                preset.autoChange.map { autoChange ->
+//                    DeckConfig.Preset(autoChange = autoChange)
+//                }
+//            ) { config, preset ->
+//                config.copy(preset = preset)
+//            }
 //            .combine(
 //                combine(
 //                    spriteQueue.name,

@@ -32,9 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -56,13 +54,8 @@ import nestdrop.loadNestdropConfig
 import nestdrop.parsePerformanceLog
 import nestdrop.performanceLogsFlow
 import nestdrop.setupSpriteFX
-import osc.OscSynced
 import osc.initializeSyncedValues
-import osc.resolumeClipConnect
-import osc.resolumeLayerClear
 import osc.runNestDropSend
-import osc.runResolumeSend
-import osc.startResolumeListener
 import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
@@ -70,11 +63,11 @@ import ui.splashScreen
 import utils.KWatchChannel
 import utils.KWatchEvent
 import utils.asWatchChannel
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTime
 
 
 private val logger = KotlinLogging.logger { }
@@ -100,10 +93,11 @@ object Main {
 //        deck2: Deck,
     ) {
 //        setupLogging()
-        println("testing logging")
-        logger.warn { "WARN" }
-        logger.error { "ERROR" }
+//        println("testing logging..")
+//        logger.warn { "WARN" }
+//        logger.error { "ERROR" }
 
+        logger.info { "connecting to carabiner" }
         flowScope.launch {
             var delayCounter = 1L
             while (true) {
@@ -120,15 +114,17 @@ object Main {
         withTimeoutOrNull(5000) {
             while (!Link.isConnected.value) {
                 logger.warn { "waiting for link to connect" }
-                delay(500)
+                delay(100)
             }
         } ?: run {
             logger.error {"failed to connect to carabiner socket / (ableton link)" }
             error("failed to connect to carabiner socket / (ableton link)")
         }
 
+        logger.info { "setup sprite FX" }
         setupSpriteFX()
 
+        logger.info { "starting OSC sender" }
         flowScope.launch(Dispatchers.IO) {
             while (true) {
                 runNestDropSend()
@@ -141,18 +137,26 @@ object Main {
 //                delay(100)
 //            }
 //        }
-        flowScope.launch(Dispatchers.IO) {
-            while (true) {
-                runResolumeSend()
-                delay(100)
-            }
+//        flowScope.launch(Dispatchers.IO) {
+//            while (true) {
+//                runResolumeSend()
+//                delay(100)
+//            }
+//        }
+
+        logger.info { "scanning presets" }
+        measureTime {
+            scanPresets()
+        }.also {
+            logger.info { "scan took $it" }
         }
 
-        scanPresets()
-        delay(100)
+//        delay(100)
+        logger.info { "starting filewatcher ./tags" }
         startTagsFileWatcher(presetQueues)
 
         run {
+            logger.info { "starting history writer" }
             val json = Json {
                 prettyPrint = false
             }
@@ -178,122 +182,122 @@ object Main {
         }
 
         // motion extraction toggles and sliders
-        val groupSyncedValues = (1..4).associateWith { group ->
-            val arenaMotionExtractionBypassed = OscSynced.Value<Int>(
-                address = "/composition/groups/$group/video/effects/motionextraction/bypassed",
-                initialValue = 1, target = OscSynced.Target.ResolumeArena
-            ).also {
-                it.logReceived = false
-//                arenaSendChannel.send(OSCMessage(it.address, "?"))
-                it.dropFirst = 1
-            }
-            val arenaMotionExtractionDelay = OscSynced.Value<Float>(
-                address = "/composition/groups/$group/video/effects/motionextraction/effect/delay",
-                initialValue = 0.25f, target = OscSynced.Target.ResolumeArena
-            ).also {
-                it.logReceived = false
-//                arenaSendChannel.send(OSCMessage(it.address, "?"))
-                it.dropFirst = 1
-            }
-            val arenaAutomaskBypassed = OscSynced.Value<Int>(
-                "/composition/groups/$group/video/effects/automask/bypassed",
-                initialValue = 1, target = OscSynced.Target.ResolumeArena
-            ).also {
-                it.logReceived = false
-//                arenaSendChannel.send(OSCMessage(it.address, "?"))
-                it.dropFirst = 1
-            }
-            val motionExtractionEnabled =
-                MutableStateFlow(false) // OscSynced.Value("/resolume/$group/motion_extraction/enabled", false)
-            motionExtractionEnabled
-                .sample(100.milliseconds)
-                .onEach {
-                    arenaMotionExtractionBypassed.value = if (it) 0 else 1
-                }
-                .launchIn(flowScope)
-            arenaMotionExtractionBypassed
-                .sample(100.milliseconds)
-                .onEach {
-                    motionExtractionEnabled.value = it == 0
-                }
-                .launchIn(flowScope)
-            val motionExtractionDelay =
-                MutableStateFlow(0.5f) // OscSynced.Value("/resolume/$group/motion_extraction/delay", 0.5f)
-            motionExtractionDelay
-                .sample(100.milliseconds)
-                .onEach {
-                    arenaMotionExtractionDelay.value = it
-                }
-                .launchIn(flowScope)
-            arenaMotionExtractionDelay
-                .sample(100.milliseconds)
-                .onEach {
-                    motionExtractionDelay.value = it
-                }
-                .launchIn(flowScope)
-            (motionExtractionEnabled to motionExtractionDelay)
-            val automaskEnabled = MutableStateFlow(false) // OscSynced.Value("/resolume/$group/auto_mask", false)
-            automaskEnabled
-                .sample(100.milliseconds)
-                .onEach {
-                    arenaAutomaskBypassed.value = if (it) 0 else 1
-                }
-                .launchIn(flowScope)
-            arenaAutomaskBypassed
-                .sample(100.milliseconds)
-                .onEach {
-                    automaskEnabled.value = it == 0
-                }
-                .launchIn(flowScope)
-            Triple(motionExtractionEnabled, motionExtractionDelay, automaskEnabled)
-        }
+//        val groupSyncedValues = (1..4).associateWith { group ->
+//            val arenaMotionExtractionBypassed = OscSynced.Value<Int>(
+//                address = "/composition/groups/$group/video/effects/motionextraction/bypassed",
+//                initialValue = 1, target = OscSynced.Target.ResolumeArena
+//            ).also {
+//                it.logReceived = false
+////                arenaSendChannel.send(OSCMessage(it.address, "?"))
+//                it.dropFirst = 1
+//            }
+//            val arenaMotionExtractionDelay = OscSynced.Value<Float>(
+//                address = "/composition/groups/$group/video/effects/motionextraction/effect/delay",
+//                initialValue = 0.25f, target = OscSynced.Target.ResolumeArena
+//            ).also {
+//                it.logReceived = false
+////                arenaSendChannel.send(OSCMessage(it.address, "?"))
+//                it.dropFirst = 1
+//            }
+//            val arenaAutomaskBypassed = OscSynced.Value<Int>(
+//                "/composition/groups/$group/video/effects/automask/bypassed",
+//                initialValue = 1, target = OscSynced.Target.ResolumeArena
+//            ).also {
+//                it.logReceived = false
+////                arenaSendChannel.send(OSCMessage(it.address, "?"))
+//                it.dropFirst = 1
+//            }
+//            val motionExtractionEnabled =
+//                MutableStateFlow(false) // OscSynced.Value("/resolume/$group/motion_extraction/enabled", false)
+//            motionExtractionEnabled
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    arenaMotionExtractionBypassed.value = if (it) 0 else 1
+//                }
+//                .launchIn(flowScope)
+//            arenaMotionExtractionBypassed
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    motionExtractionEnabled.value = it == 0
+//                }
+//                .launchIn(flowScope)
+//            val motionExtractionDelay =
+//                MutableStateFlow(0.5f) // OscSynced.Value("/resolume/$group/motion_extraction/delay", 0.5f)
+//            motionExtractionDelay
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    arenaMotionExtractionDelay.value = it
+//                }
+//                .launchIn(flowScope)
+//            arenaMotionExtractionDelay
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    motionExtractionDelay.value = it
+//                }
+//                .launchIn(flowScope)
+//            (motionExtractionEnabled to motionExtractionDelay)
+//            val automaskEnabled = MutableStateFlow(false) // OscSynced.Value("/resolume/$group/auto_mask", false)
+//            automaskEnabled
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    arenaAutomaskBypassed.value = if (it) 0 else 1
+//                }
+//                .launchIn(flowScope)
+//            arenaAutomaskBypassed
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    automaskEnabled.value = it == 0
+//                }
+//                .launchIn(flowScope)
+//            Triple(motionExtractionEnabled, motionExtractionDelay, automaskEnabled)
+//        }
+//
+//        val resetResolumeTrigger = MutableStateFlow(0) // OscSynced.Trigger("/resolume/reset")
+//        resetResolumeTrigger
+//            .drop(1)
+//            .onEach {
+//                logger.error { "executing resolume reset now" }
+//                resolumeClipConnect(1, 1, 1)
+//                groupSyncedValues[1]?.let { (motionExtraction, delay, automask) ->
+//                    motionExtraction.value = false
+//                    delay.value = 0.25f
+//                    automask.value = false
+//                }
+//                resolumeLayerClear(1, 2)
+//                resolumeLayerClear(1, 3)
+//
+//                resolumeClipConnect(2, 1, 2)
+//                groupSyncedValues[2]?.let { (motionExtraction, delay, automask) ->
+//                    motionExtraction.value = false
+//                    delay.value = 0.25f
+//                    automask.value = false
+//                }
+//                resolumeLayerClear(2, 2)
+//                resolumeLayerClear(2, 3)
+////                resolumeClipConnect(2, 3, 1)
+//
+//                resolumeClipConnect(3, 1, 1)
+//                groupSyncedValues[3]?.let { (motionExtraction, delay, automask) ->
+//                    motionExtraction.value = true
+//                    delay.value = 0.25f
+//                    automask.value = false
+//                }
+//                resolumeLayerClear(3, 2)
+//                resolumeLayerClear(3, 3)
+//
+//                resolumeClipConnect(4, 1, 2)
+//                groupSyncedValues[4]?.let { (motionExtraction, delay, automask) ->
+//                    motionExtraction.value = true
+//                    delay.value = 0.25f
+//                    automask.value = false
+//                }
+//                resolumeLayerClear(4, 2)
+//                resolumeLayerClear(4, 3)
+//
+//            }
+//            .launchIn(flowScope)
 
-        val resetResolumeTrigger = MutableStateFlow(0) // OscSynced.Trigger("/resolume/reset")
-        resetResolumeTrigger
-            .drop(1)
-            .onEach {
-                logger.error { "executing resolume reset now" }
-                resolumeClipConnect(1, 1, 1)
-                groupSyncedValues[1]?.let { (motionExtraction, delay, automask) ->
-                    motionExtraction.value = false
-                    delay.value = 0.25f
-                    automask.value = false
-                }
-                resolumeLayerClear(1, 2)
-                resolumeLayerClear(1, 3)
-
-                resolumeClipConnect(2, 1, 2)
-                groupSyncedValues[2]?.let { (motionExtraction, delay, automask) ->
-                    motionExtraction.value = false
-                    delay.value = 0.25f
-                    automask.value = false
-                }
-                resolumeLayerClear(2, 2)
-                resolumeLayerClear(2, 3)
-//                resolumeClipConnect(2, 3, 1)
-
-                resolumeClipConnect(3, 1, 1)
-                groupSyncedValues[3]?.let { (motionExtraction, delay, automask) ->
-                    motionExtraction.value = true
-                    delay.value = 0.25f
-                    automask.value = false
-                }
-                resolumeLayerClear(3, 2)
-                resolumeLayerClear(3, 3)
-
-                resolumeClipConnect(4, 1, 2)
-                groupSyncedValues[4]?.let { (motionExtraction, delay, automask) ->
-                    motionExtraction.value = true
-                    delay.value = 0.25f
-                    automask.value = false
-                }
-                resolumeLayerClear(4, 2)
-                resolumeLayerClear(4, 3)
-
-            }
-            .launchIn(flowScope)
-
-        startResolumeListener()
+//        startResolumeListener()
 
 //        run {
 //            val file = File("resolume_layers.json")
@@ -313,6 +317,7 @@ object Main {
 //                .launchIn(flowScope)
 //        }
 
+        logger.info { "starting beat counter" }
         startBeatCounter()
 
         decks.forEach { deck ->
@@ -432,6 +437,7 @@ object Main {
 
 
         flowScope.launch(Dispatchers.IO) {
+            logger.info { "loading nestdrop XML" }
             loadNestdropConfig(presetQueues, decks)
             nestdropConfig.asWatchChannel(KWatchChannel.Mode.SingleFile).consumeEach {
                 if (it.kind == KWatchEvent.Kind.Modified) {
@@ -441,13 +447,15 @@ object Main {
         }
 
 
-        withTimeoutOrNull(30.seconds) {
-
-            while (!presetQueues.queuesInitialized.value) {
-                delay(500)
+        withTimeoutOrNull(45.seconds) {
+            logger.info { "waiting for queues to be initialized" }
+            while (!presetQueues.isInitialized.value) {
+                delay(100)
             }
             true
         } ?: error("failed to load queues")
+        logger.info { "queues are initialized" }
+
 //        while(deck1.spriteQueues.value.isEmpty()) {
 //            delay(500)
 //        }
@@ -471,12 +479,12 @@ object Main {
 
         loadDeckSettings(decks)
 
-        decks.forEach {
-            it.imgSprite.index.value++
-        }
-        decks.forEach {
-            it.imgSprite.index.value--
-        }
+//        decks.forEach {
+//            it.imgSprite.index.value++
+//        }
+//        decks.forEach {
+//            it.imgSprite.index.value--
+//        }
 
         // TODO ensure that sprites are set AGAIN correctly
 //        deck1.imgSprite.index.value++
@@ -484,16 +492,18 @@ object Main {
 //        deck2.imgSprite.index.value++
 //        deck2.imgSprite.index.value--
 
-        logger.info { "initializing OSC" }
+        logger.info { "initializing OSC synced values" }
         initializeSyncedValues()
-        delay(500)
+        delay(200)
         logger.info { "re-emitting all values" }
     }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        if(false) {
-            DecoroutinatorRuntime.load()
+        if(dotenv.get("DEBUG", "false").toBooleanStrictOrNull() == true) {
+//        if(true) {
+            val state = DecoroutinatorRuntime.load()
+            logger.info { "enabling De-Corouti-nator: $state" }
         }
         runBlocking {
             //TODO: detect debug flags and such ?

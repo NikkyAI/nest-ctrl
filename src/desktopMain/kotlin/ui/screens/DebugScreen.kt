@@ -176,8 +176,8 @@ data class AutoplayState(
     val imgSpriteFx: Boolean,
 ) {
     suspend fun apply(deck: Deck) {
-        deck.presetQueue.autoChange.value = presetQueue
-        deck.preset.autoChange.value = preset
+//        deck.presetQueue.autoChange.value = presetQueue
+//        deck.preset.autoChange.value = preset
         deck.imgSprite.autoChange.value = imgSprite
         deck.imgSpriteFx.autoChange.value = imgSpriteFx
     }

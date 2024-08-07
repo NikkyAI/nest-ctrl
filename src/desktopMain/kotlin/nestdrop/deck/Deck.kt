@@ -262,13 +262,13 @@ class Deck(
 
         private suspend fun doSwitch() {
             // change preset queue
-            if (presetQueue.autoChange.value) {
-                presetQueue.next()
-            }
+//            if (presetQueue.autoChange.value) {
+//                presetQueue.next()
+//            }
             // change preset
-            if (preset.autoChange.value) {
-                preset.next()
-            }
+//            if (preset.autoChange.value) {
+//                preset.next()
+//            }
             // change sprite
             if (imgSprite.autoChange.value) {
                 imgSprite.next()
@@ -286,7 +286,7 @@ class Deck(
 
 
     suspend fun startFlows() {
-        logger.info { "initializing $deckName" }
+        logger.info { "starting coroutines for $deckName" }
 
         ndTime.startFlows()
         ndColor.startFlows()
@@ -311,7 +311,7 @@ class Deck(
             .launchIn(flowScope)
 
 //        presetQueues.startFlows()
-        presetQueue.startFlows()
+//        presetQueue.startFlows()
         preset.startFlows()
         spriteQueues.startFlows()
 //        spriteQueue.startFlows()
@@ -370,151 +370,152 @@ class Deck(
 
 //    val presetQueues = PresetQueues()
 
-    @Immutable
-    inner class PresetQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
-        private val trigger = MutableStateFlow(0) // OscSynced.Trigger("/deck$N/preset_queue/next")
-        val name = MutableStateFlow("uninitialized")
-
-        val index = MutableStateFlow(-1)
-
-        val toggles = List(20) {
-            MutableStateFlow(false)
-        }
-        val autoChange = MutableStateFlow(false)
-
-        suspend fun next() {
-            logger.info { "$deckName.presetQueue.next()" }
-            // change preset queue
-//            logger.debugF { "available queues: ${presetQueues.value}" }
-            val enabledQueues = presetQueues.value.filterIndexed { index, queue ->
-                queue.deck == N && toggles[index].value
-            }
-            logger.debug { "enabled queues: $enabledQueues" }
-            if (enabledQueues.isNotEmpty()) {
-                val next = enabledQueues.random()
-                index.value = presetQueues.value.indexOfFirst {
-                    it.deck == N && it.name == next.name
-                }
-                withTimeout(100.milliseconds) {
-                    // block until new queue is loaded
-                    this@PresetQueue.filterNotNull().first { it.name == next.name }.also { newQueue ->
-                        logger.debug { "queue loaded: ${newQueue.name}" }
-                    }
-
-                }
-            }
-        }
-
-        suspend fun startFlows() {
-            logger.info { "initializing $deckName preset queue" }
-
-//            presetQueues
+//    @Immutable
+//    inner class PresetQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
+//        private val trigger = MutableStateFlow(0) // OscSynced.Trigger("/deck$N/preset_queue/next")
+//        val name = MutableStateFlow("uninitialized")
+//
+//        val index = MutableStateFlow(-1)
+//
+//        val toggles = List(20) {
+//            MutableStateFlow(false)
+//        }
+//        val autoChange = MutableStateFlow(false)
+//
+//        suspend fun next() {
+//            logger.info { "$deckName.presetQueue.next()" }
+//            // change preset queue
+////            logger.debugF { "available queues: ${presetQueues.value}" }
+//            val enabledQueues = presetQueues.value.filterIndexed { index, queue ->
+//                queue.deck == N && toggles[index].value
+//            }
+//            logger.debug { "enabled queues: $enabledQueues" }
+//            if (enabledQueues.isNotEmpty()) {
+//                val next = enabledQueues.random()
+//                index.value = presetQueues.value.indexOfFirst {
+//                    it.deck == N && it.name == next.name
+//                }
+//                withTimeout(100.milliseconds) {
+//                    // block until new queue is loaded
+//                    this@PresetQueue.filterNotNull().first { it.name == next.name }.also { newQueue ->
+//                        logger.debug { "queue loaded: ${newQueue.name}" }
+//                    }
+//
+//                }
+//            }
+//        }
+//
+//        suspend fun startFlows() {
+//            logger.info { "initializing $deckName preset queue" }
+//
+////            presetQueues
+////                .onEach {
+////                    labels.forEachIndexed { index, label ->
+////                        label.value = it.getOrNull(index)
+////                            ?.name
+////                            ?: ""
+////                    }
+////                }
+////                .launchIn(flowScope)
+//
+//            trigger
+//                .drop(1)
 //                .onEach {
-//                    labels.forEachIndexed { index, label ->
-//                        label.value = it.getOrNull(index)
-//                            ?.name
-//                            ?: ""
-//                    }
+//                    next()
 //                }
 //                .launchIn(flowScope)
-
-            trigger
-                .drop(1)
-                .onEach {
-                    next()
-                }
-                .launchIn(flowScope)
+////            index
+////                .debounce(100)
+////                .runningHistory(index.value)
+////                .onEach { (current, last) ->
+////                    if(current >= 0 && current == last)
+////                    {
+////                        logger.infoF { "detected clicking on already active queue" }
+////                        index.value = -1
+////                    }
+////                }
+////                .launchIn(flowScope)
+//
+////            presetQueues
+////                .onEach { queues ->
+////                    queues.mapIndexed { index, queue ->
+////                        enabled[index].value = queue.deck == N
+////                    }
+////                }
+////                .launchIn(flowScope)
+//
 //            index
-//                .debounce(100)
-//                .runningHistory(index.value)
-//                .onEach { (current, last) ->
-//                    if(current >= 0 && current == last)
-//                    {
-//                        logger.infoF { "detected clicking on already active queue" }
-//                        index.value = -1
+////                .combine(resyncToTouchOSC) { a, _ -> a }
+//                .combine(presetQueues) { index, queues ->
+////                    logger.warnF { "${deckName } finding queue by index $index in $queues" }
+//                    queues.getOrNull(index)
+//                        ?.takeIf { it.deck == N }
+//                }.onEach { queue ->
+//                    this.value = queue
+//                }
+//                .launchIn(flowScope)
+//
+//            this
+//                .runningHistory()
+////                .combine(resyncToTouchOSC) { a, _ -> a }
+//                .onEach { (queue, previousQueue) ->
+//                    logger.info { "$deckName queue: ${queue?.name}" }
+//                    this.name.value = queue?.name ?: "error"
+//                    if (queue != null && previousQueue?.name != queue.name) {
+//                        nestdropPortSend(
+//                            OSCMessage("/Queue/${queue.name}", listOf(1))
+//                        )
+//                    } else {
+//                        if (previousQueue != null) {
+//
+//                            nestdropPortSend(
+//                                OSCMessage("/Queue/${previousQueue.name}", listOf(0))
+//                            )
+//                        }
 //                    }
 //                }
 //                .launchIn(flowScope)
+//        }
+//    }
 
-//            presetQueues
-//                .onEach { queues ->
-//                    queues.mapIndexed { index, queue ->
-//                        enabled[index].value = queue.deck == N
-//                    }
-//                }
-//                .launchIn(flowScope)
-
-            index
-//                .combine(resyncToTouchOSC) { a, _ -> a }
-                .combine(presetQueues) { index, queues ->
-//                    logger.warnF { "${deckName } finding queue by index $index in $queues" }
-                    queues.getOrNull(index)
-                        ?.takeIf { it.deck == N }
-                }.onEach { queue ->
-                    this.value = queue
-                }
-                .launchIn(flowScope)
-
-            this
-                .runningHistory()
-//                .combine(resyncToTouchOSC) { a, _ -> a }
-                .onEach { (queue, previousQueue) ->
-                    logger.info { "$deckName queue: ${queue?.name}" }
-                    this.name.value = queue?.name ?: "error"
-                    if (queue != null && previousQueue?.name != queue.name) {
-                        nestdropPortSend(
-                            OSCMessage("/Queue/${queue.name}", listOf(1))
-                        )
-                    } else {
-                        if (previousQueue != null) {
-
-                            nestdropPortSend(
-                                OSCMessage("/Queue/${previousQueue.name}", listOf(0))
-                            )
-                        }
-                    }
-                }
-                .launchIn(flowScope)
-        }
-    }
-
-    val presetQueue = PresetQueue()
+//    val presetQueue = PresetQueue()
 
 
     @Immutable
     inner class Preset {
-        private val trigger = MutableStateFlow(0)
-        val autoChange = MutableStateFlow(false)
+//        private val trigger = MutableStateFlow(0)
+//        val autoChange = MutableStateFlow(false)
         val name = MutableStateFlow("uninitialized")
 
-        suspend fun next() {
-            logger.info { "$deckName.preset.next()" }
-            // TODO: trigger this by emitting a history event (queue, deck, index or such)
-            presetQueue.value?.also { queue ->
-                val index = Random.nextInt(queue.presets.size)
-                val preset1 = queue.presets.getOrNull(index) // ?: return
-                logger.info { "switching ${queue.name} to $index '$preset1'" }
-                nestdropPortSend(
-                    OSCMessage(
-                        "/PresetID/${queue.name}/$index",
-                        listOf(
-                            if (false) 0 else 1
-                        )
-                    )
-                )
-            }
-        }
+//        @Deprecated("use search.next()")
+//        suspend fun next() {
+//            logger.info { "$deckName.preset.next()" }
+//            // TODO: trigger this by emitting a history event (queue, deck, index or such)
+//            presetQueue.value?.also { queue ->
+//                val index = Random.nextInt(queue.presets.size)
+//                val preset1 = queue.presets.getOrNull(index) // ?: return
+//                logger.info { "switching ${queue.name} to $index '$preset1'" }
+//                nestdropPortSend(
+//                    OSCMessage(
+//                        "/PresetID/${queue.name}/$index",
+//                        listOf(
+//                            if (false) 0 else 1
+//                        )
+//                    )
+//                )
+//            }
+//        }
 
 
         suspend fun startFlows() {
-            logger.info { "initializing $deckName preset" }
+//            logger.info { "starting flows for $deckName-preset" }
 
-            trigger
-                .drop(1)
-                .onEach {
-                    next()
-                }
-                .launchIn(flowScope)
+//            trigger
+//                .drop(1)
+//                .onEach {
+//                    next()
+//                }
+//                .launchIn(flowScope)
         }
     }
 
@@ -523,7 +524,7 @@ class Deck(
     @Immutable
     inner class SpriteQueues : MutableStateFlow<List<Queue>> by MutableStateFlow(emptyList()) {
         suspend fun startFlows() {
-            logger.info { "initializing $deckName sprite queues" }
+//            logger.info { "initializing $deckName sprite queues" }
         }
     }
 
@@ -568,10 +569,10 @@ class Deck(
 
         val spriteImgLocation = MutableStateFlow<PresetLocation.Img?>(null)
 
-        @Deprecated("switch to using scanned sprite img location")
-        val index = MutableStateFlow(-2) // OscSynced.ExclusiveSwitch("/deck$N/sprite/index", 40, -2)
-        val name =
-            MutableStateFlow("uninitialized") // OscSynced.Value("/deck$N/sprite/name", "uninitialized", receive = false)
+//        @Deprecated("switch to using scanned sprite img location")
+//        val index = MutableStateFlow(-2) // OscSynced.ExclusiveSwitch("/deck$N/sprite/index", 40, -2)
+        val name = MutableStateFlow("uninitialized")
+        // OscSynced.Value("/deck$N/sprite/name", "uninitialized", receive = false)
 
 //        private val nestdropSprite = NestdropSpriteQueue(
 //            nestdropSendChannel
@@ -625,7 +626,7 @@ class Deck(
         }
 
         suspend fun startFlows() {
-            logger.info { "initializing $deckName sprite" }
+            logger.info { "starting coroutines on $deckName img-sprite" }
 
 //            nestdropSprite.startFlows()
 
@@ -741,7 +742,7 @@ class Deck(
         }
 
         suspend fun startFlows() {
-            logger.info { "initializing $deckName sprite fx" }
+            logger.info { "starting coroutines for $deckName img-sprite-fx" }
 
             trigger
                 .drop(1)
@@ -786,7 +787,7 @@ class Deck(
         val name = MutableStateFlow("uninitialized")
 
         suspend fun startFlows() {
-            logger.info { "initializing $deckName spout queue" }
+            logger.info { "starting coroutines on $deckName spout-queue" }
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spriteQueues) { index, queues ->
@@ -822,7 +823,7 @@ class Deck(
         )
 
         suspend fun startFlows() {
-            logger.info { "initializing $deckName spout" }
+            logger.info { "starting coroutines on $deckName spout" }
             nestdropSpout.startFlows()
 
             index
@@ -887,15 +888,15 @@ class Deck(
                 .launchIn(flowScope)
         }
 
-        suspend fun resend() {
-            delay(50)
-            val currentIndex = index.value
-            if (currentIndex >= 0) {
-                index.value -= 1
-                index.value += 1
-            }
-
-        }
+//        suspend fun resend() {
+//            delay(50)
+//            val currentIndex = index.value
+//            if (currentIndex >= 0) {
+//                index.value -= 1
+//                index.value += 1
+//            }
+//
+//        }
     }
 
     val spout = Spout()
@@ -909,7 +910,7 @@ class Deck(
         val deck: Int,
         val timestamp: String,
         val preset: String,
-        val presetQueue: String,
+//        val presetQueue: String,
         val imgSprite: String,
         val imgFx: Int,
         val spoutSprite: String,
@@ -942,7 +943,7 @@ class Deck(
                     Instant.fromEpochMilliseconds(milliseconds).toString()
                 },
                 preset = preset,
-                presetQueue = presetQueue.name.value,
+//                presetQueue = presetQueue.name.value,
                 imgSprite = imgSprite,
                 imgFx = imgFx,
                 spoutSprite = spoutSprite,
