@@ -40,6 +40,7 @@ import tags.presetTagsMapping
 import ui.screens.presetsMap
 import ui.screens.imgSpritesMap
 import utils.HistoryNotNull
+import utils.prettyPrint
 import utils.runningHistory
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -832,7 +833,7 @@ class Deck(
                     queue?.presets?.getOrNull(index)
                 }.onEach { spoutPreset ->
                     this.value = spoutPreset
-                    logger.info { "$deckName spout name $spoutPreset" }
+                    logger.info { "$deckName spout name\n${spoutPreset?.prettyPrint()}" }
                     fx.value = spoutPreset?.effects ?: 0
                     name.value = spoutPreset?.label ?: "-"
                 }
@@ -854,7 +855,7 @@ class Deck(
                     sync
 //                        .drop(1)
                         .onEach {
-                            logger.info { "spout sync triggered" }
+                            logger.info { "$deckName spout sync triggered" }
                         }
                 ) { a, _ -> a }
 //                .runningHistory()

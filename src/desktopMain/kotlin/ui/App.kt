@@ -1,6 +1,7 @@
 package ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,29 +10,48 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ButtonDefaults.OutlinedBorderOpacity
+import androidx.compose.material.ButtonDefaults.OutlinedBorderSize
+import androidx.compose.material.ButtonElevation
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import configFolder
 import decks
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
@@ -44,10 +64,12 @@ import ui.screens.presetScreen
 import ui.screens.PlaytlistSelectorScreen
 import ui.screens.spoutScreen
 import ui.screens.tagEditScreen
+import utils.runCommand
 
 @Composable
 @Preview
 fun App() {
+    val logger = KotlinLogging.logger {}
     val nestdropDeckCount by Deck.enabled.collectAsState()
 
     MaterialTheme(colors = darkColors()) {
@@ -57,10 +79,115 @@ fun App() {
                     modifier = Modifier.width(300.dp)
                 ) {
                     beatProgressScreen(decks)
+                    Text("Auto Change")
                     decks.forEach { deck ->
                         if (deck.N > nestdropDeckCount) return@forEach
                         autoChangeScreen(deck)
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                    ) {
+//                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedButton(
+                                onClick = {
+                                    logger.info { "opening windows terminal to watch logs" }
+                                    runCommand(
+                                        "wt", "new-tab",
+                                        "-p", "Windows Powershell",
+                                        "--title", "NEST CTRL LOGS",
+                                        "-d", configFolder.path,
+                                        "powershell",
+                                        "Get-Content",
+                                        "-Path", "logs/latest.log",
+                                        "-Wait",
+                                        workingDir = configFolder
+                                    )
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "Watch Logs (INFO)",
+//                                tint = deck.color,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+
+                                Text("Watch Logs (INFO)")
+                            }
+                        MaterialTheme(colors = darkColors(
+                            primary = MaterialTheme.colors.error,
+                            onSurface = MaterialTheme.colors.error)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    logger.info { "opening windows terminal to watch logs" }
+                                    runCommand(
+                                        "wt", "new-tab",
+                                        "-p", "Windows Powershell",
+                                        "--title", "NEST CTRL LOGS",
+                                        "-d", configFolder.path,
+                                        "powershell",
+                                        "Get-Content",
+                                        "-Path", "logs/latest-debug.log",
+                                        "-Wait",
+                                        workingDir = configFolder
+                                    )
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(),
+//                                border = BorderStroke(
+//                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
+//                                ),
+
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "Watch LOgs (DEBUG)",
+//                                tint = deck.color,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+
+                                Text("Watch Logs (DEBUG)")
+                            }
+                        }
+                        MaterialTheme(colors = darkColors(
+                            primary = MaterialTheme.colors.error,
+                            onSurface = MaterialTheme.colors.error)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    logger.info { "opening windows terminal to watch logs" }
+                                    runCommand(
+                                        "wt", "new-tab",
+                                        "-p", "Windows Powershell",
+                                        "--title", "NEST CTRL LOGS",
+                                        "-d", configFolder.path,
+                                        "powershell",
+                                        "Get-Content",
+                                        "-Path", "logs/latest-trace.log",
+                                        "-Wait",
+                                        workingDir = configFolder
+                                    )
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(),
+//                                border = BorderStroke(
+//                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
+//                                ),
+
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "Watch LOgs (TRACE)",
+//                                tint = deck.color,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+
+                                Text("Watch Logs (TRACE)")
+                            }
+                        }
+                        }
+//                    }
                 }
 //                Column {
 //                    decks.forEach {
@@ -81,7 +208,7 @@ enum class Tabs(
     val label: String,
     val getName: ((Deck) -> Flow<String>)? = null
 ) {
-//    PresetQueues(
+    //    PresetQueues(
 //        "Preset Queues",
 //        {
 //            it.presetQueue.name

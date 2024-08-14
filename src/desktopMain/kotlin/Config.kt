@@ -13,6 +13,7 @@ import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
 import tags.TagScoreEval
 import ui.screens.customSearches
+import utils.prettyPrint
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger { }
@@ -198,7 +199,8 @@ suspend fun loadConfig() {
         .launchIn(configScope)
 
     config.value.also { config ->
-        logger.info { "loaded $config" }
+        logger.info { "loaded config" }
+        logger.debug { config.prettyPrint() }
         beatFrame.value = config.beats
         customSearches.value = config.searches
         decks.forEach { deck ->

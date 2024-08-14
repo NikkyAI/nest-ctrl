@@ -4,6 +4,7 @@ import java.io.File
 
 val dotenv = dotenv {
     if(File(".env").exists()) {
+        println("loading ${File(".env").canonicalFile}")
         directory = "./"
         filename = ".env"
     } else {

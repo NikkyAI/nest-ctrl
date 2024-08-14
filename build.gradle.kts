@@ -53,6 +53,7 @@ kotlin {
             implementation("org.deepsymmetry:lib-carabiner:_")
 
             implementation("com.illposed.osc:javaosc-core:_")
+//            implementation("com.illposed.osc:javaosc-java-se-addons:_")
 
 //            implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:_")
 

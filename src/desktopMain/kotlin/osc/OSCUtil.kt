@@ -6,10 +6,10 @@ import com.illposed.osc.OSCMessage
 import com.illposed.osc.OSCPacket
 import com.illposed.osc.OSCPacketEvent
 import com.illposed.osc.OSCPacketListener
+import com.illposed.osc.OSCSerializerAndParserBuilder
+import com.illposed.osc.argument.handler.BlobArgumentHandler
 import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
 import com.illposed.osc.transport.OSCPortIn
-import com.illposed.osc.transport.OSCPortInBuilder
-import com.illposed.osc.transport.OSCPortOutBuilder
 import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.xn32.json5k.Json5
@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import utils.receiveAvailable
@@ -39,9 +38,48 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import com.illposed.osc.argument.handler.BooleanFalseArgumentHandler
+import com.illposed.osc.argument.handler.BooleanTrueArgumentHandler
+import com.illposed.osc.argument.handler.CharArgumentHandler
+import com.illposed.osc.argument.handler.ColorArgumentHandler
+import com.illposed.osc.argument.handler.DoubleArgumentHandler
+import com.illposed.osc.argument.handler.FloatArgumentHandler
+import com.illposed.osc.argument.handler.ImpulseArgumentHandler
+import com.illposed.osc.argument.handler.IntegerArgumentHandler
+import com.illposed.osc.argument.handler.LongArgumentHandler
+import com.illposed.osc.argument.handler.MidiMessageArgumentHandler
+import com.illposed.osc.argument.handler.NullArgumentHandler
+import com.illposed.osc.argument.handler.StringArgumentHandler
+import com.illposed.osc.argument.handler.SymbolArgumentHandler
+import com.illposed.osc.argument.handler.TimeTag64ArgumentHandler
+import com.illposed.osc.argument.handler.UnsignedIntegerArgumentHandler
+import com.illposed.osc.transport.OSCPortOut
 
 
 private val logger = KotlinLogging.logger { }
+
+
+val serializer = OSCSerializerAndParserBuilder().also { serializer ->
+    serializer.setUsingDefaultHandlers(false)
+    serializer.registerArgumentHandler(BlobArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(BooleanFalseArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(BooleanTrueArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(CharArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(ColorArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(DoubleArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(FloatArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(ImpulseArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(IntegerArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(LongArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(MidiMessageArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(NullArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(TimeTag64ArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(UnsignedIntegerArgumentHandler.INSTANCE)
+    serializer.registerArgumentHandler(StringArgumentHandler())
+    serializer.registerArgumentHandler(SymbolArgumentHandler())
+    serializer.registerArgumentHandler(AwtColorArgumentHandler.INSTANCE)
+}
+
 
 val nestdropSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 val arenaSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
@@ -68,8 +106,15 @@ val resolumeArenaReceiveAddress = MutableStateFlow(
 suspend fun runNestDropSend() {
     nestdropAddress.collectLatest { address ->
         coroutineScope {
+//            val nestdropPort = OSCPortOut(
+//                serializer,
+//                address
+//            )
             val nestdropPort = // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
                 OSCPortOutBuilder()
+                    .also {
+                       it.serializerBuilder = serializer
+                    }
                     .setRemoteSocketAddress(
                         address
                     )
@@ -95,10 +140,11 @@ suspend fun runResolumeSend() {
 
     resolumeArenaSendAddress.collectLatest { address ->
         coroutineScope {
-            val arenaPort = // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
-                OSCPortOutBuilder()
-                    .setRemoteSocketAddress(address)
-                    .build()
+            val arenaPort = OSCPortOut(serializer, address)
+           // OSCPortOut(InetAddress.getByName("127.0.0.1"), 8000)
+//                OSCPortOutBuilder()
+//                    .setRemoteSocketAddress(address)
+//                    .build()
             arenaPort.connect()
 
             logger.debug { "constructed OSC port" }

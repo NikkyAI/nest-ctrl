@@ -93,7 +93,7 @@ object Main {
 //        deck2: Deck,
     ) {
 //        setupLogging()
-//        println("testing logging..")
+//        logger.info {"testing logging.."}
 //        logger.warn { "WARN" }
 //        logger.error { "ERROR" }
 
@@ -505,6 +505,31 @@ object Main {
             val state = DecoroutinatorRuntime.load()
             logger.info { "enabling De-Corouti-nator: $state" }
         }
+
+//        Activator.createParserTypes().forEach { (k,v) ->
+//            logger.info { "parser $k: $v" }
+//        }
+//        Activator.createSerializerTypes().forEach { v ->
+//            logger.info { "serializer: $v" }
+//        }
+
+//            logger.info { "opening windows terminal to watch logs" }
+//            val process = runCommand(
+//                "wt",
+//                "new-tab",
+//                "-p",
+//                "Windows Powershell",
+//                "--title",
+//                "NEST CTRL LOGS",
+//                "-d",
+//                configFolder.path,
+//                "powershell",
+//                "cat",
+//                "logs/latest.log",
+//                "-Wait",
+//                workingDir = configFolder
+//            )
+////
         runBlocking {
             //TODO: detect debug flags and such ?
             //        val presetQueues = PresetQueues()
