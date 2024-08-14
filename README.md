@@ -10,7 +10,7 @@ needed: JDK? probably java 19+
 
 https://www.nestimmersion.ca/nestdrop.php
 
-tested with `V2.x.0.12`
+tested with `V2.x.0.13`
 
 ## Carabiner
 
@@ -20,11 +20,13 @@ tested with `v1.2.0`
 
 launch `Carabiner.exe` in a terminal before running the controlpanel
 
+<!-- no longer necessary?
 ## xq
 
 https://github.com/sibprogrammer/xq/releases
 
 `xq.exe` need to be in `PATH`
+-->
 
 # Nestdrop setup
 
@@ -39,13 +41,11 @@ NESTDROP_PROFILE=DefaultUserProfile.xml
 ```
 ## IMG sprites
 
-image sprites are loaded from the first queue with `sprites` in its name
-
-... at least until UI gets added to pick them
+image sprites are getting loaded by parsing `Plugins\Milkdrop2\Sprites` folder
 
 ## SPOUT
 
-image sprites are loaded from the first queue with `spout` in its name
+spout sprites are loaded from the first queue with `spout` in its name
 
 ... at least until UI gets added to pick them
 

@@ -8,7 +8,7 @@ data class Queue(
     val deck: Int,
     val presets: List<Preset> = emptyList()
 ) {
-    val xpath = "/NestDropSettings/QueueWindows/*[@Name='$name']"
+//    val xpath = "/NestDropSettings/QueueWindows/*[@Name='$name']"
 }
 
 data class Preset(

@@ -1,7 +1,7 @@
 package nestdrop.deck
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import nestdrop.XmlDataClasses
+import nestdrop.NestdropSettings
 import nestdropConfig
 import utils.runCommandCaptureOutput
 import utils.xml
@@ -10,9 +10,23 @@ import java.io.File
 private val logger = KotlinLogging.logger { }
 
 suspend fun loadDeckSettings(decks: List<Deck>) {
+    val nestdropSettings = xml.decodeFromString(
+        NestdropSettings.serializer(), nestdropConfig.readText()
+            .substringAfter(
+                """<?xml version="1.0" encoding="utf-8"?>"""
+            )
+//            .lines().drop(1).joinToString("/n")
+    )
     decks.forEach { deck ->
         logger.info { "loading settings from ${deck.deckName}" }
-        val deckSettings = parseDeckConfig(deck.N)
+//        val deckSettings = parseDeckConfig(deck.N)
+        val deckSettings = when(deck.N) {
+            1 -> nestdropSettings.mainWindow.settingsDeck1
+            2 -> nestdropSettings.mainWindow.settingsDeck2
+            3 -> nestdropSettings.mainWindow.settingsDeck3
+            4 -> nestdropSettings.mainWindow.settingsDeck4
+            else -> error("unsupported deck number")
+        }
 
         deck.ndTime.transitionTime.value = deckSettings.transitTime.value
         deck.ndTime.animationSpeed.value = deckSettings.animationSpeed.value
@@ -66,20 +80,20 @@ suspend fun loadDeckSettings(decks: List<Deck>) {
     }
 }
 
-private suspend fun parseDeckConfig(deck: Int): XmlDataClasses.DeckSettings {
-    logger.debug { "querying /NestDropSettings/MainWindow/Settings_Deck${deck}" }
-    val deckConfigXml = runCommandCaptureOutput(
-        "xq", "-n", "-x", "/NestDropSettings/MainWindow/Settings_Deck${deck}",
-        workingDir = File("."),
-        input = nestdropConfig
-    ).trim()
-
-    logger.debug { "parsing" }
-//    logger.debugF { "$deckConfigXml" }
-
-    return xml.decodeFromString(
-        XmlDataClasses.DeckSettings.serializer(), deckConfigXml
-    ).also {
-//        logger.debug { it }
-    }
-}
+//private suspend fun parseDeckConfig(deck: Int): NestdropSettings.MainWindow.DeckSettings {
+//    logger.debug { "querying /NestDropSettings/MainWindow/Settings_Deck${deck}" }
+//    val deckConfigXml = runCommandCaptureOutput(
+//        "xq", "-n", "-x", "/NestDropSettings/MainWindow/Settings_Deck${deck}",
+//        workingDir = File("."),
+//        input = nestdropConfig
+//    ).trim()
+//
+//    logger.debug { "parsing" }
+////    logger.debugF { "$deckConfigXml" }
+//
+//    return xml.decodeFromString(
+//        DeckSettings.serializer(), deckConfigXml
+//    ).also {
+////        logger.debug { it }
+//    }
+//}
