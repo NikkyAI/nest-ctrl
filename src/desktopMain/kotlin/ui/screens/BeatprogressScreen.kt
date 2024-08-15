@@ -68,7 +68,7 @@ fun beatProgressScreen(
 
     val decksEnabled by Deck.enabled.collectAsState()
     val triggerTimes = decks.mapNotNull { deck ->
-        val enabled = (deck.N <= decksEnabled)
+        val enabled = (deck.id <= decksEnabled)
         val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 
         if(enabled) {
@@ -178,7 +178,7 @@ fun beatProgressScreen(
             }
 
             decks.forEach { deck ->
-                if (deck.N > decksEnabled) return@forEach
+                if (deck.id > decksEnabled) return@forEach
 
                 val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 

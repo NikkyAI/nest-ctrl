@@ -2,15 +2,12 @@ package ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
@@ -18,7 +15,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -89,7 +85,7 @@ fun autoChangeScreen(
     deck: Deck,
 ) {
     val decksEnabled by Deck.enabled.collectAsState()
-    if (deck.N > decksEnabled) return
+    if (deck.id > decksEnabled) return
 
     // autochange
     // next
@@ -133,7 +129,7 @@ fun autoChangeScreen(
                 .fillMaxWidth()
         ) {
             autoChangeRow(
-                deck, "Preset", deck.search.autochange
+                deck, "Preset", deck.search.autoChange
             ) {
                 deck.search.next()
             }

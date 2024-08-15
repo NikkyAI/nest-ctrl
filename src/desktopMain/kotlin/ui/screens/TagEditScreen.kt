@@ -59,7 +59,7 @@ fun tagEditScreen() {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
-                    if (deck.N > decksEnabled) return@forEach
+                    if (deck.id > decksEnabled) return@forEach
 
                     var newTagName by remember { mutableStateOf(TextFieldValue("")) }
 
@@ -118,7 +118,7 @@ fun tagEditScreen() {
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
-                    if (deck.N > decksEnabled) return@forEach
+                    if (deck.id > decksEnabled) return@forEach
 
                     val preset by deck.preset.name.collectAsState()
                     val isTagged = preset.substringBeforeLast(".milk") in entries

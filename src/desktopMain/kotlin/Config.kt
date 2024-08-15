@@ -148,7 +148,7 @@ suspend fun updateConfig(block: suspend Config.() -> Config) {
 }
 suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
     updateConfig {
-        when (N) {
+        when (id) {
             1 -> {
                 copy(deck1 = deckConfig)
             }
@@ -204,7 +204,7 @@ suspend fun loadConfig() {
         beatFrame.value = config.beats
         customSearches.value = config.searches
         decks.forEach { deck ->
-            when (deck.N) {
+            when (deck.id) {
                 1 -> deck.applyConfig(config.deck1)
                 2 -> deck.applyConfig(config.deck2)
                 3 -> deck.applyConfig(config.deck3)

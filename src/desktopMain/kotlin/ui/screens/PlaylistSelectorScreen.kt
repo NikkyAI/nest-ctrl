@@ -35,7 +35,7 @@ fun PlaytlistSelectorScreen(
 
     val deckSearches = decks.associate { deck ->
         val deckSearch by deck.search.collectAsState()
-        deck.N to deckSearch
+        deck.id to deckSearch
     }
 
     verticalScroll {
@@ -57,9 +57,9 @@ fun PlaytlistSelectorScreen(
                 ) {
 
                     decks.forEach { deck ->
-                        if (deck.N > decksEnabled) return@forEach
+                        if (deck.id > decksEnabled) return@forEach
 
-                        val deckSearch = deckSearches.getValue(deck.N)
+                        val deckSearch = deckSearches.getValue(deck.id)
 
                         val selected = (deckSearch == search)
                         Row(

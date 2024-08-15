@@ -50,7 +50,7 @@ fun imgFxScreen() {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
-                    if (deck.N > decksEnabled) return@forEach
+                    if (deck.id > decksEnabled) return@forEach
 
                     val blendModeState = deck.imgSpriteFx.blendMode
                     val blendMode by blendModeState.collectAsState()
@@ -105,7 +105,7 @@ fun imgFxScreen() {
                     }
             ) {
                 decks.forEach { deck ->
-                    if (deck.N > decksEnabled) return@forEach
+                    if (deck.id > decksEnabled) return@forEach
 
                     val selectedIndexState = deck.imgSpriteFx.index
                     val selectedIndex by selectedIndexState.collectAsState()

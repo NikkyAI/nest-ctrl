@@ -31,14 +31,14 @@ import java.util.Map;
  * see <code>com.illposed.osc.argument.handler.ColorArgumentHandler</code>
  * in javaosc-core.
  */
-public class AwtColorArgumentHandler implements ArgumentHandler<Color>, Cloneable {
+public class CustomAwtColorArgumentHandler implements ArgumentHandler<Color>, Cloneable {
 
-	public static final ArgumentHandler<Color> INSTANCE = new AwtColorArgumentHandler();
+	public static final ArgumentHandler<Color> INSTANCE = new CustomAwtColorArgumentHandler();
 
 	// Public API
 	/** Allow overriding, but somewhat enforce the ugly singleton. */
 	@SuppressWarnings("WeakerAccess")
-	protected AwtColorArgumentHandler() {
+	protected CustomAwtColorArgumentHandler() {
 		// declared only for setting the access level
 	}
 
@@ -64,8 +64,8 @@ public class AwtColorArgumentHandler implements ArgumentHandler<Color>, Cloneabl
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public AwtColorArgumentHandler clone() throws CloneNotSupportedException {
-		return (AwtColorArgumentHandler) super.clone();
+	public CustomAwtColorArgumentHandler clone() throws CloneNotSupportedException {
+		return (CustomAwtColorArgumentHandler) super.clone();
 	}
 
 	public static Color toAwt(final OSCColor color) {

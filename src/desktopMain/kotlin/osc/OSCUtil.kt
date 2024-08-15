@@ -77,7 +77,7 @@ val serializer = OSCSerializerAndParserBuilder().also { serializer ->
     serializer.registerArgumentHandler(UnsignedIntegerArgumentHandler.INSTANCE)
     serializer.registerArgumentHandler(StringArgumentHandler())
     serializer.registerArgumentHandler(SymbolArgumentHandler())
-    serializer.registerArgumentHandler(AwtColorArgumentHandler.INSTANCE)
+//    serializer.registerArgumentHandler(CustomAwtColorArgumentHandler.INSTANCE)
 }
 
 

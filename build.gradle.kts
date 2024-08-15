@@ -87,12 +87,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()  {
         freeCompilerArgs .addAll(
             "-P",
             "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
-                    project.layout.buildDirectory.file("compose_metrics").get().asFile.also { logger.lifecycle("metrics: $it") }
+                    project.layout.projectDirectory.file("compose_metrics").asFile.also { logger.lifecycle("metrics: $it") }
         )
         freeCompilerArgs .addAll(
             "-P",
             "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
-                    project.layout.buildDirectory.file("compose_metrics").get().asFile
+                    project.layout.projectDirectory.file("compose_metrics").asFile
         )
     }
 }
@@ -131,6 +131,7 @@ compose.desktop {
 
             windows {
                 iconFile.set(project.file("src/desktopMain/resources/drawable/blobhai_trans.ico"))
+                console = true
             }
             modules(
                 "java.naming",
@@ -176,6 +177,7 @@ project.afterEvaluate {
         val packageDistributable by creating(Zip::class) {
             group = "package"
             from(getByName("createDistributable"))
+            from(project.file("README.md"))
             archiveBaseName.set("nestctrl")
             destinationDirectory.set(project.file("build"))
 //            doLast {
@@ -199,6 +201,7 @@ project.afterEvaluate {
                 File(System.getProperty("user.home")).resolve("VJ").resolve("nestctrl").deleteRecursively()
             }
             from(getByName("createDistributable"))
+            from(project.file("README.md"))
             this.destinationDir = File(System.getProperty("user.home")).resolve("VJ")
 //            doLast {
 ////            val file = compose.desktop.application.mainJar.asFile.get()

@@ -1,7 +1,6 @@
 package ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,18 +9,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ButtonDefaults.OutlinedBorderOpacity
-import androidx.compose.material.ButtonDefaults.OutlinedBorderSize
-import androidx.compose.material.ButtonElevation
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
@@ -30,20 +23,15 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import configFolder
@@ -51,7 +39,6 @@ import decks
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
@@ -81,7 +68,7 @@ fun App() {
                     beatProgressScreen(decks)
                     Text("Auto Change")
                     decks.forEach { deck ->
-                        if (deck.N > nestdropDeckCount) return@forEach
+                        if (deck.id > nestdropDeckCount) return@forEach
                         autoChangeScreen(deck)
                     }
                     Spacer(modifier = Modifier.weight(1f))
@@ -268,7 +255,7 @@ fun ColumnScope.tabScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 decks.forEach { deck ->
-                                    if (deck.N > decksEnabled) return@forEach
+                                    if (deck.id > decksEnabled) return@forEach
                                     val nameMutableStateFlow = getName(deck)
                                     val name by nameMutableStateFlow.collectAsState("unitialized")
                                     Row(

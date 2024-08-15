@@ -59,7 +59,7 @@ suspend fun loadNestdropConfig(
         presetQueues.queues.value = queues.filter { it.open && it.type == QueueType.Preset }
         presetQueues.isInitialized.value = true
         decks.forEach { deck ->
-            deck.spriteQueues.value = queues.filter { it.open && it.deck == deck.N && it.type == QueueType.Sprite }
+            deck.spriteQueues.value = queues.filter { it.open && it.deck == deck.id && it.type == QueueType.Sprite }
         }
     } catch (e: Exception) {
         logger.error(e) { "failed to load queues" }

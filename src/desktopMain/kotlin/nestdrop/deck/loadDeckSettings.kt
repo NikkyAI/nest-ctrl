@@ -3,13 +3,11 @@ package nestdrop.deck
 import io.github.oshai.kotlinlogging.KotlinLogging
 import nestdrop.NestdropSettings
 import nestdropConfig
-import utils.runCommandCaptureOutput
 import utils.xml
-import java.io.File
 
 private val logger = KotlinLogging.logger { }
 
-suspend fun loadDeckSettings(decks: List<Deck>) {
+fun loadDeckSettings(decks: List<Deck>) {
     val nestdropSettings = xml.decodeFromString(
         NestdropSettings.serializer(), nestdropConfig.readText()
             .substringAfter(
@@ -20,7 +18,7 @@ suspend fun loadDeckSettings(decks: List<Deck>) {
     decks.forEach { deck ->
         logger.info { "loading settings from ${deck.deckName}" }
 //        val deckSettings = parseDeckConfig(deck.N)
-        val deckSettings = when(deck.N) {
+        val deckSettings = when(deck.id) {
             1 -> nestdropSettings.mainWindow.settingsDeck1
             2 -> nestdropSettings.mainWindow.settingsDeck2
             3 -> nestdropSettings.mainWindow.settingsDeck3

@@ -104,7 +104,7 @@ fun presetScreen() {
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         decks.forEach { deck ->
-            if (deck.N > decksEnabled) return@forEach
+            if (deck.id > decksEnabled) return@forEach
 
             Row(
                 modifier = Modifier

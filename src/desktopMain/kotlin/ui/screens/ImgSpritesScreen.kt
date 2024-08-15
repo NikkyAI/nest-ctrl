@@ -148,7 +148,7 @@ fun imgSpritesScreenNew() {
     val spriteStuff = decks.associate { deck ->
         val current by deck.imgSprite.spriteImgLocation.collectAsState()
         val enabledSprites by deck.imgSprite.toggles.collectAsState()
-        deck.N to (current to enabledSprites)
+        deck.id to (current to enabledSprites)
     }//.withDefault { false }
 
     val spritesMap by imgSpritesMap.collectAsState()
@@ -168,7 +168,7 @@ fun imgSpritesScreenNew() {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             decks.forEach { deck ->
-                if (deck.N > decksEnabled) return@forEach
+                if (deck.id > decksEnabled) return@forEach
 
                 val current by deck.imgSprite.name.collectAsState()
 
@@ -245,9 +245,9 @@ fun imgSpritesScreenNew() {
 //                                .weight(0.4f)
                         ) {
                             decks.forEach { deck ->
-                                if (deck.N > decksEnabled) return@forEach
+                                if (deck.id > decksEnabled) return@forEach
 
-                                val (current, enabledSprites) = spriteStuff.getValue(deck.N)
+                                val (current, enabledSprites) = spriteStuff.getValue(deck.id)
 //                        val current by deck.imgSprite.spriteImgLocation.collectAsState()
 //                        val enabledSprites by deck.imgSprite.enabledSprites.collectAsState()
 

@@ -135,15 +135,15 @@ fun debugScreen() {
                                 Button(
                                     onClick = {
                                         scope.launch {
-                                            nestdropSetPreset(presetEntry.id, deck = deck.N)
+                                            nestdropSetPreset(presetEntry.id, deck = deck.id)
                                         }
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         backgroundColor = deck.dimmedColor
                                     ),
-                                    enabled = deck.N <= decksEnabled
+                                    enabled = deck.id <= decksEnabled
                                 ) {
-                                    Text("deck: ${deck.N}")
+                                    Text("deck: ${deck.id}")
                                 }
                             }
                         }

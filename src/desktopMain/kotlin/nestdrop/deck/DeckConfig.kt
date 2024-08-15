@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import presetQueues
 import tags.nestdropQueueSearches
@@ -72,7 +71,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             run {
                 logger.debug { "loading spout queue ${deckConfig.spoutQueue.name} from $spriteQueuesValue" }
                 val spoutQueueValue = spriteQueuesValue.firstOrNull() { it.name == deckConfig.spoutQueue.name }
-                    ?: spriteQueuesValue.firstOrNull { it.deck == this@applyConfig.N && it.name.contains("spout") }
+                    ?: spriteQueuesValue.firstOrNull { it.deck == this@applyConfig.id && it.name.contains("spout") }
                 this@applyConfig.spoutQueue.index.value = spriteQueuesValue.indexOf(spoutQueueValue)
                     .takeUnless { it == -1 }  // ?: deckConfig.spoutQueue.index.takeUnless { it == -1 }
                     ?: run {
@@ -110,7 +109,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
             }.orEmpty()
             val combinedSearches = customSearches + nestdropQueueSearches
 
-            this@applyConfig.search.autochange.value = search.autoChange
+            this@applyConfig.search.autoChange.value = search.autoChange
             this@applyConfig.search.value = combinedSearches.firstOrNull { it.label == search.name }
         }
 //        run {
@@ -294,7 +293,7 @@ val Deck.configFlow: Flow<DeckConfig>
             }
             .combine(
                 search.combine(
-                    search.autochange
+                    search.autoChange
                 ) { search, autoChange ->
                     DeckConfig.SearchConfig(
                         autoChange = autoChange,

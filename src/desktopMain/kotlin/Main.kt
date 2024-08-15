@@ -59,6 +59,7 @@ import osc.runNestDropSend
 import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
+import ui.screens.imgSpritesMap
 import ui.splashScreen
 import utils.KWatchChannel
 import utils.KWatchEvent
@@ -76,10 +77,10 @@ private val logger = KotlinLogging.logger { }
 val presetQueues = PresetQueues()
 val decks = List(4) { index ->
     when (val n = index + 1) {
-        1 -> Deck(n, first = true, last = false, 0xFFBB0000)
-        2 -> Deck(n, first = false, last = false, 0xFF00BB00)
-        3 -> Deck(n, first = false, last = false, 0xFF00A2FF)
-        4 -> Deck(n, first = false, last = true, 0xFFF9F900)
+        1 -> Deck(n, 0xFFBB0000)
+        2 -> Deck(n, 0xFF00BB00)
+        3 -> Deck(n, 0xFF00A2FF)
+        4 -> Deck(n, 0xFFF9F900)
         else -> null
     }
 }.filterNotNull()
@@ -89,8 +90,6 @@ object Main {
     @OptIn(FlowPreview::class)
     suspend fun initApplication(
         presetQueues: PresetQueues,
-//        deck1: Deck,
-//        deck2: Deck,
     ) {
 //        setupLogging()
 //        logger.info {"testing logging.."}
@@ -117,7 +116,7 @@ object Main {
                 delay(100)
             }
         } ?: run {
-            logger.error {"failed to connect to carabiner socket / (ableton link)" }
+            logger.error { "failed to connect to carabiner socket / (ableton link)" }
             error("failed to connect to carabiner socket / (ableton link)")
         }
 
@@ -323,7 +322,7 @@ object Main {
         decks.forEach { deck ->
             performanceLogsFlow
                 .filter {
-                    it.deck == deck.N
+                    it.deck == deck.id
                 }
                 .sample(500.milliseconds)
                 .onEach {
@@ -487,6 +486,12 @@ object Main {
 //        }
 
         // TODO ensure that sprites are set AGAIN correctly
+//        decks.forEach {
+//            val last = it.imgSprite.spriteImgLocation.value
+//            if(last != null) {
+//                imgSpritesMap.value.
+//            }
+//        }
 //        deck1.imgSprite.index.value++
 //        deck1.imgSprite.index.value--
 //        deck2.imgSprite.index.value++
@@ -500,7 +505,7 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        if(dotenv.get("DEBUG", "false").toBooleanStrictOrNull() == true) {
+        if (dotenv.get("DEBUG", "false").toBooleanStrictOrNull() == true) {
 //        if(true) {
             val state = DecoroutinatorRuntime.load()
             logger.info { "enabling De-Corouti-nator: $state" }
@@ -513,41 +518,10 @@ object Main {
 //            logger.info { "serializer: $v" }
 //        }
 
-//            logger.info { "opening windows terminal to watch logs" }
-//            val process = runCommand(
-//                "wt",
-//                "new-tab",
-//                "-p",
-//                "Windows Powershell",
-//                "--title",
-//                "NEST CTRL LOGS",
-//                "-d",
-//                configFolder.path,
-//                "powershell",
-//                "cat",
-//                "logs/latest.log",
-//                "-Wait",
-//                workingDir = configFolder
-//            )
-////
         runBlocking {
             //TODO: detect debug flags and such ?
             //        val presetQueues = PresetQueues()
             awaitApplication {
-                //            nestdropDeckCount.onEach { deckCount ->
-                //                val newDecks = List(deckCount) { index ->
-                //                    when(val n = index + 1) {
-                //                        1 -> Deck(n, first = true, last = n == deckCount, 0xFFBB0000, presetQueues)
-                //                        2 -> Deck(n, first = false, last = n == deckCount, 0xFF00BB00, presetQueues)
-                //                        3 -> Deck(n, first = false, last = n == deckCount, 0xFF0000BB, presetQueues)
-                //                        4 -> Deck(n, first = false, last = n == deckCount, 0xFFBBBB00, presetQueues)
-                //                        else -> null
-                //                    }
-                //                }.filterNotNull()
-                //                decks.value = newDecks
-                //            }.launchIn(flowScope)
-                //            val deck1 = Deck(1, first = true, last = false, 0xFFBB0000, presetQueues)
-                //            val deck2 = Deck(2, first = false, last = true, 0xFF00BB00, presetQueues)
 
                 var isSplashScreenShowing by remember { mutableStateOf(true) }
                 var showException by remember { mutableStateOf<Throwable?>(null) }
@@ -676,12 +650,6 @@ object Main {
                     ) {
                         App()
                     }
-
-
-    //              fader(
-    //                  notches = 9,
-    //                  color = Color.Red,
-    //              )
                 }
             }
         }

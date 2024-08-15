@@ -65,7 +65,7 @@ fun deckSettingsScreen() {
                     Row {
                         decks.forEach { deck ->
 
-                            if (deck.N > decksEnabled) return@forEach
+                            if (deck.id > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -87,7 +87,7 @@ fun deckSettingsScreen() {
                 1 -> {
                     Row {
                         decks.forEach { deck ->
-                            if (deck.N > decksEnabled) return@forEach
+                            if (deck.id > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -111,7 +111,7 @@ fun deckSettingsScreen() {
                 2 -> {
                     Row {
                         decks.forEach { deck ->
-                            if (deck.N > decksEnabled) return@forEach
+                            if (deck.id > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -156,7 +156,7 @@ fun deckSettingsScreen() {
                 3 -> {
                     Row {
                         decks.forEach { deck ->
-                            if (deck.N > decksEnabled) return@forEach
+                            if (deck.id > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),
@@ -172,7 +172,7 @@ fun deckSettingsScreen() {
                 4 -> {
                     Row {
                         decks.forEach { deck ->
-                            if (deck.N > decksEnabled) return@forEach
+                            if (deck.id > decksEnabled) return@forEach
                             Column(
                                 modifier = Modifier
                                     .weight(0.2f),

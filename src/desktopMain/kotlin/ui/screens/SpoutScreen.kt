@@ -2,15 +2,12 @@ package ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
@@ -50,7 +47,7 @@ fun spoutScreen() {
 //                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 decks.forEach { deck ->
-                    if (deck.N > decksEnabled) return@forEach
+                    if (deck.id > decksEnabled) return@forEach
 
                     val presetNullable by deck.spout.collectAsState()
                     val preset = presetNullable
@@ -95,7 +92,7 @@ fun spoutScreen() {
                     .height(36.dp)
             ) {
                 decks.forEach { deck ->
-                    if (deck.N > decksEnabled) return@forEach
+                    if (deck.id > decksEnabled) return@forEach
 
                     val queue: Queue? by deck.spoutQueue.collectAsState()
                     val activeIndexState = deck.spout.index
