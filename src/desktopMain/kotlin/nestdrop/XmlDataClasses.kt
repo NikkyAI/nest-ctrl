@@ -46,14 +46,6 @@ data class NestdropSettings(
     ) {
         @Serializable
         data class SettingsGeneral(
-            @SerialName("Top")
-            val top: Int,
-            @SerialName("Left")
-            val left: Int,
-            @SerialName("Width")
-            val width: Int,
-            @SerialName("Height")
-            val height: Int,
             @SerialName("ShowName")
             val showName: Boolean,
             @SerialName("LoadPreview")
