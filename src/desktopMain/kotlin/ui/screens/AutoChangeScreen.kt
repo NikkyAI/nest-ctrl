@@ -15,6 +15,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,7 +36,8 @@ private fun autoChangeRow(
     deck: Deck,
     label: String,
     checkedMutableStateflow: MutableStateFlow<Boolean>,
-    onNext: suspend CoroutineScope.() -> Unit
+    onNext: suspend CoroutineScope.() -> Unit,
+    onWarn: (suspend CoroutineScope.() -> Unit)? = null,
 ) {
     val autoChange by checkedMutableStateflow.collectAsState()
     Row(
@@ -76,6 +79,23 @@ private fun autoChangeRow(
                 modifier = Modifier.padding(8.dp)
             )
         }
+        if(onWarn != null) {
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        onWarn()
+                        onNext()
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Warning,
+                    contentDescription = "NextWarn",
+                    tint = deck.color,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+        }
     }
 }
 
@@ -96,7 +116,8 @@ fun autoChangeScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxWidth(0.9f)
+//            .fillMaxWidth(0.9f)
+            .fillMaxWidth()
     ) {
         // deprecated
 //        Row(
@@ -129,10 +150,14 @@ fun autoChangeScreen(
                 .fillMaxWidth()
         ) {
             autoChangeRow(
-                deck, "Preset", deck.search.autoChange
-            ) {
-                deck.search.next()
-            }
+                deck = deck, label = "Preset", checkedMutableStateflow = deck.search.autoChange,
+                onNext = {
+                    deck.search.next()
+                },
+                onWarn = {
+                    deck.presetSwitching.warn()
+                }
+            )
         }
 
         Row(
@@ -141,10 +166,12 @@ fun autoChangeScreen(
                 .fillMaxWidth()
         ) {
             autoChangeRow(
-                deck, "IMG Sprite", deck.imgSprite.autoChange
-            ) {
-                deck.imgSprite.next()
-            }
+                deck = deck, label = "IMG Sprite", checkedMutableStateflow = deck.imgSprite.autoChange,
+                onNext = {
+                    deck.imgSprite.next()
+                },
+                onWarn = null,
+            )
         }
 
         Row(
@@ -153,10 +180,12 @@ fun autoChangeScreen(
                 .fillMaxWidth()
         ) {
             autoChangeRow(
-                deck, "IMG Sprite FX", deck.imgSpriteFx.autoChange
-            ) {
-                deck.imgSpriteFx.next()
-            }
+                deck = deck, label = "IMG Sprite FX", checkedMutableStateflow = deck.imgSpriteFx.autoChange,
+                onNext = {
+                    deck.imgSpriteFx.next()
+                },
+                onWarn = null,
+            )
         }
     }
 }

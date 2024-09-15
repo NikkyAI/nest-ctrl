@@ -4,15 +4,23 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import beatFrame
+import configFolder
+import decks
 import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -35,6 +43,7 @@ import ui.screens.imgSpritesMap
 import utils.HistoryNotNull
 import utils.prettyPrint
 import utils.runningHistory
+import java.io.File
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -44,6 +53,18 @@ class Deck(
 ) {
     companion object {
         val enabled = MutableStateFlow(1)
+        val enabledDecks = MutableStateFlow(emptyList<Deck>())
+
+        init {
+            enabled
+                .map { enabledId ->
+                    decks.filter { it.id <= enabledId }
+                }
+                .onEach {
+                    enabledDecks.value = it
+                }
+                .launchIn(flowScope)
+        }
 
         //        val enabledDecks = mutableStateMapOf<Int, Boolean>()
         private val logger = KotlinLogging.logger { }
@@ -212,11 +233,21 @@ class Deck(
 
     val ndOutput = NdOutput()
 
+    suspend fun appendWarn(message: String) {
+        configFolder.resolve("$deckName.warn.log").appendText(
+            "\n$message"
+        )
+        configFolder.resolve("warn.log").appendText(
+            "\n$message"
+        )
+    }
+
     @Immutable
     inner class PresetSwitching() {
         val transitionTime =
             MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
-        val triggerTime = MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
+        val triggerTime =
+            MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
         val currentPreset = MutableStateFlow<PerformanceLogRow?>(null)
         private val hasSwitched = MutableStateFlow(false)
 
@@ -236,7 +267,7 @@ class Deck(
                 Triple(currentBeat, lastBeat, triggerAt)
             }.onEach { (currentBeat, lastBeat, triggerAt) ->
                 if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-                    logger.info { "triggered at ${(currentBeat * 1000) .roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
+                    logger.info { "triggered at ${(currentBeat * 1000).roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
                     hasSwitched.value = true
                     doSwitch()
                 }
@@ -263,7 +294,15 @@ class Deck(
                 search.next()
             }
         }
+
+        suspend fun warn() {
+            val otherDecks = enabledDecks.value
+                .mapNotNull { it.presetSwitching.currentPreset.value?.let { preset -> it.id to preset.preset } }
+                .joinToString(", ", "{", "}") { (k, v) -> "$k: \"$v\"" }
+            appendWarn("SKIPPED $deckName preset: \"${currentPreset.value?.preset}\" all decks: $otherDecks")
+        }
     }
+
     val presetSwitching = PresetSwitching()
 
 
@@ -308,7 +347,6 @@ class Deck(
 
         val autoChange = MutableStateFlow(false)
 
-
         suspend fun next() {
             search.value?.let { search ->
 
@@ -344,7 +382,7 @@ class Deck(
 
     @Immutable
     inner class Preset {
-//        private val trigger = MutableStateFlow(0)
+        //        private val trigger = MutableStateFlow(0)
 //        val autoChange = MutableStateFlow(false)
         val name = MutableStateFlow("uninitialized")
 
@@ -401,7 +439,7 @@ class Deck(
 
         val spriteImgLocation = MutableStateFlow<PresetLocation.Img?>(null)
 
-//        @Deprecated("switch to using scanned sprite img location")
+        //        @Deprecated("switch to using scanned sprite img location")
 //        val index = MutableStateFlow(-2) // OscSynced.ExclusiveSwitch("/deck$N/sprite/index", 40, -2)
         val name = MutableStateFlow("uninitialized")
         // OscSynced.Value("/deck$N/sprite/name", "uninitialized", receive = false)
@@ -788,7 +826,6 @@ class Deck(
 //            }.filterNotNull()
 
     fun nestdropDeckAddress(address: String) = "/Controls/Deck$id/$address"
-
 
 
     val deckName: String = "Deck $id"

@@ -24,3 +24,4 @@ resolume_layers.json
 /run/
 /bin/
 /compose_metrics/
+/cache/
