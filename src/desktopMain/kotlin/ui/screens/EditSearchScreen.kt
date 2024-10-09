@@ -496,6 +496,9 @@ fun editSearchesScreen() {
                                         default = true,
                                         headerContent = { expanded ->
 
+                                            var boostField by remember {
+                                                mutableStateOf("$boost")
+                                            }
                                             if (expanded) {
 
                                                 Text("Include: ${matcher.include.size}, Exclude: ${matcher.exclude.size} -> ${boost}")
@@ -504,7 +507,61 @@ fun editSearchesScreen() {
                                             }
                                             if (expanded) {
 
-                                                Spacer(modifier = Modifier.weight(0.5f))
+                                                Spacer(modifier = Modifier.weight(0.3f))
+                                                Text("Boost", modifier = Modifier.padding(16.dp))
+                                                OutlinedTextField(
+                                                    value = boostField,
+                                                    onValueChange = {
+                                                        boostField = it
+                                                    },
+                                                    keyboardOptions = KeyboardOptions(
+                                                        keyboardType = KeyboardType.Decimal
+                                                    ),
+                                                    modifier = Modifier.onKeyEvent { event ->
+                                                        if (event.key == Key.Enter) {
+                                                            if (boostField.toDoubleOrNull()?.let { it != boost } == true) {
+
+                                                                val searchesMutable = searchesCollected.toMutableList()
+                                                                val mutableBoosts = search.terms.toMutableList()
+                                                                mutableBoosts[termIndex] = Term(
+                                                                    matcher = matcher,
+                                                                    boost = (boostField.toDoubleOrNull() ?: boost)
+                                                                )
+                                                                val newSearch = search.copy(
+                                                                    terms = mutableBoosts.toList()
+                                                                )
+                                                                searchesMutable[searchIndex] = newSearch
+                                                                selectedSearch = searchIndex to newSearch
+                                                                customSearches.value = searchesMutable.toList()
+                                                            }
+
+                                                            true
+                                                        } else {
+                                                            false
+                                                        }
+                                                    }
+                                                )
+                                                IconButton(
+                                                    onClick = {
+                                                        val searchesMutable = searchesCollected.toMutableList()
+                                                        val mutableBoosts = search.terms.toMutableList()
+                                                        mutableBoosts[termIndex] = Term(
+                                                            matcher = matcher,
+                                                            boost = (boostField.toDoubleOrNull() ?: boost)
+                                                        )
+                                                        val newSearch = search.copy(
+                                                            terms = mutableBoosts.toList()
+                                                        )
+                                                        searchesMutable[searchIndex] = newSearch
+                                                        selectedSearch = searchIndex to newSearch
+                                                        customSearches.value = searchesMutable.toList()
+                                                    },
+                                                    enabled = boostField.toDoubleOrNull()?.let { it != boost } == true
+                                                ) {
+                                                    Icon(Icons.Filled.Check, "confirm")
+                                                }
+
+                                                Spacer(modifier = Modifier.weight(0.1f))
                                                 Text("Delete Term", modifier = Modifier.padding(16.dp))
 
                                                 deleteButtonWithConfirmation() {
@@ -525,69 +582,6 @@ fun editSearchesScreen() {
                                         },
                                         modifier = Modifier,
                                     ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            var boostValue by remember {
-                                                mutableStateOf("$boost")
-                                            }
-
-                                            Spacer(modifier = Modifier.weight(0.5f))
-
-                                            Text("Edit Weight", modifier = Modifier.padding(16.dp))
-                                            OutlinedTextField(
-                                                value = boostValue,
-                                                onValueChange = {
-                                                    boostValue = it
-                                                },
-                                                keyboardOptions = KeyboardOptions(
-                                                    keyboardType = KeyboardType.Decimal
-                                                ),
-                                                modifier = Modifier.onKeyEvent { event ->
-                                                    if (event.key == Key.Enter) {
-                                                        if (boostValue.toDoubleOrNull()?.let { it != boost } == true) {
-
-                                                            val searchesMutable = searchesCollected.toMutableList()
-                                                            val mutableBoosts = search.terms.toMutableList()
-                                                            mutableBoosts[termIndex] = Term(
-                                                                matcher = matcher,
-                                                                boost = (boostValue.toDoubleOrNull() ?: boost)
-                                                            )
-                                                            val newSearch = search.copy(
-                                                                terms = mutableBoosts.toList()
-                                                            )
-                                                            searchesMutable[searchIndex] = newSearch
-                                                            selectedSearch = searchIndex to newSearch
-                                                            customSearches.value = searchesMutable.toList()
-                                                        }
-
-                                                        true
-                                                    } else {
-                                                        false
-                                                    }
-                                                }
-                                            )
-                                            Spacer(modifier = Modifier.width(16.dp))
-
-                                            IconButton(
-                                                onClick = {
-                                                    val searchesMutable = searchesCollected.toMutableList()
-                                                    val mutableBoosts = search.terms.toMutableList()
-                                                    mutableBoosts[termIndex] = Term(
-                                                        matcher = matcher,
-                                                        boost = (boostValue.toDoubleOrNull() ?: boost)
-                                                    )
-                                                    val newSearch = search.copy(
-                                                        terms = mutableBoosts.toList()
-                                                    )
-                                                    searchesMutable[searchIndex] = newSearch
-                                                    selectedSearch = searchIndex to newSearch
-                                                    customSearches.value = searchesMutable.toList()
-                                                },
-                                                enabled = boostValue.toDoubleOrNull()?.let { it != boost } == true
-                                            ) {
-                                                Icon(Icons.Filled.Check, "confirm")
-                                            }
-                                        }
-
                                         ExpandableSection(
                                             key = "searches.$searchIndex.terms.$termIndex.include.expanded",
                                             canExpand = matcher.include.isNotEmpty(),
