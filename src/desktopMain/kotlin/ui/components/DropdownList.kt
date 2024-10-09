@@ -14,9 +14,7 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import javax.swing.Icon
-import kotlin.math.exp
 
 @Composable
 fun <T : Any> Dropdown(
@@ -129,18 +125,18 @@ fun <T> DropDownPopupIconButton(
     renderItem: @Composable (T) -> Unit
 ) {
 //    Row {
-        var expanded by remember { mutableStateOf(false) }
+        var opened by remember { mutableStateOf(false) }
         IconButton(
             onClick = {
-                expanded = true
+                opened = true
             },
         ) {
             icon()
         }
         DropdownMenu(
-            expanded = expanded,
+            expanded = opened,
             onDismissRequest = {
-                expanded = false
+                opened = false
             },
             modifier = Modifier
                 .height(items.size * 36.dp + 16.dp)
@@ -150,7 +146,7 @@ fun <T> DropDownPopupIconButton(
                 DropdownMenuItem(
                     onClick = {
                         onItemClick(item)
-                        expanded = false
+                        opened = false
                     },
                     modifier = Modifier
                         .height(36.dp)

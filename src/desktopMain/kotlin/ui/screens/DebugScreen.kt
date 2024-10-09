@@ -51,6 +51,7 @@ import tags.TagScoreEval
 import tags.nestdropQueueSearches
 import ui.components.fontDseg14
 import ui.components.lazyList
+import ui.components.verticalScroll
 import kotlin.time.Duration
 import kotlin.time.measureTime
 
@@ -77,6 +78,7 @@ fun debugScreen() {
 
     var tagScore by remember { mutableStateOf<TagScoreEval?>(null) }
     Column {
+        /*
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -110,42 +112,46 @@ fun debugScreen() {
                 Text("Scan took $scanDuration")
             }
         }
+        */
         val scope = rememberCoroutineScope()
         Row {
-            Column(
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Button(
-                    onClick = {
-                        tagScore = null
-                        scope.launch {
+            verticalScroll {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            tagScore = null
+                            scope.launch {
 //                            LaunchedEffect( null) {
                                 state.scrollToItem(0)
 //                            }
-                        }
+                            }
 
-                    },
-                    colors = if (tagScore == null) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors()
-                ) {
-                    Text("All")
-                }
-                combinedSearches.forEach { it ->
-                    Button(
-                        onClick = {
-                            tagScore = it
-                            scope.launch {
+                        },
+                        colors = if (tagScore == null) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors()
+                    ) {
+                        Text("All")
+                    }
+                    combinedSearches.forEach { it ->
+                        Button(
+                            onClick = {
+                                tagScore = it
+                                scope.launch {
 //                                LaunchedEffect(it.label) {
                                     state.scrollToItem(0)
 //                                }
-                            }
-                        },
-                        colors = if (tagScore?.label == it.label) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors()
-                    ) {
-                        Text(it.label)
+                                }
+                            },
+                            colors = if (tagScore?.label == it.label) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors()
+                        ) {
+                            Text(it.label)
+                        }
                     }
                 }
             }
+
             Row {
 //        TabRow(
 //            selectedTabIndex = combinedSearches.indexOf(tagScore)+1,
@@ -176,21 +182,21 @@ fun debugScreen() {
 
                         val score = tagScore.score(tags)
                         if (score > 0.0) {
-                            Triple(key , preset , score)
+                            Triple(key, preset, score)
                         } else {
                             null
                         }
                     }
                         .sortedByDescending { it.third }
                 } ?: presets.map { (key, preset) ->
-                    Triple(key , preset , 1.0)
+                    Triple(key, preset, 1.0)
                 }
 
 
                 lazyList(state = state) {
                     var lastCategory: Pair<String, String?>? = null
                     renderPresets.forEach { (name, presetEntry, score) ->
-                        if(tagScore == null) {
+                        if (tagScore == null) {
                             val currentCategory = presetEntry.category to presetEntry.subCategory
                             if (currentCategory != lastCategory) {
                                 stickyHeader(currentCategory) {
@@ -228,7 +234,7 @@ fun debugScreen() {
                                 Column {
                                     Image(bitmap = image, contentDescription = presetEntry.previewPath)
                                     Text("ID: ${presetEntry.id}")
-                                    if(tagScore != null) {
+                                    if (tagScore != null) {
                                         Text("Score: $score")
                                     }
                                 }

@@ -1,6 +1,7 @@
 package ui.components
 
 import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -22,23 +23,25 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun verticalScroll(
+    state: ScrollState = rememberScrollState(0),
     content: @Composable (BoxScope.() -> Unit)
 ) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxHeight()
+//            .fillMaxSize()
 //            .background(color = Color(180, 180, 180))
             .padding(10.dp)
     ) {
-        val stateVertical = rememberScrollState(0)
+//        val stateVertical = rememberScrollState(0)
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
                 .padding(
                     end = 12.dp,
 //                bottom = 12.dp,
                 )
-                .verticalScroll(stateVertical)
+                .verticalScroll(state)
         ) {
 
             content()
@@ -47,7 +50,7 @@ fun verticalScroll(
         VerticalScrollbar(
             modifier = Modifier.align(Alignment.CenterEnd)
                 .fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(stateVertical),
+            adapter = rememberScrollbarAdapter(state),
             style = LocalScrollbarStyle.current.copy(
                 thickness = 16.dp,
                 shape = RoundedCornerShape(8.dp)

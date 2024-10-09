@@ -10,6 +10,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.RadioButtonColors
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.material.ripple
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -46,7 +47,7 @@ fun VerticalRadioButton(
                 enabled = enabled,
                 role = Role.RadioButton,
                 interactionSource = interactionSource,
-                indication = rememberRipple(
+                indication = ripple(
                     bounded = false,
                     radius = RadioButtonRippleRadius
                 )
@@ -133,7 +134,7 @@ fun HorizontalRadioButton(
                 enabled = enabled,
                 role = Role.RadioButton,
                 interactionSource = interactionSource,
-                indication = rememberRipple(
+                indication = ripple(
                     bounded = false,
                     radius = RadioButtonRippleRadius
                 )
