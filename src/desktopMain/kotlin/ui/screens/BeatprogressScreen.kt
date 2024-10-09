@@ -25,6 +25,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -32,8 +35,10 @@ import beatFrame
 import beatProgress
 import bpmRoundedInt
 import kotlinx.coroutines.launch
+import nestctrl.generated.resources.DSEG14_Classic
+import nestctrl.generated.resources.Res
 import nestdrop.deck.Deck
-import ui.components.fontDseg14
+import org.jetbrains.compose.resources.Font
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -43,6 +48,21 @@ fun beatProgressScreen(
     size: Dp = 200.dp,
     strokeWidth: Dp = 32.dp
 ) {
+    val fontDseg14 = FontFamily(
+        androidx.compose.ui.text.platform.Font(
+            resource = "fonts-DSEG_v046/DSEG14-Classic/DSEG14Classic-Regular.ttf",
+            weight = FontWeight.W400,
+            style = FontStyle.Normal
+        )
+    )
+//    val fontDseg14 = FontFamily(
+//        Font(
+//            resource = Res.font.DSEG14_Classic,
+//            weight = FontWeight.W400,
+//            style = FontStyle.Normal
+//        ),
+//    )
+
     val beatProgress by beatProgress.collectAsState(0f)
 //    val beatProgress  = 0f // 0.25f
 

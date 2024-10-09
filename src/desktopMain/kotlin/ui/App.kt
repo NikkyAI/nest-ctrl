@@ -226,8 +226,8 @@ enum class Tabs(
         }
     ),
     Tagging("Tags"),
-    Searches("Searches"),
-    NestdropControls("Nestdrop\nDeck\nSettings"),
+    Searches("Playlist\nEditor"),
+    NestdropControls("Nestdrop\nSettings"),
     Debug("Debug"),
     ;
 }

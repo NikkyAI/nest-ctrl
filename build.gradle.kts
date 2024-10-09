@@ -130,7 +130,7 @@ compose.desktop {
 //            this.vendor = null
 
             windows {
-                iconFile.set(project.file("src/desktopMain/resources/drawable/blobhai_trans.ico"))
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/blobhai_trans_icon.ico"))
                 console = true
             }
             modules(

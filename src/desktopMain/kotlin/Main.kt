@@ -46,6 +46,8 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
+import nestctrl.generated.resources.Res
+import nestctrl.generated.resources.blobhai_trans
 import nestdrop.PerformanceLogRow
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
@@ -54,6 +56,7 @@ import nestdrop.loadNestdropConfig
 import nestdrop.parsePerformanceLog
 import nestdrop.performanceLogsFlow
 import nestdrop.setupSpriteFX
+import org.jetbrains.compose.resources.painterResource
 import osc.initializeSyncedValues
 import osc.runNestDropSend
 import tags.startTagsFileWatcher
@@ -633,9 +636,7 @@ object Main {
                         //                    transparent = true,
                         focusable = false,
                         alwaysOnTop = true,
-                        icon = BitmapPainter(
-                            useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
-                        )
+                        icon = painterResource (resource =  Res.drawable.blobhai_trans)
                     ) {
                         splashScreen()
                     }
@@ -644,9 +645,7 @@ object Main {
                         onCloseRequest = ::exitApplication,
                         title = "Nest Ctrl",
                         state = rememberWindowState(width = 1600.dp, height = 1200.dp),
-                        icon = BitmapPainter(
-                            useResource("drawable/blobhai_trans.png", ::loadImageBitmap)
-                        )
+                        icon = painterResource (resource =  Res.drawable.blobhai_trans)
                     ) {
                         App()
                     }
