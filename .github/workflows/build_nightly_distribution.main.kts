@@ -16,7 +16,7 @@ import io.github.typesafegithub.workflows.actions.actions.CheckoutV4
 import io.github.typesafegithub.workflows.actions.actions.CreateReleaseV1
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
-import io.github.typesafegithub.workflows.actions.jimeh.UpdateTagsAction
+import io.github.typesafegithub.workflows.actions.jimeh.UpdateTagsAction_Untyped
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhRelease
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhReleaseV2
 import io.github.typesafegithub.workflows.domain.RunnerType
@@ -62,8 +62,8 @@ workflow(
 
         uses(
             name = "update tag",
-            action = UpdateTagsAction(
-                tags = "nightly"
+            action = UpdateTagsAction_Untyped(
+                tags_Untyped = "nightly"
             )
         )
 
