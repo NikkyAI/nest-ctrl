@@ -112,8 +112,8 @@ fun tagSearchScreen() {
 
         val score = tagScore.score(tags)
         val preset = presets[key]
-        if (preset != null && score >= 0.0) {
-            preset to (score + 0.01)
+        if (preset != null && score > 0.0) {
+            preset to score
         } else {
             null
         }

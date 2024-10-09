@@ -3,17 +3,25 @@ package ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,18 +32,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import decks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import nestdrop.PresetLocation
 import nestdrop.deck.Deck
 import nestdrop.nestdropSetPreset
 import tags.presetTagsMapping
 import presetsFolder
 import scanPresets
+import tags.TagScoreEval
+import tags.nestdropQueueSearches
 import ui.components.fontDseg14
 import ui.components.lazyList
 import kotlin.time.Duration
@@ -52,6 +65,17 @@ fun debugScreen() {
     }
     val scope = rememberCoroutineScope()
     val decksEnabled by Deck.enabled.collectAsState()
+    val customSearches by customSearches.collectAsState()
+    val nestdropQueueSearches by nestdropQueueSearches.collectAsState()
+
+    val combinedSearches = (customSearches + nestdropQueueSearches)
+
+    val presets by presetsMap.collectAsState()
+    val presetTags by presetTagsMapping.collectAsState()
+
+    val state = rememberLazyListState()
+
+    var tagScore by remember { mutableStateOf<TagScoreEval?>(null) }
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -63,6 +87,8 @@ fun debugScreen() {
                 lineHeight = 45.sp,
                 modifier = Modifier.padding(32.dp)
             )
+            Spacer(modifier = Modifier.width(30.dp))
+            Text(tagScore?.label ?: "All")
             Spacer(modifier = Modifier.width(30.dp))
             Button(
                 {
@@ -83,81 +109,161 @@ fun debugScreen() {
             if (scanDuration > Duration.ZERO) {
                 Text("Scan took $scanDuration")
             }
-
-
         }
+        val scope = rememberCoroutineScope()
+        Row {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    onClick = {
+                        tagScore = null
+                        scope.launch {
+//                            LaunchedEffect( null) {
+                                state.scrollToItem(0)
+//                            }
+                        }
 
-        val presetsMap by presetsMap.collectAsState()
-        val tagMap by presetTagsMapping.collectAsState()
-
-        lazyList {
-            var lastCategory: Pair<String, String?>? = null
-            presetsMap.forEach { (name, presetEntry) ->
-                val currentCategory = presetEntry.category to presetEntry.subCategory
-                if(currentCategory != lastCategory) {
-                    stickyHeader(currentCategory) {
-                        Row(
-                            modifier = Modifier
-                                .background(Brush.verticalGradient(
-                                    listOf(
-                                        Color.Black,
-                                        MaterialTheme.colors.background,
-                                    )
-                                ))
-//                                .background(MaterialTheme.colors.background)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-//                            Spacer(modifier = Modifier.width(30.dp))
-                            Text(currentCategory.first, modifier = Modifier.padding(16.dp))
-                            val subCategory = currentCategory.second
-                            if(subCategory != null) {
-                                Text(" > ", modifier = Modifier.padding(16.dp))
-                                Text(subCategory, modifier = Modifier.padding(16.dp))
+                    },
+                    colors = if (tagScore == null) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors()
+                ) {
+                    Text("All")
+                }
+                combinedSearches.forEach { it ->
+                    Button(
+                        onClick = {
+                            tagScore = it
+                            scope.launch {
+//                                LaunchedEffect(it.label) {
+                                    state.scrollToItem(0)
+//                                }
                             }
+                        },
+                        colors = if (tagScore?.label == it.label) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors()
+                    ) {
+                        Text(it.label)
+                    }
+                }
+            }
+            Row {
+//        TabRow(
+//            selectedTabIndex = combinedSearches.indexOf(tagScore)+1,
+//            modifier = Modifier
+////                .height(decksEnabled * 40.dp + 20.dp)
+////                .padding(PaddingValues())
+//        ) {
+//            Tab(
+//                text = {
+//                    Text("All")
+//                }, selected = tagScore == null, onClick = {
+//                    tagScore = null
+//                }
+//            )
+//            combinedSearches.forEach {
+//                Tab(text = {
+//                    Text(it.label)
+//                },
+//                    selected = tagScore?.label == it.label,
+//                    onClick = {
+//                        tagScore = it
+//                    })
+//            }
+//        }
+                val renderPresets = tagScore?.let { tagScore ->
+                    presets.mapNotNull { (key, preset) ->
+                        val tags = presetTags[key].orEmpty()
+
+                        val score = tagScore.score(tags)
+                        if (score > 0.0) {
+                            Triple(key , preset , score)
+                        } else {
+                            null
                         }
                     }
-
-                    lastCategory = currentCategory
+                        .sortedByDescending { it.third }
+                } ?: presets.map { (key, preset) ->
+                    Triple(key , preset , 1.0)
                 }
 
-                item(key = name) {
-                    val image = remember { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
-                    Row {
-                        Column {
-                            Image(bitmap = image, contentDescription = presetEntry.previewPath)
-                            Text(presetEntry.id.toString())
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            decks.forEach { deck ->
 
-                                Button(
-                                    onClick = {
-                                        scope.launch {
-                                            nestdropSetPreset(presetEntry.id, deck = deck.id)
+                lazyList(state = state) {
+                    var lastCategory: Pair<String, String?>? = null
+                    renderPresets.forEach { (name, presetEntry, score) ->
+                        if(tagScore == null) {
+                            val currentCategory = presetEntry.category to presetEntry.subCategory
+                            if (currentCategory != lastCategory) {
+                                stickyHeader(currentCategory) {
+                                    Row(
+                                        modifier = Modifier
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    listOf(
+                                                        Color.Black,
+                                                        MaterialTheme.colors.background,
+                                                    )
+                                                )
+                                            )
+//                                .background(MaterialTheme.colors.background)
+                                            .fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+//                            Spacer(modifier = Modifier.width(30.dp))
+                                        Text(currentCategory.first, modifier = Modifier.padding(16.dp))
+                                        val subCategory = currentCategory.second
+                                        if (subCategory != null) {
+                                            Text(" > ", modifier = Modifier.padding(16.dp))
+                                            Text(subCategory, modifier = Modifier.padding(16.dp))
                                         }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = deck.dimmedColor
-                                    ),
-                                    enabled = deck.id <= decksEnabled
-                                ) {
-                                    Text("deck: ${deck.id}")
+                                    }
                                 }
+
+                                lastCategory = currentCategory
                             }
                         }
-                        Column(
-                            modifier = Modifier.width(300.dp)
-                        ) {
-                            val tags = tagMap[name] ?: emptySet()
-                            tags.forEach {
-                                Text(it.label)
-                            }
-                        }
+
+                        item(key = name to tagScore?.label) {
+                            val image = remember { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
+                            Row {
+                                Column {
+                                    Image(bitmap = image, contentDescription = presetEntry.previewPath)
+                                    Text("ID: ${presetEntry.id}")
+                                    if(tagScore != null) {
+                                        Text("Score: $score")
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    decks.forEach { deck ->
+
+                                        Button(
+                                            onClick = {
+                                                scope.launch {
+                                                    nestdropSetPreset(presetEntry.id, deck = deck.id)
+                                                }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                backgroundColor = deck.dimmedColor
+                                            ),
+                                            enabled = deck.id <= decksEnabled
+                                        ) {
+                                            Text("deck: ${deck.id}")
+                                        }
+                                    }
+                                }
+                                Column(
+                                    modifier = Modifier.width(300.dp)
+                                ) {
+                                    val tags = presetTags[name] ?: emptySet()
+                                    tags.forEach {
+                                        Text(it.label)
+                                    }
+                                }
 //                        Text("${presetEntry.id}")
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(presetEntry.name)
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(presetEntry.name)
+                            }
+                        }
                     }
                 }
             }

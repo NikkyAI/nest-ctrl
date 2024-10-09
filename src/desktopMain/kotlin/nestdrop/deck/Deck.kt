@@ -364,8 +364,8 @@ class Deck(
 
                     val score = search.score(tags)
 //                val preset = presets[key]
-                    if (score >= 0.0) {
-                        preset to (score + 0.01)
+                    if (score > 0.0) {
+                        preset to (score)
                     } else {
                         null
                     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -59,13 +60,14 @@ fun verticalScroll(
 
 @Composable
 fun lazyList(
+    state: LazyListState = rememberLazyListState(),
     content: (LazyListScope.() -> Unit)
 ) {
     Box(
         modifier = Modifier.fillMaxSize()
             .padding(10.dp)
     ) {
-        val state = rememberLazyListState()
+//        val state = rememberLazyListState()
         LazyColumn(Modifier.fillMaxSize().padding(end = 12.dp), state) {
             content()
         }
