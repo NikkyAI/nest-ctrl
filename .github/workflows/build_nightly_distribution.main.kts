@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:2.1.1")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.0.0")
 
 @file:Repository("https://bindings.krzeminski.it")
 
@@ -12,13 +12,11 @@
 @file:DependsOn("gradle:actions__setup-gradle:v3")
 @file:DependsOn("jimeh:update-tags-action:v1.0.1")
 
-import io.github.typesafegithub.workflows.actions.actions.CheckoutV4
-import io.github.typesafegithub.workflows.actions.actions.CreateReleaseV1
+import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
 import io.github.typesafegithub.workflows.actions.jimeh.UpdateTagsAction_Untyped
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhRelease
-import io.github.typesafegithub.workflows.actions.softprops.ActionGhReleaseV2
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.Push
@@ -40,7 +38,7 @@ workflow(
     }
 ) {
     job(id = "build_and_package", runsOn = RunnerType.Windows2022) {
-        uses(name = "Check out", action = CheckoutV4())
+        uses(name = "Check out", action = Checkout())
 
         uses(
             name = "setup jdk",
