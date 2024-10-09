@@ -116,33 +116,8 @@ fun autoChangeScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-//            .fillMaxWidth(0.9f)
             .fillMaxWidth()
     ) {
-        // deprecated
-//        Row(
-//            horizontalArrangement = horizontal,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//        ) {
-//            autoChangeRow(
-//                deck, "Preset Queue", deck.presetQueue.autoChange
-//            ) {
-//                deck.presetQueue.next()
-//            }
-//        }
-//
-//        Row(
-//            horizontalArrangement = horizontal,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//        ) {
-//            autoChangeRow(
-//                deck, "Preset", deck.preset.autoChange
-//            ) {
-//                deck.preset.next()
-//            }
-//        }
 
         Row(
             horizontalArrangement = horizontal,

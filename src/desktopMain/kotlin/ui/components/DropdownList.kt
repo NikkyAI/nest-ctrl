@@ -36,23 +36,9 @@ fun <T : Any> Dropdown(
     renderItem: @Composable (item: T) -> Unit,
     onItemClick: (T) -> Unit
 ) {
-
-//    val items = listOf("Item Number 1", "Item Number 2", "Item Number 3")
-//    val selectedItem = itemList.getOrNull(selectedIndex)
     var expanded by remember { mutableStateOf(false) }
 
-//    var showDropdown by remember { mutableStateOf(true) }
-//    val scrollState = rememberScrollState()
-
-//    Box(
-//        modifier = Modifier
-////            .fillMaxSize()
-//            .background(Color.Black)
-//            .padding(16.dp),
-//        contentAlignment = Alignment.Center
-//    ) {
     Column(
-//        horizontalAlignment = Alignment.End,
         modifier = Modifier
             .width(250.dp)
             .height(50.dp)
@@ -68,11 +54,6 @@ fun <T : Any> Dropdown(
                 }
         ) {
             renderItem(selectedItem)
-//                Text(
-//                    text = selectedItem ?: "error",
-//                    color = Color.White,
-//                    modifier = Modifier.weight(1f)
-//                )
             Spacer(
                 modifier = Modifier.weight(0.9f)
             )
@@ -90,14 +71,7 @@ fun <T : Any> Dropdown(
                 .height(itemList.size * 36.dp + 16.dp)
                 .align(Alignment.End)
                 .background(color)
-//                    .fillMaxWidth()
-//                    .background(Color.Red)
         ) {
-//            verticalScroll {
-//                Column(
-//                    modifier = Modifier
-//                        .height(500.dp)
-//                ) {
             itemList.forEach { item ->
                 DropdownMenuItem(
                     onClick = {
@@ -124,38 +98,36 @@ fun <T> DropDownPopupIconButton(
     itemEnabled: (T) -> Boolean = { true },
     renderItem: @Composable (T) -> Unit
 ) {
-//    Row {
-        var opened by remember { mutableStateOf(false) }
-        IconButton(
-            onClick = {
-                opened = true
-            },
-        ) {
-            icon()
-        }
-        DropdownMenu(
-            expanded = opened,
-            onDismissRequest = {
-                opened = false
-            },
-            modifier = Modifier
-                .height(items.size * 36.dp + 16.dp)
+    var opened by remember { mutableStateOf(false) }
+    IconButton(
+        onClick = {
+            opened = true
+        },
+    ) {
+        icon()
+    }
+    DropdownMenu(
+        expanded = opened,
+        onDismissRequest = {
+            opened = false
+        },
+        modifier = Modifier
+            .height(items.size * 36.dp + 16.dp)
 //            .align(Alignment.CenterVertically)
-        ) {
-            items.forEach { item ->
-                DropdownMenuItem(
-                    onClick = {
-                        onItemClick(item)
-                        opened = false
-                    },
-                    modifier = Modifier
-                        .height(36.dp)
-                        .padding(2.dp),
-                    enabled = itemEnabled(item)
-                ) {
-                    renderItem(item)
-                }
+    ) {
+        items.forEach { item ->
+            DropdownMenuItem(
+                onClick = {
+                    onItemClick(item)
+                    opened = false
+                },
+                modifier = Modifier
+                    .height(36.dp)
+                    .padding(2.dp),
+                enabled = itemEnabled(item)
+            ) {
+                renderItem(item)
             }
         }
-//    }
+    }
 }

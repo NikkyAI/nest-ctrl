@@ -5,23 +5,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,28 +26,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
 import decks
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import nestdrop.PresetLocation
 import nestdrop.deck.Deck
 import nestdrop.nestdropSetPreset
 import tags.presetTagsMapping
 import presetsFolder
-import scanPresets
 import tags.TagScoreEval
 import tags.nestdropQueueSearches
-import ui.components.fontDseg14
 import ui.components.lazyList
 import ui.components.verticalScroll
 import kotlin.time.Duration
-import kotlin.time.measureTime
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -153,29 +139,6 @@ fun debugScreen() {
             }
 
             Row {
-//        TabRow(
-//            selectedTabIndex = combinedSearches.indexOf(tagScore)+1,
-//            modifier = Modifier
-////                .height(decksEnabled * 40.dp + 20.dp)
-////                .padding(PaddingValues())
-//        ) {
-//            Tab(
-//                text = {
-//                    Text("All")
-//                }, selected = tagScore == null, onClick = {
-//                    tagScore = null
-//                }
-//            )
-//            combinedSearches.forEach {
-//                Tab(text = {
-//                    Text(it.label)
-//                },
-//                    selected = tagScore?.label == it.label,
-//                    onClick = {
-//                        tagScore = it
-//                    })
-//            }
-//        }
                 val renderPresets = tagScore?.let { tagScore ->
                     presets.mapNotNull { (key, preset) ->
                         val tags = presetTags[key].orEmpty()
