@@ -326,7 +326,9 @@ fun editSearchesScreen() {
                                                     ),
                                                     modifier = Modifier.onKeyEvent { event ->
                                                         if (event.key == Key.Enter) {
-                                                            if (boostField.toDoubleOrNull()?.let { it != boost } == true) {
+                                                            if (boostField.toDoubleOrNull()
+                                                                    ?.let { it != boost } == true
+                                                            ) {
 
                                                                 val searchesMutable = searchesCollected.toMutableList()
                                                                 val mutableBoosts = search.terms.toMutableList()
@@ -406,6 +408,15 @@ fun editSearchesScreen() {
 
                                                 val availableTags =
                                                     presetTags.values.flatten().toSet().sortedBy { it.toString() }
+                                                        .sortedWith(
+                                                            compareBy<Tag> {
+                                                                it.namespace.first() == "nestdrop"
+                                                            }.thenBy {
+                                                                it.namespace.first() == "queue"
+                                                            }.thenBy {
+                                                                it.sortableString()
+                                                            }
+                                                        )
 
                                                 DropDownPopupIconButton(
                                                     icon = { Icon(Icons.Filled.Add, "add") },

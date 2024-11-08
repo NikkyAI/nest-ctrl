@@ -22,6 +22,7 @@ val performanceLogsFlow = MutableSharedFlow<PerformanceLogRow>(replay = 20, extr
 private val logger = KotlinLogging.logger { }
 
 val csvReader = csvReader {
+    skipMissMatchedRow = true
     excessFieldsRowBehaviour = ExcessFieldsRowBehaviour.TRIM
 }
 

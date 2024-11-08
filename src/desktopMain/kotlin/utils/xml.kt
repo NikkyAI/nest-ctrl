@@ -42,6 +42,7 @@ val xml = XML(
             DEFAULT_UNKNOWN_CHILD_HANDLER.handleUnknownChildRecovering(input, inputKind, descriptor, name, candidates)
         }
         pedantic = false
+        isStrictBoolean = false
 //        autoPolymorphic = true
     }
     this.xmlVersion = XmlVersion.XML10

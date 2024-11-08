@@ -54,7 +54,7 @@ object TagSerializer : KSerializer<Tag> {
 data class Tag(
     val name: String,
     val namespace: List<String> = emptyList()
-) {
+) { //}: Comparable<Tag> {
     val label by lazy { "${namespace.joinToString(":")} : $name" }
     val file by lazy {
         namespace.fold(tagsFolder) { file, namespace ->
@@ -62,9 +62,18 @@ data class Tag(
         }.resolve("$name.txt")
     }
 
+//    override fun compareTo(other: Tag): Int {
+//        val ordering = (namespace + name).zip(other.namespace + other.name) { first, second ->
+//            first.compareTo(second, ignoreCase = true)
+//        }
+//
+//    }
+
     override fun toString(): String {
         return label
     }
+
+    fun sortableString(): String = "${namespace.joinToString(":")}:$name"
 
     fun encode(): String {
         return if (namespace.isEmpty()) {
@@ -111,11 +120,17 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
                 it.presets.any { it.name.substringBeforeLast(".milk") == entry.name }
             }.map { Tag(it.name, listOf("queue")) }.toSet()
 
-            val c = customTags.filterValues { tagEntries ->
+            val customTags = customTags.filterValues { tagEntries ->
                 entry.name in tagEntries
             }.keys // .map { (it.namespace + it.name).joinToString(":") }
+            val customCategories = customTags.filter { it.namespace.size > 1 }
+                .map {
+                    val name = it.namespace.last()
+                    val namespace = it.namespace.dropLast(1)
+                    Tag(name = name, namespace = namespace)
+                }
 
-            setOfNotNull(categoryTag, subCategoryTag) + queueTags + c
+            setOfNotNull(categoryTag, subCategoryTag) + queueTags + customTags + customCategories
         }
     }.launchIn(flowScope)
 

@@ -47,6 +47,15 @@
             </pattern>
         </encoder>
     </appender>
+    <appender name="FILE-DATE-TRACE" class="ch.qos.logback.core.FileAppender">
+        <file>${user.home}/.nestctrl/logs/log_${startTime}.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>
+                %-55(%d{HH:mm:ss.SSS} [%thread] %-20(.\(%F:%L\))) %-5level - %msg %n
+            </pattern>
+        </encoder>
+    </appender>
    <!--
    <appender name="FILE-DATE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -103,6 +112,15 @@
         <includeCallerData>true</includeCallerData>
         <discardingThreshold>0</discardingThreshold>
     </appender>
+    <appender name="ASYNC-FILE-DATE-TRACE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE-DATE-TRACE" />
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>TRACE</level>
+        </filter>
+
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
 
 
     <root level="TRACE">
@@ -110,6 +128,7 @@
         <appender-ref ref="ASYNC-FILE-DATE"/>
         <appender-ref ref="ASYNC-FILE-DEBUG"/>
         <appender-ref ref="ASYNC-FILE-TRACE"/>
+        <appender-ref ref="ASYNC-FILE-DATE-TRACE"/>
         <appender-ref ref="ASYNC-FILE-INFO"/>
     </root>
 </configuration>
