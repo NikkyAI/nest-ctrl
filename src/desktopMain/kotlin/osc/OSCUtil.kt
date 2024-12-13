@@ -84,10 +84,16 @@ val serializer = OSCSerializerAndParserBuilder().also { serializer ->
 val nestdropSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 val arenaSendChannel = Channel<OSCPacket>(Channel.BUFFERED)
 
-val nestdropAddress = MutableStateFlow(
+val nestdropSendAddress = MutableStateFlow(
     InetSocketAddress(
         InetAddress.getLoopbackAddress(), // InetAddress.getByName("127.0.0.1"),
         8000
+    )
+)
+val nestdropListenAddress = MutableStateFlow(
+    InetSocketAddress(
+        InetAddress.getByAddress(byteArrayOf(127,0,0,1)),
+        8001
     )
 )
 val resolumeArenaSendAddress = MutableStateFlow(
@@ -104,7 +110,7 @@ val resolumeArenaReceiveAddress = MutableStateFlow(
 )
 
 suspend fun runNestDropSend() {
-    nestdropAddress.collectLatest { address ->
+    nestdropSendAddress.collectLatest { address ->
         coroutineScope {
 //            val nestdropPort = OSCPortOut(
 //                serializer,
@@ -191,15 +197,15 @@ suspend fun updateResolumeLayerState(layer: Int, clip: Int, connected: Boolean) 
     )
 }
 
-private val connectedClipSyncedValues = mutableMapOf<Int, OscSynced.Value<Int>>()
+private val connectedClipSyncedValues = mutableMapOf<Int, OscSynced.ValueSingle<Int>>()
 
 fun connectSpecificClip(
     group: Int,
     layer: Int,
-): OscSynced.Value<Int> {
+): OscSynced.ValueSingle<Int> {
     val layerIndex = resolumeLayerIndex(group, layer)
     return connectedClipSyncedValues[layerIndex] ?: run {
-        OscSynced.Value(
+        OscSynced.ValueSingle(
             "/composition/layers/$layerIndex/connectspecificclip",
             -1,
             target = OscSynced.Target.ResolumeArena
@@ -498,5 +504,112 @@ suspend fun startResolumeListener() {
         }
     }
 
+//    delay(1000)
+}
+
+suspend fun startNestdropListener() {
+//    val resolumeState = MutableStateFlow<Map<String, String>>(emptyMap())
+    val messages = Channel<Pair<String, String>>(Channel.BUFFERED)
+    var receiver: OSCPortIn? = null
+    flowScope.launch(Dispatchers.IO) {
+        nestdropListenAddress.collectLatest { address ->
+            receiver?.close()
+            logger.info { "connecting to nestdrop ${address}" }
+            receiver = OSCPortInBuilder()
+                .setSocketAddress(address)
+                .setPacketListener(OSCPortIn.defaultPacketListener())
+                .let { inBuilder ->
+                    OscSynced.syncedValues.filter {
+                        it.receive && it.target == OscSynced.Target.Nestdrop
+                    }.fold(inBuilder) { builder, syncedValue ->
+                        logger.info { "adding listener for ${syncedValue.name}" }
+                        builder.addMessageListener(
+                            syncedValue.messageSelector
+                        ) { messageEvent ->
+                            flowScope.launch {
+                                val msg = messageEvent.message
+                                if (syncedValue.logReceived) {
+                                    logger.info { "NESTDROP IN: ${msg.stringify()}" }
+                                }
+                                syncedValue.onMessageEvent(messageEvent)
+                            }
+                        }
+                    }
+                }
+//                .addPacketListener(object : OSCPacketListener {
+//                    override fun handlePacket(event: OSCPacketEvent) {
+//                        val packet = event.packet
+//
+//                        handlePacket(packet)
+//                    }
+//
+//                    fun handlePacket(packet: OSCPacket) {
+//                        when (packet) {
+//                            is OSCBundle -> {
+//                                packet.packets.forEach {
+//                                    handlePacket(it)
+//                                }
+//                            }
+//
+//                            is OSCMessage -> {
+//                                handleMessage(packet)
+//                            }
+//                        }
+//                    }
+//
+//                    fun handleMessage(message: OSCMessage) {
+//                        runBlocking {
+////                    logger.debugF { "RESOLUME IN: ${message.stringify()}" }
+//                            val address = message.address
+//
+////                    if(address.endsWith("connected")) {
+////                        logger.infoF { message.stringify() }
+////                    }
+//
+//                            val arguments = message.arguments.joinToString(" ")
+//                            when {
+//                                address.endsWith("sBpm") -> {
+//                                    logger.trace { "receiving: $address ${message.arguments}" }
+//                                }
+//                                address.endsWith("sBpmCnt") -> {
+//                                    logger.trace { "receiving: $address ${message.arguments}" }
+//                                }
+//                                else -> {
+//                                    logger.info { "receiving: $address ${message.arguments}" }
+//                                }
+//                            }
+//
+////                            messages.send(address to arguments)
+//                        }
+//                    }
+//
+//                    override fun handleBadData(event: OSCBadDataEvent) {
+//                        runBlocking {
+//                            logger.warn { "osc bad data: $event" }
+//                        }
+//                        // TODO("Not yet implemented")
+//                    }
+//
+//                })
+                .build()
+                .also {
+                    logger.info { "start listening on $address" }
+                    while(receiver?.isConnected == false) {
+                        delay(100)
+                    }
+                    it.startListening()
+
+                    delay(100)
+//                    logger.info { "isListening ${it.isListening}" }
+//                    logger.info { "isConnected ${it.isConnected}" }
+                }
+
+        }
+
+//        while(receiver?.isConnected == true) {
+//            delay(10_000)
+//            logger.info { "isConnected ${receiver?.isConnected}" }
+//        }
+    }
 //    delay(1000)
 }

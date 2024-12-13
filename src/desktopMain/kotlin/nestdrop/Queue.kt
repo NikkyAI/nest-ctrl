@@ -14,6 +14,7 @@ data class Queue(
 data class Preset(
     val index: Int,
     val name: String,
+    val id: Int,
     val effects: Int?,
     val overlay: Boolean?,
 //    val settingsCapture: List<Int> = emptyList(),

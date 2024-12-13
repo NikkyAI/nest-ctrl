@@ -27,8 +27,12 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -173,6 +177,24 @@ fun editSearchesScreen() {
                                     searchesMutable.removeAt(searchIndex)
                                     selectedSearch = null
                                     customSearches.value = searchesMutable.toList()
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Spacer(modifier = Modifier.weight(0.5f))
+                                Text("Copy Entry", modifier = Modifier.padding(16.dp))
+                                IconButton(
+                                    onClick = {
+                                        val searchesMutable = searchesCollected.toMutableList()
+
+                                        newLabel = newLabel.copy(text = search.label + " Copy")
+                                        val newSearch = search.copy(label = newLabel.text)
+                                        searchesMutable.add(searchIndex+1, newSearch)
+                                        selectedSearch = searchIndex+1 to newSearch
+                                        customSearches.value = searchesMutable.toList()
+                                    },
+//                                    enabled = newLabel.text != search.label
+                                ) {
+                                    Icon(Icons.Default.AddCircle, "duplicate")
                                 }
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {

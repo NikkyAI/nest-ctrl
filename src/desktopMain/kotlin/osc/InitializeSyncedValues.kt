@@ -20,14 +20,14 @@ suspend fun initializeSyncedValues() {
     OscSynced.syncedValues.filter {
         it.target == OscSynced.Target.ResolumeArena
     }.forEach { oscSyncedValue ->
-        if(oscSyncedValue is OscSynced.Address) {
+        if (oscSyncedValue is OscSynced.Address) {
             val lastChanged = MutableStateFlow(Instant.DISTANT_PAST)
             flowScope.launch {
                 oscSyncedValue.flow.onEach {
                     lastChanged.value = Clock.System.now()
                 }
                 while (true) {
-                    if(lastChanged.value < Clock.System.now() - 500.milliseconds) {
+                    if (lastChanged.value < Clock.System.now() - 500.milliseconds) {
                         arenaSendChannel.send(
                             OSCMessage(oscSyncedValue.address, "?")
                         )
@@ -57,4 +57,27 @@ suspend fun initializeSyncedValues() {
                 }
             }.launchIn(flowScope)
     }
+
+    OscSynced.syncedValues.filter {
+        it.send && it.target == OscSynced.Target.Nestdrop
+    }
+        .forEach { oscSyncedValue ->
+            @OptIn(FlowPreview::class)
+            oscSyncedValue
+                .flow
+                .drop(oscSyncedValue.dropFirst)
+                .sample(100.milliseconds)
+//            .combine(resyncToTouchOSC) { a, _ -> a }
+                .onEach { value ->
+                    val oscMessages = oscSyncedValue.generateOscMessages(value!!)
+                    oscMessages.forEach {
+                        if (oscSyncedValue.logSending) {
+                            logger.debug { "Nestdrop OUT: ${it.stringify()}" }
+                        } else {
+                            logger.trace { "Nestdrop OUT: ${it.stringify()}" }
+                        }
+                        nestdropSendChannel.send(it)
+                    }
+                }.launchIn(flowScope)
+        }
 }

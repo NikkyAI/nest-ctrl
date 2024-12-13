@@ -8,22 +8,19 @@ import configFolder
 import decks
 import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import nestdrop.ImgMode
 import nestdrop.NestdropControl
 import nestdrop.NestdropSpriteQueue
 import nestdrop.PerformanceLogRow
@@ -34,6 +31,7 @@ import nestdrop.imgFxMap
 import nestdrop.nestdropSetPreset
 import nestdrop.nestdropSetSprite
 import osc.OSCMessage
+import osc.OscSynced
 import osc.nestdropSendChannel
 import tags.TagScoreEval
 import tags.pickItemToGenerate
@@ -43,7 +41,6 @@ import ui.screens.imgSpritesMap
 import utils.HistoryNotNull
 import utils.prettyPrint
 import utils.runningHistory
-import java.io.File
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -86,7 +83,7 @@ class Deck(
         val horizontalMotion = NestdropControl.SliderWithResetButton(id, "HorizonMotion", -0.5f..0.5f, 0.0f)
         val verticalMotion = NestdropControl.SliderWithResetButton(id, "VerticalMotion", -0.5f..0.5f, 0.0f)
         val stretchSpeed = NestdropControl.SliderWithResetButton(id, "StretchSpeed", 0.5f..1.5f, 1.0f)
-        val waveMode = NestdropControl.SliderWithResetButton(id, "WaveMode", 0.5f..1.5f, 1.0f)
+        val waveMode = NestdropControl.SliderWithResetButton(id, "WaveMode", -15f..15f, 0.0f)
 
         suspend fun startFlows() {
             transitionTime.startFlows()
@@ -256,7 +253,7 @@ class Deck(
             hasSwitched.value = false
         }
 
-        suspend fun beatFlow(
+        suspend fun beatFlowOld(
             flow: Flow<HistoryNotNull<Double>>
         ) = flow
             .combine(
@@ -266,9 +263,30 @@ class Deck(
             ) { (currentBeat, lastBeat), triggerAt ->
                 Triple(currentBeat, lastBeat, triggerAt)
             }.onEach { (currentBeat, lastBeat, triggerAt) ->
-                if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-                    logger.info { "triggered at ${(currentBeat * 1000).roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
+                if (!hasSwitched.value &&  lastBeat < triggerAt && currentBeat >= triggerAt) {
+                    logger.info { "$deckName triggered at ${(currentBeat * 1000).roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
                     hasSwitched.value = true
+                    doSwitch()
+                }
+            }
+
+        suspend fun beatFlow(
+            flow: Flow<HistoryNotNull<Int>>
+        ) = flow
+            .combine(
+                triggerTime.combine(beatFrame) { triggerTime, b ->
+                    logger.info { "$deckName triggerTime: $triggerTime * $b" }
+                    (triggerTime * b).toInt()
+                }
+            ) { (currentBeat, lastBeat), triggerAt ->
+                Triple(currentBeat, lastBeat, triggerAt)
+            }.onEach { (currentBeat, lastBeat, triggerAt) ->
+//                logger.info { "currentBeat: $currentBeat" }
+//                logger.info { "triggerAt: $triggerAt" }
+//                logger.info { "lastBeat: $lastBeat" }
+                if (/*!hasSwitched.value &&*/ lastBeat < triggerAt && currentBeat >= triggerAt) {
+                    logger.info { "$deckName triggered at $currentBeat ($triggerAt)" }
+//                    hasSwitched.value = true
                     doSwitch()
                 }
             }
@@ -325,17 +343,18 @@ class Deck(
 //                )
 //            }.launchIn(flowScope)
 
-        presetSwitching.currentPreset
-            .onEach {
-                preset.name.value = it?.preset ?: "unset"
-            }
-            .launchIn(flowScope)
+//        presetSwitching.currentPreset
+//            .onEach {
+//                preset.name.value = it?.preset ?: "unset"
+//            }
+//            .launchIn(flowScope)
 
 //        presetQueues.startFlows()
 //        presetQueue.startFlows()
         preset.startFlows()
         spriteQueues.startFlows()
 //        spriteQueue.startFlows()
+        spriteState.startFlows()
         imgSprite.startFlows()
         imgSpriteFx.startFlows()
         spoutQueue.startFlows()
@@ -348,6 +367,10 @@ class Deck(
         val autoChange = MutableStateFlow(false)
 
         suspend fun next() {
+            if (id > enabled.value) {
+                logger.info { "skip disabled $deckName" }
+                return
+            }
             search.value?.let { search ->
 
                 val presets = presetsMap.value
@@ -380,35 +403,55 @@ class Deck(
 
     val search = Search()
 
+    @Serializable
+    data class PresetData(
+        val id: Int,
+        val name: String,
+    )
+
     @Immutable
     inner class Preset {
+//        private val internalSyncedValue = OscSynced.Custom(
+//            "/Deck$id/Preset",
+//            initialValue = PresetData(-1, "unitialized"),
+//            target = OscSynced.Target.Nestdrop
+//        ) { address, arguments ->
+//            PresetData(arguments[0] as Int, arguments[1] as String)
+//        }
+        val syncedValue = OscSynced.Custom(
+            "/Deck$id/Preset",
+            initialValue = PresetData(-1, "unitialized"),
+            target = OscSynced.Target.Nestdrop
+        ) { address, arguments ->
+            PresetData(arguments[0] as Int, arguments[1] as String)
+        }
+//        val syncedValue = MutableStateFlow(
+//            PresetData(-1, "unitialized")
+//        )
+
         //        private val trigger = MutableStateFlow(0)
 //        val autoChange = MutableStateFlow(false)
         val name = MutableStateFlow("uninitialized")
 
-//        @Deprecated("use search.next()")
-//        suspend fun next() {
-//            logger.info { "$deckName.preset.next()" }
-//            // TODO: trigger this by emitting a history event (queue, deck, index or such)
-//            presetQueue.value?.also { queue ->
-//                val index = Random.nextInt(queue.presets.size)
-//                val preset1 = queue.presets.getOrNull(index) // ?: return
-//                logger.info { "switching ${queue.name} to $index '$preset1'" }
-//                nestdropPortSend(
-//                    OSCMessage(
-//                        "/PresetID/${queue.name}/$index",
-//                        listOf(
-//                            if (false) 0 else 1
-//                        )
-//                    )
-//                )
-//            }
-//        }
-
-
         suspend fun startFlows() {
 //            logger.info { "starting flows for $deckName-preset" }
 
+//            internalSyncedValue
+//                .onEach { data ->
+////                    val expectedName = presetsMap.value[data.id].name
+//                    if (data.name !in presetsMap.value) {
+//                        logger.info { "$deckName IGNORING $data" }
+//                    } else {
+//                        syncedValue.value = data
+//                    }
+//                }
+//                .launchIn(flowScope)
+
+            syncedValue
+                .onEach {
+                    logger.info { "$deckName preset syncedValue: $it" }
+                }
+                .launchIn(flowScope)
 //            trigger
 //                .drop(1)
 //                .onEach {
@@ -429,6 +472,191 @@ class Deck(
 
     val spriteQueues = SpriteQueues()
 
+    @Serializable
+    data class SpriteData(
+        val id: Int = -1,
+        val name: String = "unset",
+        val mode: ImgMode = ImgMode.Overlay,
+        val fx: Int = 0,
+        val mystery: Int = 0,
+        val enabled: Boolean = false,
+    ) {
+        val key = SpriteKey(id, name, mode, fx, mystery)
+    }
+
+    @Serializable
+    data class SpriteKey(
+        val id: Int = -1,
+        val name: String = "unset",
+        val mode: ImgMode = ImgMode.Overlay,
+        val fx: Int = 0,
+        val mystery: Int = 0
+    )
+
+    @Immutable
+    inner class SpriteState {
+        val imgTarget = MutableStateFlow(emptySet<SpriteKey>())
+        val imgStates = MutableStateFlow<Map<String, SpriteKey>>(mapOf())
+
+        val spoutTarget = MutableStateFlow(emptySet<SpriteKey>())
+        val spoutStates = MutableStateFlow(emptyMap<String, SpriteKey>())
+        private val syncedSpriteState = OscSynced.Custom<SpriteData>(
+            "/Deck$id/Sprite",
+            SpriteData(),
+            target = OscSynced.Target.Nestdrop
+        ) { address, args ->
+            SpriteData(
+                id = args[0] as Int,
+                name = args[1] as String,
+                mode = ImgMode.valueOf(args[2] as String),
+                fx = args[3] as Int,
+                mystery = args[4] as Int,
+                enabled = (args[5] as Int) == 1,
+            )
+        }
+
+//        suspend fun enabledSprites() = imgStates.value.values
+
+        suspend fun startFlows() {
+//
+//            syncedSpriteState
+//                .sample(100.milliseconds)
+//                .onEach {
+//                    logger.info { "syncedSpriteState: $it" }
+//                }
+//                .launchIn(flowScope)
+//            val imgSpriteIds = imgSpritesMap.map { it.values.map { it.id }.toSet() } //.stateIn(flowScope)
+            syncedSpriteState
+                .combine(
+                    imgSpritesMap.map { it.values.map { it.id }.toSet() }
+                ) { spriteData, imgSpriteIds ->
+                    spriteData to imgSpriteIds
+                }
+                .onEach { (spriteState, imgSpriteIds) ->
+                    if (spriteState.id in imgSpriteIds) {
+                        logger.info { "is img $spriteState" }
+                        val state = imgStates.value
+                        val mutableState = state.toMutableMap()
+                        if (spriteState.enabled) {
+                            mutableState += (spriteState.name to spriteState.key)
+                        } else {
+                            mutableState -= spriteState.name
+                        }
+                        if(state != mutableState) {
+                            imgStates.value = mutableState.toMap()
+                        }
+                    } else {
+//                        logger.info { "is spout: $spriteState" }
+                        if (spriteState.enabled) {
+                            spoutStates.value += spriteState.name+spriteState.fx to spriteState.key
+                        } else {
+                            spoutStates.value -= spriteState.name+spriteState.fx
+                        }
+
+                    }
+                }
+                .launchIn(flowScope)
+
+//            imgStates
+//                .sample(100.milliseconds)
+//                .combine(imgTarget) { states, target ->
+//                    if (id > enabled.value) {
+//                        return@combine
+//                    }
+//                    val states = spoutStates.value
+//
+//                    logger.info { "updating img states" }
+//                    val spritesToDisable = states.values.filter {
+//                        it !in target
+//                    }
+//                    val spritesToEnable = target.filter {
+//                        it !in states.values
+//                    }
+//                    if (spritesToDisable.isNotEmpty()) {
+//                        logger.info { "img disabling: $spritesToDisable" }
+//                        spritesToDisable.forEach {
+//                            nestdropSetSprite(id = it.id, deck = this@Deck.id, overlayMode = it.mode, single = true)
+////                            delay(100)
+//                        }
+//                        logger.info { "img disabling done" }
+//                    }
+//                    if (spritesToEnable.isNotEmpty()) {
+//                        logger.info { "img enabling: $spritesToEnable" }
+//                        spritesToEnable.forEach {
+//                            nestdropSetSprite(id = it.id, deck = this@Deck.id, overlayMode = it.mode, single = true)
+//                            delay(10)
+//                            imgSpriteFx.setSpriteFxRaw(rawFx = it.fx)
+//                            delay(100)
+//                        }
+//                        logger.info { "img enabling: done" }
+//                    }
+//
+////                    logger.info { "setting fx" }
+////                    target.forEach {
+////                        imgSpriteFx.setSpriteFxRaw(rawFx = it.fx)
+////                    }
+//                }
+//                .launchIn(flowScope)
+
+//            spoutStates
+//                .onEach {
+//                    logger.info { "spout states: ${it}" }
+//
+//                }
+//                .launchIn(flowScope)
+
+//            spoutStates
+//                .sample(200.milliseconds)
+//                .combine(spoutTarget) { states, target ->
+//                    if (id > enabled.value) {
+//                        return@combine
+//                    }
+//                    val states = spoutStates.value
+//                    logger.info { "updating spout" }
+//                    logger.info { "states: $states" }
+//                    logger.info { "target: $target" }
+//                    val spritesToDisable = states.values.filter {
+//                        it.name !in target.map { it.name }
+//                    }
+//                    val spritesToEnable = target.filter {
+//                        it !in states.values
+//                    }
+//                    if (spritesToDisable.isNotEmpty()) {
+//                        logger.info { "spout disabling: $spritesToDisable" }
+//                        spritesToDisable.forEach {
+//                            nestdropSetSprite(id = it.id, deck = this@Deck.id, overlayMode = ImgMode.Overlay, single = true)
+////                            delay(100)
+//                        }
+//                        logger.info { "spout disabling done" }
+//                    }
+//                    if (spritesToEnable.isNotEmpty()) {
+//                        logger.info { "spout enabling: $spritesToEnable" }
+//                        spritesToEnable.forEach {
+////                            setSpoutFx(rawFx = it.fx)
+//                            nestdropSetSprite(id = it.id, deck = this@Deck.id, overlayMode = it.mode, single = true)
+////                            delay(100)
+//                        }
+//                        logger.info { "spout enabling: done" }
+//                    }
+//                    logger.info { "setting fx" }
+//                    target.forEach {
+//                        setSpoutFx(rawFx = it.fx)
+//                    }
+//                }
+//                .launchIn(flowScope)
+        }
+
+        private suspend fun setSpoutFx(rawFx: Int) {
+            logger.info { "setting $deckName FX to $rawFx" }
+            val arg = rawFx / 99.0f
+
+            logger.info { "NESTDROP OUT: ${nestdropDeckAddress("sSpoutFx")} $arg" }
+            nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpoutFx"), arg))
+        }
+    }
+
+    val spriteState = SpriteState()
+
     @Immutable
     inner class ImgSprite {
         //TODO: replace with a map ?
@@ -438,6 +666,7 @@ class Deck(
         val autoChange = MutableStateFlow(false)
 
         val spriteImgLocation = MutableStateFlow<PresetLocation.Img?>(null)
+        val spriteImgTarget = MutableStateFlow<SpriteKey?>(null)
 
         //        @Deprecated("switch to using scanned sprite img location")
 //        val index = MutableStateFlow(-2) // OscSynced.ExclusiveSwitch("/deck$N/sprite/index", 40, -2)
@@ -465,7 +694,10 @@ class Deck(
 //        }
 
         suspend fun next() {
-            logger.info { "$deckName.sprite.next()" }
+            if (id > enabled.value) {
+                return
+            }
+            logger.info { "$deckName sprite.next()" }
 
             //TODO: load all available sprite locations
 
@@ -475,103 +707,63 @@ class Deck(
             val nextRandom = imgSpritesMap.value.filterKeys { it in enabledKeys }.values.randomOrNull()
 
             if (nextRandom != null) {
+                spriteImgTarget.value = SpriteKey(
+                    id = nextRandom.id,
+                    name = nextRandom.name,
+                    mode = ImgMode.Nested,
+                    fx = -1 // to be set later
+                )
                 spriteImgLocation.value = nextRandom
             }
-
-//            spriteQueue.value?.also { spriteQueue ->
-//                val enabledSprites = spriteQueue.presets.filterIndexed() { index, it ->
-////                    logger.debugF { spriteQueue.name + " " +spriteQueue.type + " " + it }
-//                    toggles[index].value
-//                }
-//                logger.debugF { "enabled sprites: $enabledSprites" }
-//                if (enabledSprites.isNotEmpty()) {
-//                    val next = enabledSprites.random()
-//                    index.value = spriteQueue.presets.indexOf(next)
-////                    withTimeout(100.milliseconds) {
-////                        // block until new queue is loaded
-////                        name.first { it == next }
-////                    }
-//                }
-//            }
         }
 
         suspend fun startFlows() {
             logger.info { "starting coroutines on $deckName img-sprite" }
 
-//            nestdropSprite.startFlows()
-
-//            trigger
-//                .drop(1)
-//                .onEach {
-//                    next()
-//                    //spriteFX.sync.trigger()
-//                }
-//                .launchIn(flowScope)
-
+            spriteImgTarget
+                .combine(imgSpriteFx.rawFx) { key, fx -> key?.copy(fx = fx) }
+                .runningHistory()
+                .sample(50.milliseconds)
+                .onEach { (next, previous) ->
+                    val imgTarget = spriteState.imgTarget.value
+                    val imgTargetNew = imgTarget.toMutableSet()
+                    if (previous != null) {
+                        logger.info { "$deckName removing $previous" }
+                        imgTargetNew -= previous
+                    }
+                    if (next != null) {
+                        logger.info { "$deckName adding $next" }
+                        imgTargetNew += next
+                    }
+                    if (imgTargetNew != imgTarget) {
+                        spriteState.imgTarget.value = imgTargetNew.toSet()
+                    }
+                }
+                .launchIn(flowScope)
             spriteImgLocation
                 .runningHistory()
                 .sample(50.milliseconds)
                 .onEach { (next, previous) ->
                     name.value = next?.name ?: "-"
-                    if (next == null && previous != null) {
-                        nestdropSetSprite(previous.id, id)
-                    } else if (next != null) {
-                        nestdropSetSprite(next.id, id)
-                    }
-//                    nestdropSprite.send(
-//                        when {
-//                            presetIdState is PresetIdState.Data && presetIdState.index != -1 -> presetIdState
-////                                .also {
-////                                    logger.warnF { "sending $presetIdState" }
-////                                }
-//                            else -> PresetIdState.Unset
-//                        }
+//
+//                    val previousData = previous?.let {
+//                        SpriteKey(
+//                            previous.id, previous.name, mode = ImgMode.Nested, previous.fx
+//                        )
+//                    }
+//
+//                    val spriteData = SpriteData(
+//
 //                    )
-//                    spriteFX.sync.trigger()
+//                    spriteState.target += spriteData.key to spriteData
+                    if (next == null && previous != null) {
+                        nestdropSetSprite(previous.id, id, single = true)
+                    } else if (next != null) {
+                        nestdropSetSprite(next.id, id, single = true)
+                    }
                 }
                 .launchIn(flowScope)
 
-//            index
-////                .combine(resyncToTouchOSC) { a, _ -> a }
-//                .combine(spriteQueue) { index, queue ->
-//                    queue?.presets?.getOrNull(index)
-//                }.onEach { spritePreset ->
-////                    logger.infoF { "setting name of sprite $spritePreset" }
-//                    name.value = spritePreset?.name ?: "-"
-//                }
-//                .launchIn(flowScope)
-
-//            // do sprite change
-//            index
-//                // set current image sprite again if spout was enabled or changed
-////                .combine(spout.index.filter { it != -1 }) { a, _ -> a }
-//                .combine(spriteQueue) { index, queue ->
-//                    when {
-//                        queue != null ->
-//                            PresetIdState.Data(
-//                                index = index,
-//                                queue = queue,
-//                            )
-//
-//                        else -> PresetIdState.Unset
-//
-//                    }
-//                }
-//                //maybe debounce ? does this break history ?
-//                .sample(50.milliseconds)
-//                .onEach { presetIdState ->
-//                    nestdropSprite.send(
-//                        when {
-//                            presetIdState is PresetIdState.Data && presetIdState.index != -1 -> presetIdState
-////                                .also {
-////                                    logger.warnF { "sending $presetIdState" }
-////                                }
-//                            else -> PresetIdState.Unset
-//                        }
-//                    )
-////                    spriteFX.sync.trigger()
-//                }
-//                .launchIn(flowScope)
         }
     }
 
@@ -582,6 +774,9 @@ class Deck(
         val autoChange = MutableStateFlow(true)
         val blendMode = MutableStateFlow(false)
         val index = MutableStateFlow(0)
+        val rawFx = index.combine(blendMode) { fx, blendMode ->
+            if(blendMode) 50+fx else fx
+        }
         val name = MutableStateFlow("uninitialized")
         val shortLabel = MutableStateFlow("uninitialized")
         val toggles = List(50) {
@@ -590,10 +785,13 @@ class Deck(
 //                logSending = false
 //            }
         }
-        val sync = MutableStateFlow(0)
+        private val sync = MutableStateFlow(0)
         private val trigger = MutableStateFlow(0)
 
         suspend fun next() {
+            if (id > enabled.value) {
+                return
+            }
             logger.info { "$deckName.spriteFX.next()" }
             val enabledFx = imgFxMap.value.filterKeys { key ->
                 toggles.getOrNull(key)?.value ?: false
@@ -608,6 +806,12 @@ class Deck(
             val fx = if (blendMode) index + 50 else index
             logger.info { "setting $deckName FX to $fx" }
             val arg = fx / 99.0f
+            nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpriteFx"), arg))
+        }
+
+        suspend fun setSpriteFxRaw(rawFx: Int) {
+            logger.info { "setting $deckName FX to $rawFx" }
+            val arg = rawFx / 99.0f
             nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpriteFx"), arg))
         }
 
@@ -635,6 +839,8 @@ class Deck(
                 } ?: "error"
             }.launchIn(flowScope)
 
+            //TODO: remove
+            //  handled via passing raw FX into SpriteKey
             index
                 .combine(sync) { a, _ -> a }
                 .combine(blendMode) { index, blendMode ->
@@ -676,7 +882,9 @@ class Deck(
     val spoutQueue = SpoutQueue()
 
     @Immutable
-    inner class Spout : MutableStateFlow<nestdrop.Preset?> by MutableStateFlow(null) {
+    inner class Spout
+        : MutableStateFlow<nestdrop.Preset?> by MutableStateFlow(null)
+    {
 //        val toggles = List(20) {
 //            MutableStateFlow(false)
 //        }
@@ -684,9 +892,13 @@ class Deck(
         val sync = MutableStateFlow(0)
 
         // val autoChange = MutableStateFlow(false)
+//        @Deprecated("use spoutImgTarget")
         val index = MutableStateFlow(-1)
+        @Deprecated("use spoutImgTarget")
         val name = MutableStateFlow("uninitialized")
+        @Deprecated("use spoutImgTarget")
         val fx = MutableStateFlow(0)
+        val spriteTargetKey = MutableStateFlow<SpriteKey?>(null)
 
         private val nestdropSpout = NestdropSpriteQueue(
             nestdropSendChannel
@@ -696,17 +908,44 @@ class Deck(
             logger.info { "starting coroutines on $deckName spout" }
             nestdropSpout.startFlows()
 
+            spriteTargetKey
+                .runningHistory()
+                .sample(50.milliseconds)
+                .onEach { (next, previous) ->
+                    val spoutTarget = spriteState.spoutTarget.value
+                    val spoutTargetNew = spoutTarget.toMutableSet()
+                    if (previous != null) {
+                        logger.info { "$deckName removing $previous" }
+                        spoutTargetNew -= previous
+                    }
+                    if (next != null) {
+                        logger.info { "$deckName adding $next" }
+                        spoutTargetNew += next
+                    }
+                    if (spoutTargetNew != spoutTarget) {
+                        spriteState.spoutTarget.value = spoutTargetNew.toSet()
+                    }
+                }
+                .launchIn(flowScope)
+
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spoutQueue) { index, queue ->
+                    logger.info { "spout queue index $index" }
                     queue?.presets?.getOrNull(index)
                 }.onEach { spoutPreset ->
-                    this.value = spoutPreset
+//                    this.value = spoutPreset
+                    logger.info { "spout queue preset $spoutPreset" }
+//                    spriteTargetKey.value = spoutPreset?.let {
+//                        SpriteKey(id = it.id, name = it.name, mode = if(it.overlay == true) ImgMode.Overlay else ImgMode.Nested, fx = it.effects ?: 0)
+//                    }
                     logger.info { "$deckName spout name\n${spoutPreset?.prettyPrint()}" }
                     fx.value = spoutPreset?.effects ?: 0
                     name.value = spoutPreset?.label ?: "-"
                 }
                 .launchIn(flowScope)
+
+            //TODO: compare if target spout queue is in active sprites and trigger change if necessary
 
             // do spout change
             index
@@ -737,7 +976,11 @@ class Deck(
                             else -> PresetIdState.Unset
                         }
                     )
+//                    queue?.presets?.getOrNull(index)?.effects?.let { fx ->
+//                        setSpoutFx(fx)
+//                    }
                 }
+
                 //maybe debounce ? does this break history ?
 //                .onEach { (current, last) ->
 //                    val (index, queue) = current
@@ -755,6 +998,7 @@ class Deck(
 //                        }
 //                    }
 //                }
+
                 .launchIn(flowScope)
         }
 
@@ -765,8 +1009,15 @@ class Deck(
 //                index.value -= 1
 //                index.value += 1
 //            }
-//
 //        }
+
+        private suspend fun setSpoutFx(rawFx: Int) {
+            logger.info { "setting $deckName FX to $rawFx" }
+            val arg = rawFx / 99.0f
+
+            logger.info { "NESTDROP OUT: ${nestdropDeckAddress("sSpoutFx")} $arg" }
+            nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpoutFx"), arg))
+        }
     }
 
     val spout = Spout()
@@ -779,22 +1030,21 @@ class Deck(
     data class DeckState(
         val deck: Int,
         val timestamp: String,
-        val preset: String,
+        val preset: PresetData,
 //        val presetQueue: String,
         val imgSprite: String,
         val imgFx: Int,
-        val spoutSprite: String,
-        val spoutFx: Int,
+        val spoutSpriteKey: SpriteKey?,
     ) {
         val timestampInstant get() = Instant.parse(timestamp)
     }
 
     val currentState: Flow<DeckState>
         get() = combine(
-            preset.name,
+            preset.syncedValue,
             combine(imgSprite.name, imgSpriteFx.index) { a, b -> a to b },
-            combine(spout.name, spout.fx) { a, b -> a to b }
-        ) { preset, (imgSprite, imgFx), (spoutSprite, spoutFx) ->
+            spout.spriteTargetKey
+        ) { presetData, (imgSprite, imgFx), spoutSpriteKey ->
             DeckState(
                 deck = id,
                 timestamp = Clock.System.now().let {
@@ -812,12 +1062,11 @@ class Deck(
                     }
                     Instant.fromEpochMilliseconds(milliseconds).toString()
                 },
-                preset = preset,
+                preset = presetData,
 //                presetQueue = presetQueue.name.value,
                 imgSprite = imgSprite,
                 imgFx = imgFx,
-                spoutSprite = spoutSprite,
-                spoutFx = spoutFx
+                spoutSpriteKey = spoutSpriteKey,
             )
         }
 //            .filter { !skipHistory.value }

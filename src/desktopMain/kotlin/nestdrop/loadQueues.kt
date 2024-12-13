@@ -24,8 +24,8 @@ suspend fun loadNestdropConfig(
     val nestdropSettings = xml.decodeFromString(
         NestdropSettings.serializer(), nestdropConfig.readText()
             .substringAfter(
-            """<?xml version="1.0" encoding="utf-8"?>"""
-        )
+                """<?xml version="1.0" encoding="utf-8"?>"""
+            )
 //            .lines().drop(1).joinToString("/n")
     )
     logger.info { "loaded xml from $nestdropConfig" }
@@ -36,23 +36,26 @@ suspend fun loadNestdropConfig(
 
     logger.info { "loading queues from $nestdropConfig" }
     try {
-        val queues = nestdropSettings.queueWindows.queues.map { queue ->
-            Queue(
-                index = queue.index,
-                name = queue.name,
-                type = QueueType.entries[queue.type - 1],
-                open = queue.open,
-                deck = queue.deck,
-                presets = queue.presets.mapIndexed() { i, p ->
-                    Preset(
-                        index = i,
-                        name = p.name,
-                        effects = p.effect ?: 0,
-                        overlay = p.overlay,
-                    )
-                }
-            )
-        }
+        val queues = nestdropSettings.queueWindows.queues
+            .filter { it.deck != null }
+            .map { queue ->
+                Queue(
+                    index = queue.index,
+                    name = queue.name,
+                    type = QueueType.entries[queue.type - 1],
+                    open = queue.open,
+                    deck = queue.deck!!,
+                    presets = queue.presets.mapIndexed() { i, p ->
+                        Preset(
+                            index = i,
+                            name = p.name,
+                            id = p.id,
+                            effects = p.effect ?: 0,
+                            overlay = p.overlay,
+                        )
+                    }
+                )
+            }
         logger.info { "loaded ${queues.size} queues from xml" }
 
         presetQueues.allQueues.value = queues.filter { /*it.open &&*/ it.type == QueueType.Preset }

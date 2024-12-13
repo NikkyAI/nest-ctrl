@@ -20,9 +20,12 @@ fun OSCMessage.stringifyArguments(): String {
     val typeTags = info?.argumentTypeTags ?: ""
     return arguments.mapIndexed{ i, arg ->
         typeTags.getOrNull(i)?.let {
-            "$it$arg"
+            when(it) {
+                's' -> "$it\"$arg\""
+                else -> "$it$arg"
+            }
         } ?: when (arg) {
-            is String -> "\"$arg\""
+            is String -> "s\"$arg\""
             is Float -> "f${arg}"
             is Double -> "d${arg}"
             is Boolean -> if(arg) "Ttrue" else "Ffalse"

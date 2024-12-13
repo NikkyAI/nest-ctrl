@@ -75,9 +75,9 @@ fun deckSettingsScreen() {
                                 deck.ndTime.zoomSpeed.asSlider(deck)
                                 deck.ndTime.rotationSpeed.asSlider(deck)
                                 deck.ndTime.wrapSpeed.asSlider(deck)
+                                deck.ndTime.stretchSpeed.asSlider(deck)
                                 deck.ndTime.horizontalMotion.asSlider(deck)
                                 deck.ndTime.verticalMotion.asSlider(deck)
-                                deck.ndTime.stretchSpeed.asSlider(deck)
                                 deck.ndTime.waveMode.asSlider(deck)
                             }
                         }

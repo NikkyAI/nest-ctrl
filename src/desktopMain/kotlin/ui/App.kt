@@ -47,7 +47,7 @@ import ui.screens.deckSettingsScreen
 import ui.screens.editSearchesScreen
 import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreenNew
-import ui.screens.presetScreen
+import ui.screens.presetDisplayScreen
 import ui.screens.PlaytlistSelectorScreen
 import ui.screens.spoutScreen
 import ui.screens.tagEditScreen
@@ -182,7 +182,7 @@ fun App() {
 //                    }
 //                }
                 Column {
-                    presetScreen()
+                    presetDisplayScreen()
                     tabScreen()
                 }
             }

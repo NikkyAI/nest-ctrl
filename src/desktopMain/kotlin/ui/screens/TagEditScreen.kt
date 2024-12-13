@@ -120,8 +120,9 @@ fun tagEditScreen() {
                 decks.forEach { deck ->
                     if (deck.id > decksEnabled) return@forEach
 
-                    val preset by deck.preset.name.collectAsState()
-                    val isTagged = preset.substringBeforeLast(".milk") in entries
+                    val presetData by deck.preset.syncedValue.collectAsState()
+                    val presetName = presetData.name
+                    val isTagged = presetName.substringBeforeLast(".milk") in entries
 
                     Row(
                         modifier = Modifier
@@ -133,9 +134,9 @@ fun tagEditScreen() {
                             checked = isTagged,
                             onCheckedChange = {
                                 if (it) {
-                                    customTagsMapping.value += tag to entries + preset.substringBeforeLast(".milk")
+                                    customTagsMapping.value += tag to entries + presetName.substringBeforeLast(".milk")
                                 } else {
-                                    customTagsMapping.value += tag to entries - preset.substringBeforeLast(".milk")
+                                    customTagsMapping.value += tag to entries - presetName.substringBeforeLast(".milk")
                                 }
                             },
                             colors = CheckboxDefaults.colors(

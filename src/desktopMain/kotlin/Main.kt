@@ -59,6 +59,7 @@ import nestdrop.setupSpriteFX
 import org.jetbrains.compose.resources.painterResource
 import osc.initializeSyncedValues
 import osc.runNestDropSend
+import osc.startNestdropListener
 import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
@@ -99,36 +100,36 @@ object Main {
 //        logger.warn { "WARN" }
 //        logger.error { "ERROR" }
 
-        logger.info { "connecting to carabiner" }
-        flowScope.launch {
-            var delayCounter = 1L
-            while (true) {
-                val increaseDelay = Link.openConnection()
-                if (increaseDelay) {
-                    delayCounter++
-                } else {
-                    delayCounter = 1
-                }
-                logger.warn { "reconnecting to carabiner $delayCounter" }
-                delay(delayCounter * 250)
-            }
-        }
-        withTimeoutOrNull(5000) {
-            while (!Link.isConnected.value) {
-                logger.warn { "waiting for link to connect" }
-                delay(100)
-            }
-        } ?: run {
-            logger.error { "failed to connect to carabiner socket / (ableton link)" }
-            error("failed to connect to carabiner socket / (ableton link)")
-        }
+//        logger.info { "connecting to carabiner" }
+//        flowScope.launch {
+//            var delayCounter = 1L
+//            while (true) {
+//                val increaseDelay = Link.openConnection()
+//                if (increaseDelay) {
+//                    delayCounter++
+//                } else {
+//                    delayCounter = 1
+//                }
+//                logger.warn { "reconnecting to carabiner $delayCounter" }
+//                delay(delayCounter * 250)
+//            }
+//        }
+//        withTimeoutOrNull(5000) {
+//            while (!Link.isConnected.value) {
+//                logger.warn { "waiting for link to connect" }
+//                delay(100)
+//            }
+//        } ?: run {
+//            logger.error { "failed to connect to carabiner socket / (ableton link)" }
+//            error("failed to connect to carabiner socket / (ableton link)")
+//        }
 
         logger.info { "setup sprite FX" }
         setupSpriteFX()
 
-        logger.info { "starting OSC sender" }
         flowScope.launch(Dispatchers.IO) {
             while (true) {
+                logger.info { "starting OSC sender" }
                 runNestDropSend()
                 delay(100)
             }
@@ -500,10 +501,13 @@ object Main {
 //        deck2.imgSprite.index.value++
 //        deck2.imgSprite.index.value--
 
+        logger.info { "starting OSC listener" }
+        startNestdropListener()
+
         logger.info { "initializing OSC synced values" }
         initializeSyncedValues()
         delay(200)
-        logger.info { "re-emitting all values" }
+//        logger.info { "re-emitting all values" }
     }
 
     @JvmStatic

@@ -41,7 +41,7 @@ class NestdropSpriteQueue(
     }
 
     private suspend fun presetId(queue: Queue, index: Int, overlay: Boolean = false) {
-        logger.debug { "presetid $index on ${queue.name}" }
+        logger.debug { "presetId $index on ${queue.name}" }
         nestdropSendChannel.send(
             OSCMessage(
                 "/PresetID/${queue.name}/$index",

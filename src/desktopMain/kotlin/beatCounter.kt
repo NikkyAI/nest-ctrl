@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import osc.OscSynced
 import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
@@ -28,11 +29,44 @@ val bpmRoundedInt = MutableStateFlow(120)
 
 private val logger = KotlinLogging.logger { }
 
+val bpmSynced = OscSynced.ValueSingle<Float>(
+    "/Controls/sBpm",
+    120f, send = false,
+    target = OscSynced.Target.Nestdrop
+).also {
+    it.logReceived = false
+}
+//val beatCountSynced = OscSynced.ValueSingle<Int>(
+//    "/Controls/sBpmCnt",
+//    0, send = false,
+//    target = OscSynced.Target.Nestdrop,
+//).also {
+//    it.logReceived = false
+//}
+
 suspend fun startBeatCounter(
 //    vararg decks: Deck
 ) {
+//    @OptIn(FlowPreview::class)
+//    Link.bpm
+//        .sample(100.milliseconds)
+//        .map { bpm ->
+//            (bpm * 10).roundToInt() / 10.0f
+//        }
+//        .onEach {
+//            bpmRounded.value = it
+//            bpmRoundedInt.value = it.roundToInt()
+//        }
+//        .launchIn(flowScope)
+
+//    beatCountSynced
+//        .onEach {
+//            logger.info { "beat: $it" }
+//        }
+//        .launchIn(flowScope)
+
     @OptIn(FlowPreview::class)
-    Link.bpm
+    bpmSynced
         .sample(100.milliseconds)
         .map { bpm ->
             (bpm * 10).roundToInt() / 10.0f
@@ -52,6 +86,8 @@ suspend fun startBeatCounter(
             config.value = config.value.copy(beats = it)
         }
         .launchIn(flowScope)
+
+
     run {
         val beatCounter = MutableStateFlow(0.0)
 
@@ -74,16 +110,36 @@ suspend fun startBeatCounter(
             .launchIn(flowScope)
 
         beatCounter.combine(beatFrame) { beats, beatFrame ->
-            beats.toFloat() / beatFrame
-        }.onEach {
-            beatProgress.value = it
+            (beats % beatFrame).toFloat() / beatFrame
         }
+            .onEach {
+                beatProgress.value = it
+            }
             .launchIn(flowScope)
 
+//        beatCountSynced.onEach {
+//            beatCounter.value = (beatCounter.value+1) % beatFrame.value
+//        }
+//            .launchIn(flowScope)
+
+//        beatCounter.combine(beatFrame) { beats, beatFrame ->
+//            beats.toFloat() / beatFrame
+//        }.onEach {
+//            beatProgress.value = it
+//        }
+//            .launchIn(flowScope)
+
         decks.forEach { deck ->
-            deck.presetSwitching.beatFlow(beatCounter.runningHistoryNotNull())
+            deck.presetSwitching.beatFlowOld(beatCounter.runningHistoryNotNull())
                 .launchIn(flowScope)
         }
+//        decks.forEach { deck ->
+//            deck.presetSwitching
+//                .beatFlow(
+//                    beatCountSynced.runningHistoryNotNull()
+//                )
+//                .launchIn(flowScope)
+//        }
 
         flowScope.launch {
             var lastLoop = Clock.System.now()

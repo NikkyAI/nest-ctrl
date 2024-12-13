@@ -49,8 +49,10 @@ fun spoutScreen() {
                 decks.forEach { deck ->
                     if (deck.id > decksEnabled) return@forEach
 
-                    val presetNullable by deck.spout.collectAsState()
-                    val preset = presetNullable
+//                    val presetNullable by deck.spout.collectAsState()
+//                    val preset = presetNullable
+                    val spoutState by deck.spriteState.spoutStates.collectAsState()
+                    val enabledSpoutSprites = spoutState.values
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -68,17 +70,25 @@ fun spoutScreen() {
                                 "Spout:"
                             )
                             Spacer(modifier = Modifier.width(16.dp))
-                            if (preset != null) {
-                                Text(
-                                    preset.label,
-                                )
-                                Text(
-                                    "FX: ${preset.effects ?: 0}",
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
+                            if(enabledSpoutSprites.isNotEmpty()) {
+                                val text = enabledSpoutSprites.joinToString(" | ","[ ", " ]") {
+                                    it.name + " FX: " + it.fx
+                                }
+                                Text(text)
                             } else {
                                 Text("-")
                             }
+//                            if (preset != null) {
+//                                Text(
+//                                    preset.label,
+//                                )
+//                                Text(
+//                                    "FX: ${preset.effects ?: 0}",
+//                                )
+//                                Spacer(modifier = Modifier.width(16.dp))
+//                            } else {
+//                                Text("-")
+//                            }
                         }
                     }
                 }

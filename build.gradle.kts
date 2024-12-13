@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.compose")
     kotlin("plugin.serialization")
     kotlin("plugin.power-assert")
+    id("dev.reformator.stacktracedecoroutinator")
 }
 
 repositories {
@@ -63,6 +64,8 @@ kotlin {
 
             implementation("com.github.doyaaaaaken:kotlin-csv-jvm:_")
 
+            implementation("io.obs-websocket.community:client:_")
+
             implementation("io.github.cdimascio:dotenv-kotlin:_")
 
             implementation("io.github.oshai:kotlin-logging:_")
@@ -77,6 +80,10 @@ kotlin {
 //    testImplementation(compose.desktop.uiTestJUnit4)
         }
     }
+}
+
+stacktraceDecoroutinator {
+    enabled = false
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()  {

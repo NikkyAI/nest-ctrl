@@ -68,7 +68,7 @@ fun beatProgressScreen(
 
     //TODO: display current BPM
 
-    val bpm by Link.bpm.collectAsState()
+//    val bpm by Link.bpm.collectAsState()
     val bpmRounded by bpmRoundedInt.collectAsState()
     val frame by beatFrame.collectAsState()
     val currentBeat = (beatProgress * frame).roundToInt()

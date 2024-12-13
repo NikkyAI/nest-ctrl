@@ -17,6 +17,17 @@ import nl.adaptivity.xmlutil.serialization.InputKind
 import nl.adaptivity.xmlutil.serialization.PolyInfo
 import nl.adaptivity.xmlutil.serialization.XML
 
+class LibraryClosedSectionsSerializer() : SharedContainerSerializer<NestdropSettings.LibraryClosedSections,NestdropSettings.LibraryClosedSections.LibraryClosedSection>() {
+    override fun constructContainer(list: List<NestdropSettings.LibraryClosedSections.LibraryClosedSection>): NestdropSettings.LibraryClosedSections {
+        return NestdropSettings.LibraryClosedSections(list)
+    }
+    override val elementSerializer = serializer<NestdropSettings.LibraryClosedSections.LibraryClosedSection>()
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("LibraryClosedSections") {
+        element("sections", ListSerializer(elementSerializer).descriptor)
+    }
+    override val prefix: String = "Section_"
+}
+
 class QueueWindowsSerializer() : SharedContainerSerializer<NestdropSettings.QueueWindows, NestdropSettings.QueueWindows.Queue>() {
     override fun constructContainer(list: List<NestdropSettings.QueueWindows.Queue>): NestdropSettings.QueueWindows {
         return NestdropSettings.QueueWindows(list)

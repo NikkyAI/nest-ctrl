@@ -32,8 +32,9 @@ fun presetScreenSingle(deck: Deck) {
     val presetsMap by presetsMap.collectAsState()
     val tagMap by presetTagsMapping.collectAsState()
 
-    val currentPreset by deck.preset.name.collectAsState()
-    val presetEntry = presetsMap[currentPreset]
+    val currentPreset by deck.preset.syncedValue.collectAsState()
+    val presetName = currentPreset.name
+    val presetEntry = presetsMap[presetName]
 
     Row(
         modifier = Modifier
@@ -53,7 +54,7 @@ fun presetScreenSingle(deck: Deck) {
                     modifier = Modifier
 //                                .padding(4.dp)
                 ) {
-                    val tags = tagMap[currentPreset] ?: emptySet()
+                    val tags = tagMap[presetName] ?: emptySet()
                     tags.forEach {
                         Text(it.label)
                     }
@@ -80,7 +81,7 @@ fun presetScreenSingle(deck: Deck) {
                 )
 
                 Text(
-                    text = currentPreset,
+                    text = presetName,
                     textAlign = TextAlign.End,
                     modifier = Modifier
 //                                    .padding(horizontal = 4.dp, vertical = 4.dp)
@@ -93,7 +94,7 @@ fun presetScreenSingle(deck: Deck) {
 }
 
 @Composable
-fun presetScreen() {
+fun presetDisplayScreen() {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
     val tagMap by presetTagsMapping.collectAsState()
@@ -115,8 +116,9 @@ fun presetScreen() {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                val currentPreset by deck.preset.name.collectAsState()
-                val presetEntry = presetsMap[currentPreset]
+                val currentPreset by deck.preset.syncedValue.collectAsState()
+                val presetName = currentPreset.name
+                val presetEntry = presetsMap[presetName]
 
                 if (presetEntry != null) {
                     val image = remember(presetEntry) { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
@@ -142,7 +144,7 @@ fun presetScreen() {
                             horizontalAlignment = Alignment.Start,
                             modifier = Modifier
                         ) {
-                            val tags = tagMap[currentPreset] ?: emptySet()
+                            val tags = tagMap[presetName] ?: emptySet()
                             tags.forEach {
                                 Text(it.label)
                             }
@@ -165,7 +167,7 @@ fun presetScreen() {
 //                                .padding(4.dp)
                         ) {
                             Text(
-                                text = currentPreset,
+                                text = presetName,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier
                             )

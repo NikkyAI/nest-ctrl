@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import xml.FavoriteListSerializer
+import xml.LibraryClosedSectionsSerializer
 import xml.QueueWindowsSerializer
 
 @Serializable
@@ -32,6 +33,9 @@ data class NestdropSettings(
         @XmlSerialName("Settings_General")
         val settingsGeneral: SettingsGeneral,
         @XmlElement
+        @XmlSerialName("LibraryClosedSections")
+        val libraryClosedSections: LibraryClosedSections,
+        @XmlElement
         @XmlSerialName("Settings_Deck1")
         val settingsDeck1: DeckSettings,
         @XmlElement
@@ -54,6 +58,8 @@ data class NestdropSettings(
             val width: Int = 0,
             @SerialName("Height")
             val height: Int = 0,
+            @SerialName("OpenSettingsAtStart")
+            val openSettingsAtStart: Boolean = false,
             @SerialName("ShowName")
             val showName: Boolean,
             @SerialName("LoadPreview")
@@ -64,8 +70,14 @@ data class NestdropSettings(
             val resyncOnPreset: Boolean,
             @SerialName("LogPerformanceHistory")
             val logPerformanceHistory: Boolean,
-            @SerialName("SmoothChange")
-            val smoothChange: Boolean,
+            @SerialName("AutoSave")
+            val autoSave: Boolean = true,
+            @SerialName("QueueTopMost")
+            val queueTopMost: Boolean = true,
+            @SerialName("QueueMagnet")
+            val queueMagnet: Boolean = false,
+//            @SerialName("SmoothChange")
+//            val smoothChange: Boolean,
             @SerialName("RedBlue3D")
             val redBlue3D: Boolean,
             @SerialName("BpmModulateSpeed")
@@ -84,12 +96,16 @@ data class NestdropSettings(
             val midiOutputDevice: String = "LoopBe Internal MIDI",
             @SerialName("HardCutThreshold")
             val hardCutThreshold: Int,
-            @SerialName("OscEnable")
-            val oscEnable: Boolean,
+            @SerialName("OscInputEnable")
+            val oscInputEnable: Boolean,
+            @SerialName("OscOutputEnable")
+            val oscOutputEnable: Boolean,
             @SerialName("OscPort")
             val oscPort: Int = 8000,
-            @SerialName("OscIpFrom")
-            val oscIpFrom: String,
+            @SerialName("OscOutputPort")
+            val oscOutputPort: String,
+            @SerialName("OscOutputIp")
+            val oscOutputIp: String, // = "127.0.0.1",
             @SerialName("AutoChangeInstant")
             val autoChangeInstant: Boolean = false,
             @SerialName("BeatThreshold")
@@ -98,6 +114,8 @@ data class NestdropSettings(
             val manualBPM: Float = 120f,
             @SerialName("UseAbleton")
             val useAbleton: Boolean = false,
+            @SerialName("AbletonMaster")
+            val abletonMaster: Boolean = false,
             @SerialName("AutoChangeEnable")
             val autoChangeEnable: Boolean = false,
             @SerialName("ShuffleEnable")
@@ -282,6 +300,18 @@ data class NestdropSettings(
         }
     }
 
+    @Serializable(with = LibraryClosedSectionsSerializer::class)
+    data class LibraryClosedSections(
+        val sections: List<LibraryClosedSection>
+    ) {
+        @Serializable
+        data class LibraryClosedSection(
+            val index: Int,
+            @XmlSerialName("Value")
+            val value: String
+        )
+    }
+
     @Serializable(with = QueueWindowsSerializer::class)
     data class QueueWindows(
         val queues: List<Queue>
@@ -302,11 +332,23 @@ data class NestdropSettings(
             @SerialName("Type")
             val type: Int,
             @SerialName("Deck")
-            val deck: Int,
+            val deck: Int? = null,
             @SerialName("Open")
             val open: Boolean,
             @SerialName("AlwaysOnTop")
             val alwaysOnTop: Boolean,
+            @SerialName("Magnetic")
+            val magnetic: Boolean,
+            @SerialName("BeatOffset")
+            val beatOffset: Int = 1,
+            @SerialName("BeatMulti")
+            val beatMulti: Int = 1,
+            @SerialName("DefaultSpriteOverlay")
+            val defaultSpriteOverlay: Int = -1,
+            @SerialName("Active")
+            val active: Boolean,
+            @SerialName("MidiDevice")
+            val midiDevice: String? = null,
             @XmlElement
             @SerialName("Presets")
             val presetsWrappers: Presets,
@@ -324,6 +366,8 @@ data class NestdropSettings(
                 data class Preset(
                     @SerialName("Name")
                     val name: String,
+                    @SerialName("Id")
+                    val id: Int,
                     @SerialName("Effects")
                     val effect: Int? = null,
                     @SerialName("Overlay")
@@ -342,6 +386,18 @@ data class NestdropSettings(
                     val settingCaptureValues: String? = null,
                     @SerialName("Type")
                     val type: String? = null,
+                    @SerialName("MidiId")
+                    val midiId: Int? = null,
+                    @SerialName("MidiAction")
+                    val midiAction: Int? = null,
+                    @SerialName("MidiMode")
+                    val midiMode: Int? = null,
+                    @SerialName("MidiDeck")
+                    val midiDeck: Int? = null,
+                    @SerialName("MidiPresetType")
+                    val midiPresetType: Int? = null,
+                    @SerialName("MidiHotKey")
+                    val midiHotKey: String? = null,
                     @SerialName("Comments")
                     val comments: String? = null,
                 )
@@ -380,7 +436,7 @@ data class NestdropSettings(
 
     @Serializable
     data class EffectsList(
-        val effects: List< Effects>
+        val effects: List<Effects>
     ) {
         @Serializable
         data class Effects(

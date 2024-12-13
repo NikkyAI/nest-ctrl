@@ -170,7 +170,12 @@ fun imgSpritesScreenNew() {
             decks.forEach { deck ->
                 if (deck.id > decksEnabled) return@forEach
 
-                val current by deck.imgSprite.name.collectAsState()
+//                val current by deck.imgSprite.name.collectAsState()
+                val imgStates by deck.spriteState.imgStates.collectAsState() // .name.collectAsState()
+                val enabledImgSprites = imgStates.values
+                val current = enabledImgSprites.joinToString(" | ","[ ", " ]") {
+                    it.name + " FX: " + it.fx
+                }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
