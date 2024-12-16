@@ -2,15 +2,10 @@ package obs
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.obswebsocket.community.client.OBSRemoteController
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executors
 
 private val logger = KotlinLogging.logger {}
-val Dispatchers.LOOM: CoroutineDispatcher
-    get() = Executors.newVirtualThreadPerTaskExecutor().asCoroutineDispatcher()
 
 val obsRemote by lazy {
     OBSRemoteController.builder() // set options, register for events, etc.
