@@ -44,7 +44,7 @@ workflow(
             name = "setup jdk",
             action = SetupJava(
                 javaPackage = SetupJava.JavaPackage.Jdk,
-                javaVersion = "18",
+                javaVersion = "21",
                 architecture = "x64",
                 distribution = SetupJava.Distribution.Adopt,
                 cache = SetupJava.BuildPlatform.Gradle,
