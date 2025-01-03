@@ -1,8 +1,12 @@
 ## Nestdrop Visuals Controlpanel
 
+# Download
+
+get the latest build from the [nightly](https://github.com/NikkyAI/nest-ctrl/releases/tag/nightly) tag
+
 # setup and building
 
-needed: JDK/JRE probably java 21+
+needed: JDK/JRE, java 21+
 
 with https://scoop.sh/
 ```bash
