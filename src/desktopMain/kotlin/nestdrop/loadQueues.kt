@@ -60,7 +60,7 @@ suspend fun loadNestdropConfig(
                 Queue(
                     index = queue.index,
                     name = queue.name,
-                    type = QueueType.entries[queue.type - 1],
+                    type = QueueType.entries[queue.type],
                     open = queue.open,
                     deck = queue.deck!!,
                     presets = queue.presets.mapIndexed() { i, p ->
