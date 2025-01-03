@@ -1,10 +1,10 @@
 package ui.screens
 
-import tags.Tag
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -55,10 +55,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import tags.presetTagsMapping
-import tags.TagMatcher
 import tags.PresetPlaylist
+import tags.Tag
+import tags.TagMatcher
 import tags.Term
+import tags.presetTagsMapping
 import ui.components.DropDownPopupIconButton
 import ui.components.verticalScroll
 
@@ -103,7 +104,7 @@ fun editSearchesScreen() {
             }
         }
         verticalScroll(state = contentState) {
-            Column() {
+            Column(modifier = Modifier.padding(end = 4.dp)) {
                 if (selectedSearch == null) {
                     Row(
                         modifier = Modifier.padding(8.dp),
@@ -161,7 +162,7 @@ fun editSearchesScreen() {
                             key = "search.$searchIndex.editLabel"
                         ) { mutableStateOf(TextFieldValue(search.label)) }
 
-                        Column {
+                        Column() {
                             // section header
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("Entry: ${search.label}")
@@ -183,8 +184,8 @@ fun editSearchesScreen() {
 
                                         newLabel = newLabel.copy(text = search.label + " Copy")
                                         val newSearch = search.copy(label = newLabel.text)
-                                        searchesMutable.add(searchIndex+1, newSearch)
-                                        selectedSearch = searchIndex+1 to newSearch
+                                        searchesMutable.add(searchIndex + 1, newSearch)
+                                        selectedSearch = searchIndex + 1 to newSearch
                                         customSearches.value = searchesMutable.toList()
                                     },
 //                                    enabled = newLabel.text != search.label
@@ -410,9 +411,10 @@ fun editSearchesScreen() {
                                         },
                                         modifier = Modifier,
                                     ) {
-                                        ExpandableSection(
+                                        AlwaysExpandableSection(
                                             key = "searches.$searchIndex.terms.$termIndex.include.expanded",
-                                            canExpand = matcher.include.isNotEmpty(),
+//                                            default = true,
+//                                            canExpand = matcher.include.isNotEmpty(),
                                             headerContent = { expand ->
                                                 if (!expand) {
                                                     if (matcher.include.isNotEmpty()) {
@@ -468,7 +470,9 @@ fun editSearchesScreen() {
                                             modifier = Modifier
                                         ) {
                                             matcher.include.forEachIndexed { tagIndex, tag ->
-                                                Row {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
                                                     Text(tag.toString())
                                                     Spacer(modifier = Modifier.weight(0.5f))
                                                     deleteButtonWithConfirmation() {
@@ -584,24 +588,27 @@ fun editSearchesScreen() {
 fun ExpandableSectionHeader(
     isExpanded: Boolean,
     canExpand: Boolean,
+    showImage: Boolean = true,
     modifier: Modifier = Modifier,
     content: @Composable RowScope.(Boolean) -> Unit
 ) {
 
     val icon = if (isExpanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown
 
-    Row(modifier = modifier.padding(8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
 //        if (canExpand){
-        Image(
-            modifier = Modifier.size(32.dp),
-            imageVector = icon,
-            colorFilter = if (canExpand) {
-                ColorFilter.tint(color = MaterialTheme.colors.onSurface)
-            } else {
-                ColorFilter.tint(color = Color.DarkGray)
-            },
-            contentDescription = "expandable",
-        )
+        if (showImage) {
+            Image(
+                modifier = Modifier.size(32.dp),
+                imageVector = icon,
+                colorFilter = if (canExpand) {
+                    ColorFilter.tint(color = MaterialTheme.colors.onSurface)
+                } else {
+                    ColorFilter.tint(color = Color.DarkGray)
+                },
+                contentDescription = "expandable",
+            )
+        }
 //        }
         content(isExpanded)
 //        Text(
@@ -628,7 +635,7 @@ fun ExpandableSection(
         modifier = modifier
             .background(color = MaterialTheme.colors.surface)
             .fillMaxWidth()
-            .padding(4.dp)
+            .padding(start = 4.dp)
             .drawBehind {
                 if (canExpand && isExpanded) {
                     drawLine(
@@ -646,6 +653,8 @@ fun ExpandableSection(
 //            title = title,
             content = headerContent,
             modifier = Modifier
+                .padding(start = 8.dp)
+                .fillMaxWidth()
                 .then(
                     if (canExpand) {
                         Modifier
@@ -673,6 +682,48 @@ fun ExpandableSection(
             }
         }
     }
+}
+
+@Composable
+fun AlwaysExpandableSection(
+    key: String,
+    modifier: Modifier = Modifier,
+//    default: Boolean = false,
+//    canExpand: Boolean = true,
+    headerContent: @Composable RowScope.(Boolean) -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+
+    val canExpand = true
+    val isExpanded = true // expandedStates[key] ?: default
+//    val lineColor = MaterialTheme.colors.onSurface
+    Column(
+        modifier = modifier
+            .background(color = MaterialTheme.colors.surface)
+            .fillMaxWidth()
+            .padding(start = 8.dp)
+//            .drawBehind {
+//                if (canExpand && isExpanded) {
+//                    drawLine(
+//                        color = lineColor,
+//                        start = Offset(-1.0f, 0.0f),
+//                        end = Offset(-1.0f, size.height),
+//                        strokeWidth = Stroke.HairlineWidth
+//                    )
+//                }
+//            }
+    ) {
+        Row(modifier = modifier
+            .padding(start = 8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            headerContent(true)
+        }
+        Column(
+            modifier = Modifier.padding(start = 24.dp),
+        ) {
+            content()
+        }
+    }
+
 }
 
 @Composable

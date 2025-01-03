@@ -1,15 +1,13 @@
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import nestdrop.PresetLocation
 import tags.Tag
 import tags.nestdropCategoryTagsSet
-import ui.screens.presetsMap
 import ui.screens.imgSpritesMap
+import ui.screens.presetsMap
 import java.io.File
 import kotlin.time.measureTimedValue
 

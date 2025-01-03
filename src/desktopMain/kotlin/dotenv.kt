@@ -1,5 +1,4 @@
 import io.github.cdimascio.dotenv.dotenv
-import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 
 val dotenv = dotenv {

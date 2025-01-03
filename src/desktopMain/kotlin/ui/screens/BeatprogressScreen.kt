@@ -22,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.colorspace.ColorSpace
-import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -39,7 +37,6 @@ import beatProgress
 import bpmRoundedInt
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
-import org.jetbrains.skia.ColorFilter
 import kotlin.math.max
 import kotlin.math.roundToInt
 

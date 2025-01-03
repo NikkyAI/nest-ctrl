@@ -1,18 +1,10 @@
 package utils
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
-import nestdrop.NestdropSettings
-import nl.adaptivity.xmlutil.QName
-import nl.adaptivity.xmlutil.XmlReader
 import nl.adaptivity.xmlutil.core.XmlVersion
-import nl.adaptivity.xmlutil.serialization.InputKind
 import nl.adaptivity.xmlutil.serialization.UnknownChildHandler
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlConfig.Companion.DEFAULT_UNKNOWN_CHILD_HANDLER
-import nl.adaptivity.xmlutil.serialization.structure.XmlDescriptor
 
 private val logger = KotlinLogging.logger {}
 

@@ -1,16 +1,11 @@
 package nestdrop
 
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.graphics.toPixelMap
-import org.jetbrains.skia.Bitmap
-import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.Image
-import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.SamplingMode
 import org.jetbrains.skia.Surface
 import spritesFolder
-import ui.screens.imageFromFile
 
 sealed class PresetLocation {
     abstract val id: Int

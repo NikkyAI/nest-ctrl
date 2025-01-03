@@ -40,6 +40,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nestdrop.deck.Deck
+import ui.screens.PlaytlistSelectorScreen
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
 import ui.screens.debugScreen
@@ -48,7 +49,6 @@ import ui.screens.editSearchesScreen
 import ui.screens.imgFxScreen
 import ui.screens.imgSpritesScreenNew
 import ui.screens.presetDisplayScreen
-import ui.screens.PlaytlistSelectorScreen
 import ui.screens.spoutScreen
 import ui.screens.tagEditScreen
 import utils.runCommand

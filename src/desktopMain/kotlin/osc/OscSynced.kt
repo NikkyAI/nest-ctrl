@@ -1,6 +1,9 @@
 package osc
 
-import com.illposed.osc.*
+import com.illposed.osc.MessageSelector
+import com.illposed.osc.OSCMessage
+import com.illposed.osc.OSCMessageEvent
+import com.illposed.osc.OSCPacket
 import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow

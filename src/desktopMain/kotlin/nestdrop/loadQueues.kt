@@ -6,7 +6,6 @@ import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdropConfig
 import utils.xml
-import javax.xml.stream.XMLStreamException
 
 private val logger = KotlinLogging.logger { }
 

@@ -21,7 +21,6 @@
 package xml
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import nl.adaptivity.xmlutil.EventType
 import nl.adaptivity.xmlutil.XmlDelegatingWriter
 import nl.adaptivity.xmlutil.XmlWriter
 import nl.adaptivity.xmlutil.serialization.structure.XmlDescriptor
