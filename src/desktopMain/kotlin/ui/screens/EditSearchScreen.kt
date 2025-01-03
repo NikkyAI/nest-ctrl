@@ -2,7 +2,6 @@ package ui.screens
 
 import tags.Tag
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -29,10 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -62,12 +57,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import tags.presetTagsMapping
 import tags.TagMatcher
-import tags.TagScoreEval
+import tags.PresetPlaylist
 import tags.Term
 import ui.components.DropDownPopupIconButton
 import ui.components.verticalScroll
 
-val customSearches = MutableStateFlow<List<TagScoreEval>>(emptyList())
+val customSearches = MutableStateFlow<List<PresetPlaylist>>(emptyList())
 
 @Composable
 fun editSearchesScreen() {
@@ -76,7 +71,7 @@ fun editSearchesScreen() {
 
     val contentState = rememberScrollState()
 
-    var selectedSearch by remember { mutableStateOf<Pair<Int, TagScoreEval>?>(null) }
+    var selectedSearch by remember { mutableStateOf<Pair<Int, PresetPlaylist>?>(null) }
     val scope = rememberCoroutineScope()
     Row {
         verticalScroll {
@@ -128,7 +123,7 @@ fun editSearchesScreen() {
                             modifier = Modifier.onKeyEvent { event ->
                                 if (event.key == Key.Enter) {
                                     if (newSearchField.text.isNotBlank()) {
-                                        val newSearch = TagScoreEval(
+                                        val newSearch = PresetPlaylist(
                                             label = newSearchField.text, terms = emptyList()
                                         )
                                         selectedSearch = searchesCollected.size to newSearch
@@ -147,7 +142,7 @@ fun editSearchesScreen() {
 
                         IconButton(
                             onClick = {
-                                val newSearch = TagScoreEval(
+                                val newSearch = PresetPlaylist(
                                     label = newSearchField.text, terms = emptyList()
                                 )
                                 selectedSearch = searchesCollected.size to newSearch
@@ -269,7 +264,7 @@ fun editSearchesScreen() {
                                                     mutableBoosts.add(
                                                         Term(
                                                             matcher = TagMatcher(
-                                                                emptySet(), emptySet()
+                                                                emptySet(), // emptySet()
                                                             ),
                                                             boost = (newBoostValue.toDoubleOrNull() ?: 10.0)
                                                         )
@@ -298,7 +293,7 @@ fun editSearchesScreen() {
                                             mutableBoosts.add(
                                                 Term(
                                                     matcher = TagMatcher(
-                                                        include = emptySet(), exclude = emptySet()
+                                                        include = emptySet(), // exclude = emptySet()
                                                     ),
                                                     boost = (newBoostValue.toDoubleOrNull() ?: 10.0)
                                                 )
@@ -330,9 +325,11 @@ fun editSearchesScreen() {
                                             }
                                             if (expanded) {
 
-                                                Text("Include: ${matcher.include.size}, Exclude: ${matcher.exclude.size} -> ${boost}")
+//                                                Text("Include: ${matcher.include.size}, Exclude: ${matcher.exclude.size} -> ${boost}")
+                                                Text("Include: ${matcher.include.size} -> ${boost}")
                                             } else {
-                                                Text("Include: ${matcher.include}, Exclude: ${matcher.exclude} -> ${boost}")
+//                                                Text("Include: ${matcher.include}, Exclude: ${matcher.exclude} -> ${boost}")
+                                                Text("Include: ${matcher.include} -> ${boost}")
                                             }
                                             if (expanded) {
 
@@ -443,7 +440,7 @@ fun editSearchesScreen() {
                                                 DropDownPopupIconButton(
                                                     icon = { Icon(Icons.Filled.Add, "add") },
                                                     items = availableTags,
-                                                    itemEnabled = { item -> (item !in matcher.include && item !in matcher.exclude) },
+                                                    itemEnabled = { item -> (item !in matcher.include /*&& item !in matcher.exclude*/) },
                                                     onItemClick = { item ->
                                                         val searchesMutable = searchesCollected.toMutableList()
 
@@ -496,81 +493,81 @@ fun editSearchesScreen() {
                                                 }
                                             }
                                         }
-                                        ExpandableSection(
-                                            key = "searches.$searchIndex.terms.$termIndex.exclude.expanded",
-                                            canExpand = matcher.exclude.isNotEmpty(),
-                                            headerContent = { expand ->
-                                                if (!expand) {
-                                                    if (matcher.exclude.isNotEmpty()) {
-                                                        Text("Exclude ${matcher.exclude}")
-                                                    } else {
-                                                        Text("Exclude")
-                                                    }
-                                                } else {
-                                                    Text("Exclude ${matcher.exclude.size}")
-                                                }
-                                                Spacer(modifier = Modifier.weight(0.5f))
-
-                                                val availableTags =
-                                                    presetTags.values.flatten().toSet().sortedBy { it.toString() }
-                                                DropDownPopupIconButton(
-                                                    icon = { Icon(Icons.Filled.Add, "add") },
-                                                    items = availableTags,
-                                                    itemEnabled = { item -> (item !in matcher.include && item !in matcher.exclude) },
-                                                    onItemClick = { item ->
-                                                        val searchesMutable = searchesCollected.toMutableList()
-
-                                                        val mutableBoosts = search.terms.toMutableList()
-                                                        mutableBoosts[termIndex] = Term(
-                                                            matcher = matcher.copy(
-                                                                exclude = matcher.exclude + item
-                                                            ),
-                                                            boost = boost
-                                                        )
-
-                                                        val newSearch = search.copy(
-                                                            terms = mutableBoosts.toList()
-                                                        )
-                                                        searchesMutable[searchIndex] = newSearch
-                                                        selectedSearch = searchIndex to newSearch
-
-                                                        customSearches.value = searchesMutable.toList()
-                                                    },
-                                                    renderItem = { item ->
-                                                        Text(item.toString())
-                                                    }
-                                                )
-                                            },
-//                                    default = true,
-                                            modifier = Modifier
-                                        ) {
-                                            matcher.exclude.forEachIndexed { tagIndex, tag ->
-                                                Row {
-                                                    Text(tag.toString())
-                                                    Spacer(modifier = Modifier.weight(0.5f))
-
-                                                    deleteButtonWithConfirmation() {
-                                                        val searchesMutable = searchesCollected.toMutableList()
-
-                                                        val mutableBoosts = search.terms.toMutableList()
-                                                        mutableBoosts[termIndex] = Term(
-                                                            matcher = matcher.copy(
-                                                                exclude = matcher.exclude - tag
-                                                            ),
-                                                            boost = boost
-                                                        )
-
-                                                        val newSearch = search.copy(
-                                                            terms = mutableBoosts.toList()
-                                                        )
-                                                        searchesMutable[searchIndex] = newSearch
-                                                        selectedSearch = searchIndex to newSearch
-
-                                                        customSearches.value = searchesMutable.toList()
-                                                    }
-                                                }
-                                            }
-                                        }
+//                                        ExpandableSection(
+//                                            key = "searches.$searchIndex.terms.$termIndex.exclude.expanded",
+//                                            canExpand = matcher.exclude.isNotEmpty(),
+//                                            headerContent = { expand ->
+//                                                if (!expand) {
+//                                                    if (matcher.exclude.isNotEmpty()) {
+//                                                        Text("Exclude ${matcher.exclude}")
+//                                                    } else {
+//                                                        Text("Exclude")
+//                                                    }
+//                                                } else {
+//                                                    Text("Exclude ${matcher.exclude.size}")
+//                                                }
+//                                                Spacer(modifier = Modifier.weight(0.5f))
+//
+//                                                val availableTags =
+//                                                    presetTags.values.flatten().toSet().sortedBy { it.toString() }
+//                                                DropDownPopupIconButton(
+//                                                    icon = { Icon(Icons.Filled.Add, "add") },
+//                                                    items = availableTags,
+//                                                    itemEnabled = { item -> (item !in matcher.include && item !in matcher.exclude) },
+//                                                    onItemClick = { item ->
+//                                                        val searchesMutable = searchesCollected.toMutableList()
+//
+//                                                        val mutableBoosts = search.terms.toMutableList()
+//                                                        mutableBoosts[termIndex] = Term(
+//                                                            matcher = matcher.copy(
+//                                                                exclude = matcher.exclude + item
+//                                                            ),
+//                                                            boost = boost
+//                                                        )
+//
+//                                                        val newSearch = search.copy(
+//                                                            terms = mutableBoosts.toList()
+//                                                        )
+//                                                        searchesMutable[searchIndex] = newSearch
+//                                                        selectedSearch = searchIndex to newSearch
+//
+//                                                        customSearches.value = searchesMutable.toList()
+//                                                    },
+//                                                    renderItem = { item ->
+//                                                        Text(item.toString())
+//                                                    }
+//                                                )
+//                                            },
+////                                    default = true,
+//                                            modifier = Modifier
+//                                        ) {
+//                                            matcher.exclude.forEachIndexed { tagIndex, tag ->
+//                                                Row {
+//                                                    Text(tag.toString())
+//                                                    Spacer(modifier = Modifier.weight(0.5f))
+//
+//                                                    deleteButtonWithConfirmation() {
+//                                                        val searchesMutable = searchesCollected.toMutableList()
+//
+//                                                        val mutableBoosts = search.terms.toMutableList()
+//                                                        mutableBoosts[termIndex] = Term(
+//                                                            matcher = matcher.copy(
+//                                                                exclude = matcher.exclude - tag
+//                                                            ),
+//                                                            boost = boost
+//                                                        )
+//
+//                                                        val newSearch = search.copy(
+//                                                            terms = mutableBoosts.toList()
+//                                                        )
+//                                                        searchesMutable[searchIndex] = newSearch
+//                                                        selectedSearch = searchIndex to newSearch
+//
+//                                                        customSearches.value = searchesMutable.toList()
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
                                     }
                                 }
                             }

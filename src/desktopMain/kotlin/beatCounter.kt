@@ -130,7 +130,7 @@ suspend fun startBeatCounter(
 //            .launchIn(flowScope)
 
         decks.forEach { deck ->
-            deck.presetSwitching.beatFlowOld(beatCounter.runningHistoryNotNull())
+            deck.presetSwitching.beatFlow(beatCounter.runningHistoryNotNull())
                 .launchIn(flowScope)
         }
 //        decks.forEach { deck ->
@@ -151,7 +151,7 @@ suspend fun startBeatCounter(
                 val now = Clock.System.now()
                 val timeDelta = now - lastLoop
                 lastLoop = Clock.System.now()
-                val beatsPerMillisecond = Link.bpm.value / 60_000.0
+                val beatsPerMillisecond = bpmSynced.value / 60_000.0
                 val beatsInDuration = beatsPerMillisecond * timeDelta.inWholeMilliseconds
                 beatCounter.value += beatsInDuration
             }

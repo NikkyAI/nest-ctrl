@@ -1,10 +1,12 @@
 package nestdrop
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.delay
 import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdropConfig
 import utils.xml
+import javax.xml.stream.XMLStreamException
 
 private val logger = KotlinLogging.logger { }
 
@@ -17,17 +19,34 @@ private val logger = KotlinLogging.logger { }
 //    ).trim().toInt()
 //}
 
+private suspend fun parseNestdropXml(
+    retries: Int = 0
+): NestdropSettings {
+    val nestdropSettings: NestdropSettings = try {
+        xml.decodeFromString(
+            NestdropSettings.serializer(), nestdropConfig.readText()
+                .substringAfter(
+                    """<?xml version="1.0" encoding="utf-8"?>"""
+                )
+//            .lines().drop(1).joinToString("/n")
+        )
+    } catch (e: nl.adaptivity.xmlutil.XmlException) {
+        logger.error(e) { "failed to parse XML" }
+        delay(100)
+        if (retries < 5) {
+            return parseNestdropXml( retries + 1)
+        } else {
+            throw e
+        }
+    }
+    return nestdropSettings
+}
+
 suspend fun loadNestdropConfig(
     presetQueues: PresetQueues,
-    decks: List<Deck>,
+    decks: List<Deck>
 ) {
-    val nestdropSettings = xml.decodeFromString(
-        NestdropSettings.serializer(), nestdropConfig.readText()
-            .substringAfter(
-                """<?xml version="1.0" encoding="utf-8"?>"""
-            )
-//            .lines().drop(1).joinToString("/n")
-    )
+    val nestdropSettings = parseNestdropXml()
     logger.info { "loaded xml from $nestdropConfig" }
 
 //    val numberOfDecks = loadNumberOfDecks()

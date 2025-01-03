@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.0.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.0.2")
 
 @file:Repository("https://bindings.krzeminski.it")
 
@@ -11,9 +11,11 @@
 @file:DependsOn("joutvhu:/create-release:v1.0.1")
 @file:DependsOn("gradle:actions__setup-gradle:v3")
 @file:DependsOn("jimeh:update-tags-action:v1.0.1")
+@file:DependsOn("Dylan700:sftp-upload-action:v1.2.3")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
+import io.github.typesafegithub.workflows.actions.dylan700.SftpUploadAction_Untyped
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
 import io.github.typesafegithub.workflows.actions.jimeh.UpdateTagsAction_Untyped
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhRelease

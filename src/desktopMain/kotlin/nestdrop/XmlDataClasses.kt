@@ -396,6 +396,8 @@ data class NestdropSettings(
                     val midiDeck: Int? = null,
                     @SerialName("MidiPresetType")
                     val midiPresetType: Int? = null,
+                    @SerialName("MidiPresetQueue")
+                    val midiPresetQueue: String? = null,
                     @SerialName("MidiHotKey")
                     val midiHotKey: String? = null,
                     @SerialName("Comments")

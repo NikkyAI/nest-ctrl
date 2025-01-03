@@ -1,11 +1,13 @@
 package tags
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class TagScoreEval(
+data class PresetPlaylist(
     val label: String = "",
     val terms: List<Term>
 ) {
@@ -38,9 +40,11 @@ private fun <E> List<E>.startsWith(subset: List<E>): Boolean {
 
 @Immutable
 @Serializable
-data class TagMatcher(
-    val include: Set<Tag> = emptySet(),
-    val exclude: Set<Tag> = emptySet(),
+data class TagMatcher (
+    val include: Set<Tag> = setOf(),
+    @OptIn(ExperimentalSerializationApi::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val exclude: Set<Tag> = setOf(),
 ) {
     fun matches(tags: Set<Tag>): Boolean {
         val matchInclude = include.all { includeTag ->
@@ -48,12 +52,12 @@ data class TagMatcher(
                 t.namespace.startsWith(includeTag.namespace + includeTag.name)
             }
         }
-        val matchExclude = exclude.none { excludeTag ->
-            excludeTag in tags || tags.any { t ->
-                t.namespace.startsWith(excludeTag.namespace + excludeTag.name)
-            }
-        }
-        return matchInclude && matchExclude
+//        val matchExclude = exclude.none { excludeTag ->
+//            excludeTag in tags || tags.any { t ->
+//                t.namespace.startsWith(excludeTag.namespace + excludeTag.name)
+//            }
+//        }
+        return matchInclude // && matchExclude
     }
 }
 

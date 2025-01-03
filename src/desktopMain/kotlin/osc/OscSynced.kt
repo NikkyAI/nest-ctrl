@@ -4,24 +4,22 @@ import com.illposed.osc.*
 import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 
 
 private val logger = KotlinLogging.logger { }
 
 
-sealed interface OscSynced {
+sealed interface OscSynced<T: Any> {
     val receive: Boolean
     val send: Boolean
     var logReceived: Boolean
     var logSending: Boolean
-    val flow: StateFlow<*>
+    val flow: Flow<*>
     val messageSelector: MessageSelector
     val target: Target
     var dropFirst: Int
@@ -35,28 +33,33 @@ sealed interface OscSynced {
     suspend fun onMessageEvent(event: OSCMessageEvent)
 
 //    suspend fun generateOscMessage(value: Any): OSCPacket
-    suspend fun generateOscMessages(value: Any): List<OSCPacket>
+    suspend fun generateOscMessagesUntyped(value: Any): List<OSCPacket> {
+        return generateOscMessages(value as T)
+    }
 
-    interface Address: OscSynced {
+    suspend fun generateOscMessages(value: T): List<OSCPacket>
+
+    interface ListenAddress<T: Any>: OscSynced<T> {
         override val name: String
-            get() = address
-        val address: String
-        override val messageSelector: MessageSelector get() = OSCPatternAddressMessageSelector(address)
+            get() = listenAddress
+        val listenAddress: String
+        override val messageSelector: MessageSelector get() = OSCPatternAddressMessageSelector(listenAddress)
     }
 
 
-    interface ISingle<T> : OscSynced, Address {
+    interface SendingSingle<T: Any> : OscSynced<T> {
+        val sendAddress: String
 
         suspend fun trySetValue(value: Any) {
             try {
                 @Suppress("UNCHECKED_CAST")
                 setValue(value as T)
             } catch (e: TypeCastException) {
-                logger.error(e) { "failed to sync value $value to $address (${value::class.qualifiedName})" }
+                logger.error(e) { "failed to sync value $value to $sendAddress (${value::class.qualifiedName})" }
             }
         }
 
-        override suspend fun generateOscMessages(value: Any): List<OSCPacket> {
+        override suspend fun generateOscMessages(value: T): List<OSCPacket> {
             return listOf(
                 generateOscMessage(value)
             )
@@ -67,70 +70,64 @@ sealed interface OscSynced {
             trySetValue(value)
         }
 
-        suspend fun generateOscMessage(value: Any): OSCPacket {
-            return OSCMessage(address, value)
+        suspend fun generateOscMessage(value: T): OSCPacket {
+            return OSCMessage(sendAddress, value)
         }
 
         suspend fun setValue(value: T)
     }
 
-    interface IList<T, Q> : OscSynced, Address {
-        suspend fun trySetValue(value1: Any, value2: Any) {
-            try {
-                @Suppress("UNCHECKED_CAST")
-                setValue(value1 as T, value2 as Q)
-
-            } catch (e: TypeCastException) {
-                logger.error(e) { "unexpected type in osc message arguments $value1 $value2" }
-                logger.error(e) { "failed to sync value $value1, $value2 to $address (${value1::class.qualifiedName} ${value2::class.qualifiedName})" }
-            }
-        }
-
-
-        override suspend fun generateOscMessages(value: Any): List<OSCPacket> {
-            return listOf(
-                generateOscMessage(value)
-            )
-        }
-
-        override suspend fun onMessageEvent(event: OSCMessageEvent) {
-            val msg = event.message
-            val value1 = msg.arguments[0]
-            val value2 = msg.arguments[1]
-            trySetValue(value1, value2)
-        }
-
-        suspend fun generateOscMessage(value: Any): OSCPacket {
-            val (value1, value2) = value as kotlin.Pair<*, *>
-            return OSCMessage(
-                address,
-                listOf(value1!!, value2!!)
-            )
-        }
-
-        suspend fun setValue(value1: T, value2: Q)
-    }
+//    interface IList<T, Q> : OscSynced, Address {
+//        suspend fun trySetValue(value1: Any, value2: Any) {
+//            try {
+//                @Suppress("UNCHECKED_CAST")
+//                setValue(value1 as T, value2 as Q)
+//
+//            } catch (e: TypeCastException) {
+//                logger.error(e) { "unexpected type in osc message arguments $value1 $value2" }
+//                logger.error(e) { "failed to sync value $value1, $value2 to $address (${value1::class.qualifiedName} ${value2::class.qualifiedName})" }
+//            }
+//        }
+//
+//
+//        override suspend fun generateOscMessages(value: Any): List<OSCPacket> {
+//            return listOf(
+//                generateOscMessage(value)
+//            )
+//        }
+//
+//        override suspend fun onMessageEvent(event: OSCMessageEvent) {
+//            val msg = event.message
+//            val value1 = msg.arguments[0]
+//            val value2 = msg.arguments[1]
+//            trySetValue(value1, value2)
+//        }
+//
+//        suspend fun generateOscMessage(value: Any): OSCPacket {
+//            val (value1, value2) = value as kotlin.Pair<*, *>
+//            return OSCMessage(
+//                address,
+//                listOf(value1!!, value2!!)
+//            )
+//        }
+//
+//        suspend fun setValue(value1: T, value2: Q)
+//    }
 
     class ValueSingle<T: Any> private constructor(
-        override val address: String,
+        address: String,
         private val state: MutableStateFlow<T>,
         override val receive: Boolean,
         override val send: Boolean,
         override val target: Target,
         val valueToMessages: suspend (String, T) -> List<OSCMessage>,
-    ) : MutableStateFlow<T> by state, ISingle<T> {
+    ) : MutableStateFlow<T> by state, SendingSingle<T>, ListenAddress<T> {
         override val flow = state
-//        override suspend fun trySetValue(value: Any) {
-//            try {
-//                @Suppress("UNCHECKED_CAST")
-//                state.value = value as T
-//            } catch (e: TypeCastException) {
-//                logger.errorF(e) { "failed to sync value $value to $address (${value::class.qualifiedName})" }
-//            }
-//        }
+        override val listenAddress: String = address
+        override val sendAddress: String = address
 
-        override suspend fun generateOscMessages(value: Any): List<OSCPacket> {
-            return valueToMessages(address, value as T)
+        override suspend fun generateOscMessages(value: T): List<OSCPacket> {
+            return valueToMessages(sendAddress, value)
         }
 
         override suspend fun setValue(value: T) {
@@ -147,9 +144,9 @@ sealed interface OscSynced {
             receive: Boolean = true,
             send: Boolean = true,
             target: Target,
-            valueToMessages: suspend (String, T) -> List<OSCMessage> = { address, value ->
+            valueToMessages: suspend (String, T) -> List<OSCMessage> = { sendAddress, value ->
                 listOf(
-                    OSCMessage(address, value)
+                    OSCMessage(sendAddress, value)
                 )
             },
         ) : this(
@@ -163,21 +160,72 @@ sealed interface OscSynced {
 
         init {
             syncedValues += this
-//            label(address)
             runBlocking {
                 logger.info { "creating synced value for $address" }
             }
         }
     }
 
-    class Custom <T: Any> private constructor(
-        override val address: String,
-        private val state: MutableStateFlow<T>,
+    class FlowSingle<T: Any> private constructor(
+        address: String,
+        private val mutableFlow: MutableSharedFlow<T>,
+        override val receive: Boolean,
+        override val send: Boolean,
+        override val target: Target,
+        val valueToMessages: suspend (String, T) -> List<OSCMessage>,
+    ) : SharedFlow<T> by mutableFlow, SendingSingle<T>, ListenAddress<T> {
+        override val flow = mutableFlow
+        override val listenAddress: String = address
+        override val sendAddress: String = address
+
+        override suspend fun generateOscMessages(value: T): List<OSCPacket> {
+            return valueToMessages(sendAddress, value)
+        }
+
+        override suspend fun setValue(value: T) {
+            mutableFlow.emit(value)
+        }
+
+        override var logReceived: Boolean = true
+        override var logSending: Boolean = true
+        override var dropFirst: Int = 0
+
+        constructor(
+            address: String,
+            receive: Boolean = true,
+            send: Boolean = true,
+            target: Target,
+            valueToMessages: suspend (String, T) -> List<OSCMessage> = { sendAddress, value ->
+                listOf(
+                    OSCMessage(sendAddress, value)
+                )
+            },
+        ) : this(
+            address = address,
+            mutableFlow = MutableSharedFlow(),
+            receive = receive,
+            send = send,
+            target = target,
+            valueToMessages = valueToMessages
+        )
+
+        init {
+            syncedValues += this
+            runBlocking {
+                logger.info { "creating synced value for $address" }
+            }
+        }
+    }
+
+    class FlowCustom <T: Any> private constructor(
+        address: String,
+        private val mutableSharedFlow: MutableSharedFlow<T>,
         override val receive: Boolean,
         override val target: Target,
         val argToValue: suspend (String, List<Any>) -> T,
-    ): MutableStateFlow<T> by state, Address {
-        override val flow = state
+    ): SharedFlow<T> by mutableSharedFlow, ListenAddress<T> {
+        override val flow = mutableSharedFlow
+        override val listenAddress: String = address
 
         //NOTE: maybe allow sending if required
         override val send: Boolean = false
@@ -187,11 +235,64 @@ sealed interface OscSynced {
         override var dropFirst: Int = 0
 
         override suspend fun onMessageEvent(event: OSCMessageEvent) {
-            state.value = argToValue(event.message.address, event.message.arguments)
+            logger.info { "onMessageEvent ${event.message.stringify()}" }
+            mutableSharedFlow.emit(argToValue(event.message.address, event.message.arguments))
         }
 
-        override suspend fun generateOscMessages(value: Any): List<OSCPacket> {
+        override suspend fun generateOscMessages(value: T): List<OSCPacket> {
             return listOf(
+                //TODO: generate message as required
+//                generateOscMessage(value)
+            )
+        }
+
+        constructor(
+            address: String,
+            receive: Boolean = true,
+            target: Target,
+            argToValue: suspend (String, List<Any>) -> T,
+        ) : this(
+            address = address,
+            mutableSharedFlow = MutableSharedFlow(),
+            receive = receive,
+            target = target,
+            argToValue = argToValue
+        )
+
+        init {
+            syncedValues += this
+            runBlocking {
+                logger.info { "creating synced value for $listenAddress" }
+            }
+        }
+    }
+
+    class ValueCustom <T: Any> private constructor(
+        address: String,
+        private val stateFlow: MutableStateFlow<T>,
+        override val receive: Boolean,
+        override val target: Target,
+        val argToValue: suspend (address: String, arguments: List<Any>) -> T,
+    ): StateFlow<T> by stateFlow, ListenAddress<T> {
+        override val flow = stateFlow
+        override val listenAddress: String = address
+
+        //NOTE: maybe allow sending if required
+        override val send: Boolean = false
+
+        override var logReceived: Boolean = true
+        override var logSending: Boolean = true
+        override var dropFirst: Int = 0
+
+        override suspend fun onMessageEvent(event: OSCMessageEvent) {
+//            logger.info { "parsing ${event.message.stringify()}" }
+            stateFlow.emit(argToValue(event.message.address, event.message.arguments))
+//            state.value = argToValue(event.message.address, event.message.arguments)
+        }
+
+        override suspend fun generateOscMessages(value: T): List<OSCPacket> {
+            return listOf(
+                //TODO: generate message as required
 //                generateOscMessage(value)
             )
         }
@@ -201,10 +302,10 @@ sealed interface OscSynced {
             initialValue: T,
             receive: Boolean = true,
             target: Target,
-            argToValue: suspend (String, List<Any>) -> T,
+            argToValue: suspend (address: String, arguments: List<Any>) -> T,
         ) : this(
             address = address,
-            state = MutableStateFlow(initialValue),
+            stateFlow = MutableStateFlow(initialValue),
             receive = receive,
             target = target,
             argToValue = argToValue
@@ -212,9 +313,8 @@ sealed interface OscSynced {
 
         init {
             syncedValues += this
-//            label(address)
             runBlocking {
-                logger.info { "creating synced value for $address" }
+                logger.info { "creating synced value for $listenAddress" }
             }
         }
     }
@@ -401,7 +501,7 @@ sealed interface OscSynced {
 //    }
 
     companion object {
-        val syncedValues = mutableListOf<OscSynced>()
+        val syncedValues = mutableListOf<OscSynced<*>>()
     }
 }
 

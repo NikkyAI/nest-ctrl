@@ -120,7 +120,7 @@ fun tagEditScreen() {
                 decks.forEach { deck ->
                     if (deck.id > decksEnabled) return@forEach
 
-                    val presetData by deck.preset.syncedValue.collectAsState()
+                    val presetData by deck.preset.currentPreset.collectAsState()
                     val presetName = presetData.name
                     val isTagged = presetName.substringBeforeLast(".milk") in entries
 

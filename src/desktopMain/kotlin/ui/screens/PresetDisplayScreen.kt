@@ -32,7 +32,7 @@ fun presetScreenSingle(deck: Deck) {
     val presetsMap by presetsMap.collectAsState()
     val tagMap by presetTagsMapping.collectAsState()
 
-    val currentPreset by deck.preset.syncedValue.collectAsState()
+    val currentPreset by deck.preset.currentPreset.collectAsState()
     val presetName = currentPreset.name
     val presetEntry = presetsMap[presetName]
 
@@ -116,7 +116,7 @@ fun presetDisplayScreen() {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                val currentPreset by deck.preset.syncedValue.collectAsState()
+                val currentPreset by deck.preset.currentPreset.collectAsState()
                 val presetName = currentPreset.name
                 val presetEntry = presetsMap[presetName]
 

@@ -35,7 +35,7 @@ import nestdrop.deck.Deck
 import nestdrop.nestdropSetPreset
 import tags.presetTagsMapping
 import presetsFolder
-import tags.TagScoreEval
+import tags.PresetPlaylist
 import tags.nestdropQueueSearches
 import ui.components.lazyList
 import ui.components.verticalScroll
@@ -62,7 +62,7 @@ fun debugScreen() {
 
     val state = rememberLazyListState()
 
-    var tagScore by remember { mutableStateOf<TagScoreEval?>(null) }
+    var tagScore by remember { mutableStateOf<PresetPlaylist?>(null) }
     Column {
         /*
         Row(

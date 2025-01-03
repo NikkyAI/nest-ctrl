@@ -526,7 +526,7 @@ suspend fun startNestdropListener() {
                         builder.addMessageListener(
                             syncedValue.messageSelector
                         ) { messageEvent ->
-                            flowScope.launch {
+                            runBlocking {
                                 val msg = messageEvent.message
                                 if (syncedValue.logReceived) {
                                     logger.info { "NESTDROP IN: ${msg.stringify()}" }

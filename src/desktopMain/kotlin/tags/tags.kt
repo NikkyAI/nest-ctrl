@@ -33,7 +33,7 @@ val customTagsMapping = MutableStateFlow<Map<Tag, Set<String>>>(emptyMap())
 val nestdropCategoryTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val customTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val queueTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
-val nestdropQueueSearches = MutableStateFlow<List<TagScoreEval>>(emptyList())
+val nestdropQueueSearches = MutableStateFlow<List<PresetPlaylist>>(emptyList())
 
 //@Serializer(forClass = tags.Tag::class)
 object TagSerializer : KSerializer<Tag> {
@@ -145,7 +145,7 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
             val queueTagsAndSearches = queues.associate { queue ->
 
                 val tag = Tag(queue.name, listOf("queue"))
-                val search = TagScoreEval(
+                val search = PresetPlaylist(
                     label = "Queue ${tag.name}",
                     terms = listOf(
                         Term(

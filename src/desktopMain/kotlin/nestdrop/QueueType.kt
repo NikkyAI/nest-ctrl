@@ -4,5 +4,6 @@ enum class QueueType {
     Preset,
     Sprite,
     Text,
-    MIDI
+    MIDI,
+    Settings
 }

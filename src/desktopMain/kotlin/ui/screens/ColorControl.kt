@@ -19,8 +19,8 @@ fun ColorControl(deck: Deck) {
 //            .defaultMinSize(300.dp)
 //            .width(300.dp)
     ) {
-        deck.ndColor.brightness.asFader(Color(deck.hexColor))
-        deck.ndColor.contrast.asFader(Color(deck.hexColor))
-        deck.ndColor.gamma.asFader(Color(deck.hexColor))
+        deck.ndColor.brightness.asFader(deck.color)
+        deck.ndColor.contrast.asFader(deck.color)
+        deck.ndColor.gamma.asFader(deck.color)
     }
 }

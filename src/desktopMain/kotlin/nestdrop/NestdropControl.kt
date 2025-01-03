@@ -4,7 +4,6 @@ import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -42,8 +41,11 @@ sealed interface NestdropControl {
     ) : MutableStateFlow<Float> by stateFlow, NestdropControl {
         private val sliderAddress: String get() = "/Controls/Deck$deck/s$propertyName"
 
-        private val syncedValue =
-            OscSynced.ValueSingle<Float>(sliderAddress, initialValue, target = OscSynced.Target.Nestdrop)
+        private val syncedFlow = OscSynced.ValueSingle(
+            address = sliderAddress,
+            initialValue = initialValue,
+            target = OscSynced.Target.Nestdrop,
+        )
 
         private val valueLabel = MutableStateFlow("")
         private suspend fun onSliderValueChanged(value: Float) {
@@ -71,13 +73,13 @@ sealed interface NestdropControl {
                 }
                 .onEach {
                     valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
-                    syncedValue.value = it
+                    syncedFlow.setValue(it)
 //                    onSliderValueChanged(it)
                 }
                 .launchIn(flowScope)
 
 
-            syncedValue
+            syncedFlow
                 .onEach { value ->
                     stateFlow.value = value
                 }
@@ -99,8 +101,11 @@ sealed interface NestdropControl {
 
         private val valueLabel = MutableStateFlow("")
 
-        private val syncedValue =
-            OscSynced.ValueSingle<Float>(sliderAddress, initialValue, target = OscSynced.Target.Nestdrop)
+        private val syncedFlow = OscSynced.ValueSingle(
+            address = sliderAddress,
+            initialValue = initialValue,
+            target = OscSynced.Target.Nestdrop,
+        )
 
         suspend fun doReset() {
             stateFlow.value = defaultValue
@@ -114,15 +119,6 @@ sealed interface NestdropControl {
             }
         }
 
-        private suspend fun onSliderValueChanged(value: Float) {
-            nestdropSendChannel.send(
-                OSCMessage(
-                    sliderAddress,
-                    value
-                )
-            )
-        }
-
         override suspend fun startFlows() {
             stateFlow
                 .map {
@@ -130,12 +126,11 @@ sealed interface NestdropControl {
                 }
                 .onEach {
                     valueLabel.value = ((it * 100).roundToInt() / 100f).toString()
-                    syncedValue.value = it
-//                    onSliderValueChanged(it)
+                    syncedFlow.setValue(it)
                 }
                 .launchIn(flowScope)
 
-            syncedValue
+            syncedFlow
                 .onEach { value ->
                     stateFlow.value = value
                 }
@@ -150,30 +145,20 @@ sealed interface NestdropControl {
         private val stateFlow: MutableStateFlow<Boolean> = MutableStateFlow(initialValue),
     ) : MutableStateFlow<Boolean> by stateFlow, NestdropControl {
         private val buttonAddress: String get() = "/Controls/Deck$deck/bt$propertyName"
-        private val syncedValue = OscSynced.ValueSingle<Int>(
+        private val syncedFlow = OscSynced.ValueSingle<Int>(
             buttonAddress,
-            if(initialValue) 0 else 1,
+            if (initialValue) 0 else 1,
             target = OscSynced.Target.Nestdrop
         )
-
-        private suspend fun doClick(value: Boolean) {
-            nestdropSendChannel.send(
-                OSCMessage(
-                    buttonAddress,
-                    if (value) 1 else 0
-                )
-            )
-        }
 
         override suspend fun startFlows() {
             stateFlow
                 .onEach { value ->
-                    syncedValue.value = if(value) 1 else 0
-//                    doClick(value)
+                    syncedFlow.setValue(if (value) 1 else 0)
                 }
                 .launchIn(flowScope)
 
-            syncedValue
+            syncedFlow
                 .onEach { value ->
                     stateFlow.value = value != 0
                 }
@@ -193,10 +178,16 @@ sealed interface NestdropControl {
         private val buttonAddress: String = "/Controls/Deck$deck/b$propertyName"
         private val sliderAddressMin: String = "/Controls/Deck$deck/s$propertyName/Min"
         private val sliderAddressMax: String = "/Controls/Deck$deck/s$propertyName/Max"
-        private val syncedValueMin =
-            OscSynced.ValueSingle<Float>(sliderAddressMin, initialMin, target = OscSynced.Target.Nestdrop)
-        private val syncedValueMax =
-            OscSynced.ValueSingle<Float>(sliderAddressMax, initialMax, target = OscSynced.Target.Nestdrop)
+        private val syncedFlowMin = OscSynced.ValueSingle(
+            address = sliderAddressMin,
+            initialValue = initialMin,
+            target = OscSynced.Target.Nestdrop
+        )
+        private val syncedFlowMax = OscSynced.ValueSingle(
+            address = sliderAddressMax,
+            initialValue = initialMax,
+            target = OscSynced.Target.Nestdrop
+        )
 
         private val valueLabel = MutableStateFlow("")
 
@@ -212,20 +203,8 @@ sealed interface NestdropControl {
         }
 
         private suspend fun onSliderValueChanged(min: Float, max: Float) {
-            syncedValueMin.value = min
-            syncedValueMax.value = max
-//            nestdropSendChannel.send(
-//                OSCMessage(
-//                    sliderAddressMin,
-//                    min
-//                )
-//            )
-//            nestdropSendChannel.send(
-//                OSCMessage(
-//                    sliderAddressMax,
-//                    max
-//                )
-//            )
+            syncedFlowMin.setValue(min)
+            syncedFlowMax.setValue(max)
         }
 
         override suspend fun startFlows() {
@@ -238,14 +217,14 @@ sealed interface NestdropControl {
                 }
                 .launchIn(flowScope)
 
-            syncedValueMin
+            syncedFlowMin
                 .onEach { value ->
                     minState.value = value
                 }
                 .launchIn(flowScope)
 
 
-            syncedValueMax
+            syncedFlowMax
                 .onEach { value ->
                     maxState.value = value
                 }
@@ -262,22 +241,12 @@ sealed interface NestdropControl {
         private val stateFlow: MutableStateFlow<T> = MutableStateFlow(initialValue),
     ) : MutableStateFlow<T> by stateFlow, NestdropControl {
         private val dropdownAddress: String get() = "/Controls/Deck$deck/cb$propertyName"
-        private val syncedValue = OscSynced.ValueSingle<Int>(
-            dropdownAddress,
-            enumToValue(initialValue),
+        private val syncedFlow = OscSynced.ValueSingle<Int>(
+            address = dropdownAddress,
+            initialValue = enumToValue(initialValue),
             target = OscSynced.Target.Nestdrop
         )
         private val valueLabel = MutableStateFlow("")
-
-        private suspend fun onValueChanged(value: Int) {
-            nestdropSendChannel.send(
-                OSCMessage(
-                    dropdownAddress,
-                    value
-                )
-            )
-        }
-
 
         fun doReset() {
             stateFlow.value = initialValue
@@ -287,12 +256,12 @@ sealed interface NestdropControl {
             stateFlow
                 .onEach {
                     valueLabel.value = it.toString()
-                    syncedValue.value = enumToValue(it)
+                    syncedFlow.setValue(enumToValue(it))
 //                    onValueChanged(enumToValue(it))
                 }
                 .launchIn(flowScope)
 
-            syncedValue
+            syncedFlow
                 .onEach { value ->
                     stateFlow.value = options[value]
                 }

@@ -7,11 +7,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNamingStrategy
 import nestdrop.deck.Deck
 import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
-import tags.TagScoreEval
+import obs.LOOM
+import tags.PresetPlaylist
 import ui.screens.customSearches
 import utils.prettyPrint
 import kotlin.time.Duration.Companion.seconds
@@ -20,8 +24,8 @@ private val logger = KotlinLogging.logger { }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 val configScope = CoroutineScope(
-    Dispatchers.IO
-        .limitedParallelism(32)
+    Dispatchers.LOOM
+        .limitedParallelism(16)
 ) + CoroutineName("flows")
 
 @Immutable
@@ -40,7 +44,7 @@ data class Config(
     val deck4: DeckConfig = DeckConfig(
         triggerTime = 0.25f + 0.125f
     ),
-    val searches: List<TagScoreEval> = emptyList()
+    val presetPlaylists: List<PresetPlaylist> = emptyList()
 )
 
 @Immutable
@@ -138,6 +142,9 @@ data class DeckConfig(
 
 val config = MutableStateFlow(Config())
 
+//val json = Json {
+//    namingStrategy = JsonNamingStrategy.SnakeCase
+//}
 val json5 = Json5 {
     prettyPrint = true
     encodeDefaults = true
@@ -202,7 +209,7 @@ suspend fun loadConfig() {
         logger.info { "loaded config" }
         logger.debug { config.prettyPrint() }
         beatFrame.value = config.beats
-        customSearches.value = config.searches
+        customSearches.value = config.presetPlaylists
         decks.forEach { deck ->
             when (deck.id) {
                 1 -> deck.applyConfig(config.deck1)
@@ -225,7 +232,7 @@ suspend fun loadConfig() {
 
     customSearches.onEach { searches ->
         updateConfig {
-            copy(searches = searches)
+            copy(presetPlaylists = searches)
         }
     }.launchIn(configScope)
 }

@@ -9,16 +9,12 @@ plugins {
     kotlin("plugin.serialization")
     kotlin("plugin.power-assert")
     id("dev.reformator.stacktracedecoroutinator")
+    id("org.bytedeco.gradle-javacpp-platform") version "1.5.10"
 }
 
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-//    maven("https://oss.sonatype.org/content/repositories/snapshots/") {
-//        this.mavenContent {
-//            this.includeGroup("com.ryanharter.kotlinx.serialization")
-//        }
-//    }
     google()
 }
 
@@ -51,12 +47,18 @@ kotlin {
             implementation(Ktor.client.cio)
             implementation("io.ktor:ktor-network:_")
 
-            implementation("org.deepsymmetry:lib-carabiner:_")
+//            implementation("org.deepsymmetry:lib-carabiner:_")
 
             implementation("com.illposed.osc:javaosc-core:_")
 //            implementation("com.illposed.osc:javaosc-java-se-addons:_")
 
 //            implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:_")
+
+            // MIDI xperiments.. WIP
+            implementation("dev.atsushieno:ktmidi:_")
+            implementation("dev.atsushieno:ktmidi-jvm-desktop:_")
+            api("dev.atsushieno:libremidi-javacpp:_")
+            api("dev.atsushieno:libremidi-javacpp-platform:_")
 
             implementation("io.github.pdvrieze.xmlutil:serialization:_")
 //            implementation("com.ryanharter.kotlinx.serialization:kotlinx-serialization-xml:_")

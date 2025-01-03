@@ -1,6 +1,6 @@
 package ui.screens
 
-import Link
+//import Link
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,6 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.colorspace.ColorSpace
+import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
@@ -35,10 +38,8 @@ import beatFrame
 import beatProgress
 import bpmRoundedInt
 import kotlinx.coroutines.launch
-import nestctrl.generated.resources.DSEG14_Classic
-import nestctrl.generated.resources.Res
 import nestdrop.deck.Deck
-import org.jetbrains.compose.resources.Font
+import org.jetbrains.skia.ColorFilter
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -73,10 +74,9 @@ fun beatProgressScreen(
     val frame by beatFrame.collectAsState()
     val currentBeat = (beatProgress * frame).roundToInt()
 
-    val tailSweep = 1.0f / frame * 16
+    val tailSweep = 1.0f / frame * 8
 
-
-    val stroke = with(LocalDensity.current) {
+    val strokeTransition = with(LocalDensity.current) {
         Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Butt)
     }
     val strokeTail = with(LocalDensity.current) {
@@ -87,15 +87,42 @@ fun beatProgressScreen(
     }
 
     val decksEnabled by Deck.enabled.collectAsState()
-    val triggerTimes = decks.mapNotNull { deck ->
-        val enabled = (deck.id <= decksEnabled)
+//    val decksSwitched =  decks.mapNotNull { deck ->
+//        val enabled = (deck.id <= decksEnabled)
+//
+//        if (!enabled) {
+//            return@mapNotNull null
+//        }
+//
+//        val hasSwitched by deck.presetSwitching.hasSwitched.collectAsState()
+//        deck.id to hasSwitched
+//    }.toMap()
+    val deckData = decks.mapNotNull { deck ->
+        val enabled by deck.isEnabled.collectAsState()
+        if(!enabled) return@mapNotNull null
+
+        val hasSwitched by deck.presetSwitching.hasSwitched.collectAsState()
         val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 
-        if(enabled) {
-            deck.color to triggerTime
-        } else {
-            null
+        val transitionTime by deck.ndTime.transitionTime.collectAsState()
+        val beatsPerSecond = 60.0f / bpmRounded.toFloat()
+        val beatsInTransitionTime = transitionTime / beatsPerSecond
+        val sweepAngle = 1.0f / frame * beatsInTransitionTime
+
+        val brush = if (!hasSwitched)
+            Brush.sweepGradient(
+                0f to deck.color,
+                sweepAngle*0.2f to deck.dimmedColor,
+                sweepAngle to deck.color.copy(alpha = 0.25f).compositeOver(Color.Black),
+            )
+        else {
+            Brush.sweepGradient(
+                0f to deck.color,
+                sweepAngle*0.2f to deck.dimmedColor,
+                sweepAngle to deck.color.copy(alpha = 0.4f).compositeOver(Color.Black),
+            )
         }
+        Triple(brush, triggerTime, sweepAngle)
     }
 
     Row(
@@ -134,6 +161,19 @@ fun beatProgressScreen(
 //                )
                     .padding(strokeWidth / 2)
             ) {
+                deckData.forEach { (brush, triggerTime, sweepAngle) ->
+                    rotate(
+                        (triggerTime * 360f )+270f,
+                    ) {
+                        drawArc(
+                            brush = brush,
+                            startAngle = 0f , //+ (1.0f / frame * 360f), //triggerTime * 360f - 90f,
+                            sweepAngle = (sweepAngle * 360f) , // - (2.0f / frame * 360f),
+                            useCenter = false,
+                            style = strokeTransition,
+                        )
+                    }
+                }
                 drawArc(
                     color = Color.DarkGray,
                     startAngle = 0f,
@@ -142,7 +182,7 @@ fun beatProgressScreen(
                     style = strokeThin,
                 )
                 rotate(
-                    beatProgress * 360f,
+                    (beatProgress * 360f) - 90f,
                 ) {
 //                drawArc(
 //                    color = Color.White,
@@ -153,10 +193,10 @@ fun beatProgressScreen(
 //                )
                     drawArc(
                         brush = Brush.sweepGradient(
-                            0.75f - tailSweep to Color.Transparent,
-                            0.75f to Color.White,
+                            1f - tailSweep to Color.Transparent,
+                            1f to Color.White,
                         ),
-                        startAngle = 270f - (tailSweep * 360f),
+                        startAngle = (1f-tailSweep)*360f, // 270f - (tailSweep * 360f),
                         sweepAngle = (tailSweep * 360f),
                         useCenter = false,
                         style = strokeTail,
@@ -174,16 +214,6 @@ fun beatProgressScreen(
 //                style = stroke,
 //            )
 
-                triggerTimes.forEach { (color, triggerTime) ->
-
-                    drawArc(
-                        color = color,
-                        startAngle = triggerTime * 360f - 90f - 2f,
-                        sweepAngle = 2f,
-                        useCenter = false,
-                        style = stroke,
-                    )
-                }
 
                 (0f..1f step (1.0f / frame)).forEach { beat ->
                     drawArc(
@@ -237,7 +267,7 @@ fun beatProgressScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        beatFrame.value = max(8, frame + 8)
+                        beatFrame.value = max(16, frame + 8)
                     }
                 },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
@@ -248,7 +278,7 @@ fun beatProgressScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        beatFrame.value = max(8, frame - 8)
+                        beatFrame.value = max(16, frame - 8)
                     }
                 },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),

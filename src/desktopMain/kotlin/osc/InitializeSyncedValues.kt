@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -20,16 +21,18 @@ suspend fun initializeSyncedValues() {
     OscSynced.syncedValues.filter {
         it.target == OscSynced.Target.ResolumeArena
     }.forEach { oscSyncedValue ->
-        if (oscSyncedValue is OscSynced.Address) {
+        if (oscSyncedValue is OscSynced.ListenAddress) {
             val lastChanged = MutableStateFlow(Instant.DISTANT_PAST)
             flowScope.launch {
-                oscSyncedValue.flow.onEach {
+                oscSyncedValue.flow
+                    .distinctUntilChanged()
+                    .onEach {
                     lastChanged.value = Clock.System.now()
                 }
                 while (true) {
                     if (lastChanged.value < Clock.System.now() - 500.milliseconds) {
                         arenaSendChannel.send(
-                            OSCMessage(oscSyncedValue.address, "?")
+                            OSCMessage(oscSyncedValue.listenAddress, "?")
                         )
                         delay(500)
                     } else {
@@ -43,10 +46,11 @@ suspend fun initializeSyncedValues() {
         oscSyncedValue
             .flow
             .drop(oscSyncedValue.dropFirst)
+            .distinctUntilChanged()
             .sample(100.milliseconds)
 //            .combine(resyncToTouchOSC) { a, _ -> a }
             .onEach { value ->
-                val oscMessages = oscSyncedValue.generateOscMessages(value!!)
+                val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
                 oscMessages.forEach {
                     if (oscSyncedValue.logSending) {
                         logger.debug { "Arena OUT: ${it.stringify()}" }
@@ -66,10 +70,11 @@ suspend fun initializeSyncedValues() {
             oscSyncedValue
                 .flow
                 .drop(oscSyncedValue.dropFirst)
+                .distinctUntilChanged()
                 .sample(100.milliseconds)
 //            .combine(resyncToTouchOSC) { a, _ -> a }
                 .onEach { value ->
-                    val oscMessages = oscSyncedValue.generateOscMessages(value!!)
+                    val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
                     oscMessages.forEach {
                         if (oscSyncedValue.logSending) {
                             logger.debug { "Nestdrop OUT: ${it.stringify()}" }
