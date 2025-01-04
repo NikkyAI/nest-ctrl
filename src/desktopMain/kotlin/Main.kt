@@ -113,7 +113,7 @@ object Main {
 
         logger.info { "scanning presets" }
         measureTime {
-            scanPresets()
+            scanMilkdrop()
         }.also {
             logger.info { "scan took $it" }
         }

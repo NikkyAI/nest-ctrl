@@ -1,4 +1,6 @@
-## Nestdrop Visuals Controlpanel
+# NEST CTRL
+
+> Nestdrop Control Panel
 
 # Download
 
@@ -23,6 +25,13 @@ https://www.nestimmersion.ca/nestdrop.php
 tested with `V2.x.0.23`
 
 # Nestdrop setup
+
+## sprites
+
+Nestdrop tends to do random stuff if any image is laying in the sprites root folder `NestDropProV2\Plugins\Milkdrop2\Sprites`
+it is recommended to move the files there to a subfolder
+
+(it makes the IDs assigned to sprites unpredictable and wil lead to the wrong sprites being loaded)
 
 ## OSC
 

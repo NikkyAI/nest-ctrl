@@ -11,7 +11,7 @@ import ui.screens.presetsMap
 import java.io.File
 import kotlin.time.measureTimedValue
 
-suspend fun scanPresets() {
+suspend fun scanMilkdrop() {
 
     val categoryTagsSet = mutableSetOf<Tag>()
 
