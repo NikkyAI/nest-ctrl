@@ -43,11 +43,9 @@ import tags.pickItemToGenerate
 import tags.presetTagsMapping
 import ui.screens.imgSpritesMap
 import ui.screens.presetsMap
-import utils.HistoryNotNull
 import utils.prettyPrint
 import utils.runningHistory
 import utils.runningHistoryNotNull
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -183,23 +181,6 @@ class Deck(
             pulseWidth.startFlows()
             waveForm.startFlows()
             enabled.startFlows()
-
-//            Link.bpm
-//                .combine(bpmSyncMultiplier) { bpm, multiplier ->
-//                    val beatsPerSecond = bpm / 60.0f
-//                    beatsPerSecond / multiplier
-//                }
-//                .map {
-//                    (it * 100).roundToInt() / 100f
-//                }
-//                .combine(bpmSyncEnabled) { a, b -> a to b }
-//                .distinctUntilChanged()
-//                .onEach { (value, toggle) ->
-//                    if (toggle) {
-//                        effectSpeed.value = value
-//                    }
-//                }
-//                .launchIn(flowScope)
         }
     }
 
@@ -252,45 +233,10 @@ class Deck(
 
     @Immutable
     inner class PresetSwitching() {
-        val transitionTime =
-            MutableStateFlow(1f) // OscSynced.Value("/deck$N/transitionTime", 1.0f, target = Target.TouchOSC)
-        val triggerTime =
-            MutableStateFlow(0.75f) // OscSynced.Value("/deck$N/triggerTime", 0.75f, target = Target.TouchOSC)
-//        val hasSwitched = MutableStateFlow(false)
-        private val hasSwitchedNew = MutableStateFlow(false)
-        val hasSwitched = hasSwitchedNew.asStateFlow()
-
-        suspend fun beatFlow(
-            flow: Flow<HistoryNotNull<Double>>
-        ) = combine(
-            flow,
-            beatFrame,
-            triggerTime,
-            isEnabled,
-        ) { (currentBeat, lastBeat), beatFrame, triggerTime, isEnabled ->
-            val triggerAt = triggerTime * beatFrame
-//                logger.info { "currentBeat: $currentBeat" }
-//                logger.info { "triggerAt: $triggerAt" }
-//                logger.info { "lastBeat: $lastBeat" }
-            //TODO: reset hasSwitched after transition time has passed
-            if (isEnabled && !hasSwitchedNew.value) {
-                val shouldTrigger = (lastBeat < triggerAt && currentBeat >= triggerAt) || (lastBeat > beatFrame && currentBeat >= triggerAt)
-
-                if(shouldTrigger) {
-                    flowScope.launch {
-                        logger.info { "$deckName triggered at $currentBeat ($triggerAt)" }
-                    }
-                    hasSwitchedNew.value = true
-                    flowScope.launch {
-                        val transitionTime = ndTime.transitionTime.value.toDouble().seconds
-                        delay(transitionTime)
-                        hasSwitchedNew.value = false
-                    }
-                    doSwitch()
-                }
-            }
-            currentBeat
-        }
+        val transitionTime = MutableStateFlow(1f)
+        val triggerTime = MutableStateFlow(0.75f)
+        private val switchingLocked = MutableStateFlow(false)
+        val isLocked = switchingLocked.asStateFlow()
 
         private suspend fun doSwitch() {
             // change preset queue
@@ -330,17 +276,17 @@ class Deck(
                 isEnabled,
             ) { (currentBeat, lastBeat), beatFrame, triggerTime, isEnabled ->
                 val triggerAt = triggerTime * beatFrame
-                if (isEnabled && !hasSwitchedNew.value) {
+                if (isEnabled && !switchingLocked.value) {
                     val shouldTrigger =
                         (lastBeat < triggerAt && currentBeat >= triggerAt) || (lastBeat > beatFrame && currentBeat >= triggerAt)
 
                     if (shouldTrigger) {
-                        logger.info { "$deckName triggered at $currentBeat $triggerAt" }
-                        hasSwitchedNew.emit(true)
+                        logger.debug { "$deckName triggered at $currentBeat $triggerAt" }
+                        switchingLocked.emit(true)
                         flowScope.launch {
                             val transitionTime = ndTime.transitionTime.value.toDouble().seconds
                             delay(transitionTime)
-                            hasSwitchedNew.emit(false)
+                            switchingLocked.emit(false)
                         }
                         flowScope.launch {
                             doSwitch()

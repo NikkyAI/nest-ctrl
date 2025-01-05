@@ -98,7 +98,7 @@ fun beatProgressScreen(
         val enabled by deck.isEnabled.collectAsState()
         if(!enabled) return@mapNotNull null
 
-        val hasSwitched by deck.presetSwitching.hasSwitched.collectAsState()
+        val isLocked by deck.presetSwitching.isLocked.collectAsState()
         val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 
         val transitionTime by deck.ndTime.transitionTime.collectAsState()
@@ -106,7 +106,7 @@ fun beatProgressScreen(
         val beatsInTransitionTime = transitionTime / beatsPerSecond
         val sweepAngle = 1.0f / frame * beatsInTransitionTime
 
-        val brush = if (!hasSwitched)
+        val brush = if (!isLocked)
             Brush.sweepGradient(
                 0f to deck.color,
                 sweepAngle*0.2f to deck.dimmedColor,
