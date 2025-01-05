@@ -3,7 +3,9 @@ package nestdrop.deck
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import beatCounter
 import beatFrame
+import com.illposed.osc.OSCMessage
 import configFolder
 import decks
 import flowScope
@@ -92,7 +94,7 @@ class Deck(
         val horizontalMotion = NestdropControl.SliderWithResetButton(id, "HorizonMotion", -0.5f..0.5f, 0.0f)
         val verticalMotion = NestdropControl.SliderWithResetButton(id, "VerticalMotion", -0.5f..0.5f, 0.0f)
         val stretchSpeed = NestdropControl.SliderWithResetButton(id, "StretchSpeed", 0.5f..1.5f, 1.0f)
-        val waveMode = NestdropControl.SliderWithResetButton(id, "WaveMode", -15f..15f, 0.0f)
+        val waveMode = NestdropControl.SliderWithResetButton(id, "WaveMode", -15f..15f, 0f)
 
         suspend fun startFlows() {
             transitionTime.startFlows()
@@ -258,47 +260,6 @@ class Deck(
         private val hasSwitchedNew = MutableStateFlow(false)
         val hasSwitched = hasSwitchedNew.asStateFlow()
 
-        suspend fun resetLatch() {
-//            hasSwitched.value = false
-        }
-
-        //        suspend fun beatFlowOldOld(
-//            flow: Flow<HistoryNotNull<Double>>
-//        ) = flow
-//            .combine(
-//                triggerTime.combine(beatFrame) { triggerTime, b ->
-//                    logger.info { "$deckName triggerTime: ${triggerTime * b} ($triggerTime * $b)" }
-//                    triggerTime * b
-//                }
-//            ) { (currentBeat, lastBeat), triggerAt ->
-//                Triple(currentBeat, lastBeat, triggerAt)
-//            }.onEach { (currentBeat, lastBeat, triggerAt) ->
-//
-////                logger.info { "currentBeat: $currentBeat" }
-////                logger.info { "triggerAt: $triggerAt" }
-//                if (!hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-//                    logger.info { "$deckName triggered at ${(currentBeat * 1000).roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
-//                    hasSwitched.value = true
-//                    doSwitch()
-//                }
-//            }
-        suspend fun beatFlowOld(
-            flow: Flow<HistoryNotNull<Double>>
-        ) = combine(
-                flow,
-                triggerTime.combine(beatFrame) { triggerTime, b ->
-                    logger.info { "$deckName triggerTime: ${triggerTime * b} ($triggerTime * $b)" }
-                    triggerTime * b
-                },
-                isEnabled
-            ) { (currentBeat, lastBeat), triggerAt, isEnabled ->
-                if (isEnabled && !hasSwitched.value && lastBeat < triggerAt && currentBeat >= triggerAt) {
-                    logger.info { "$deckName triggered at ${(currentBeat * 1000).roundToInt() / 1000f} ${(triggerAt * 1000).roundToInt() / 1000f}" }
-//                    hasSwitched.value = true
-                    doSwitch()
-                }
-            }
-
         suspend fun beatFlow(
             flow: Flow<HistoryNotNull<Double>>
         ) = combine(
@@ -316,7 +277,9 @@ class Deck(
                 val shouldTrigger = (lastBeat < triggerAt && currentBeat >= triggerAt) || (lastBeat > beatFrame && currentBeat >= triggerAt)
 
                 if(shouldTrigger) {
-                    logger.info { "$deckName triggered at $currentBeat ($triggerAt)" }
+                    flowScope.launch {
+                        logger.info { "$deckName triggered at $currentBeat ($triggerAt)" }
+                    }
                     hasSwitchedNew.value = true
                     flowScope.launch {
                         val transitionTime = ndTime.transitionTime.value.toDouble().seconds
@@ -358,6 +321,36 @@ class Deck(
                 .joinToString(", ", "{", "}") { (k, v) -> "$k: \"$v\"" }
             appendWarn("SKIPPED $deckName preset: \"${preset.currentPreset.value.name}\" all decks: $otherDecks")
         }
+
+        suspend fun startFlows() {
+            combine(
+                beatCounter.runningHistoryNotNull(),
+                beatFrame,
+                triggerTime,
+                isEnabled,
+            ) { (currentBeat, lastBeat), beatFrame, triggerTime, isEnabled ->
+                val triggerAt = triggerTime * beatFrame
+                if (isEnabled && !hasSwitchedNew.value) {
+                    val shouldTrigger =
+                        (lastBeat < triggerAt && currentBeat >= triggerAt) || (lastBeat > beatFrame && currentBeat >= triggerAt)
+
+                    if (shouldTrigger) {
+                        logger.info { "$deckName triggered at $currentBeat $triggerAt" }
+                        hasSwitchedNew.emit(true)
+                        flowScope.launch {
+                            val transitionTime = ndTime.transitionTime.value.toDouble().seconds
+                            delay(transitionTime)
+                            hasSwitchedNew.emit(false)
+                        }
+                        flowScope.launch {
+                            doSwitch()
+                        }
+                    }
+                }
+                currentBeat
+            }
+                .launchIn(flowScope)
+        }
     }
 
     val presetSwitching = PresetSwitching()
@@ -371,6 +364,7 @@ class Deck(
         ndStrobe.startFlows()
         ndAudio.startFlows()
         ndOutput.startFlows()
+        presetSwitching.startFlows()
 
 //        transitionTime
 //            //TODO: combine with trigger flow
@@ -450,12 +444,15 @@ class Deck(
 
     @Immutable
     inner class Preset {
-        val currentPreset = OscSynced.FlowCustom(
+        val currentPreset = object: OscSynced.FlowBase<PresetData>(
             "/Deck$id/Preset",
 //            initialValue = PresetData(-1, "unitialized"),
             target = OscSynced.Target.Nestdrop
-        ) { address, arguments ->
-            PresetData(arguments[0] as Int, arguments[1] as String)
+        ) {
+            override fun convertMessage(message: OSCMessage): PresetData {
+                val input = message.arguments
+                return PresetData(input[0] as Int, input[1] as String)
+            }
         }
             .stateIn(flowScope, SharingStarted.Eagerly, initialValue = PresetData(-1, "unitialized"))
 
@@ -517,19 +514,22 @@ class Deck(
 
         val spoutTarget = MutableStateFlow(emptySet<SpriteKey>())
         val spoutStates = MutableStateFlow<Map<String, SpriteKey>>(mapOf())
-        private val spriteStateFlow = OscSynced.FlowCustom(
+        private val spriteStateFlow = object : OscSynced.FlowBase<SpriteData>(
             "/Deck$id/Sprite",
 //            SpriteData(),
             target = OscSynced.Target.Nestdrop
-        ) { _, args ->
-            SpriteData(
-                id = args[0] as Int,
-                name = args[1] as String,
-                mode = ImgMode.valueOf(args[2] as String),
-                fx = args[3] as Int,
-                mystery = args[4] as Int,
-                enabled = (args[5] as Int) == 1,
-            )
+        ) {
+            override fun convertMessage(message: OSCMessage): SpriteData {
+                val args = message.arguments
+                return SpriteData(
+                    id = args[0] as Int,
+                    name = args[1] as String,
+                    mode = ImgMode.valueOf(args[2] as String),
+                    fx = args[3] as Int,
+                    mystery = args[4] as Int,
+                    enabled = (args[5] as Int) == 1,
+                )
+            }
         }
 
 //        suspend fun enabledSprites() = imgStates.value.values
@@ -544,12 +544,11 @@ class Deck(
 //                .launchIn(flowScope)
 //            val imgSpriteIds = imgSpritesMap.map { it.values.map { it.id }.toSet() } //.stateIn(flowScope)
             spriteStateFlow
-                .onEach {
-                    logger.info { "$deckName sprite: $it" }
-                }
-
+//                .onEach {
+//                    logger.info { "$deckName sprite: $it" }
+//                }
                 .combine(
-                    imgSpritesMap.map { it.values.map { it.id }.toSet() }
+                    imgSpritesMap.map { map -> map.values.map { img -> img.id }.toSet() }
                 ) { spriteData, imgSpriteIds ->
                     spriteData.copy(isImg = spriteData.id in imgSpriteIds)
                 }

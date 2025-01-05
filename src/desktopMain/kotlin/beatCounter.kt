@@ -44,6 +44,8 @@ val bpmSynced = OscSynced.ValueSingle<Float>(
 //    it.logReceived = false
 //}
 
+val beatCounter = MutableStateFlow(0.0)
+
 suspend fun startBeatCounter(
 //    vararg decks: Deck
 ) {
@@ -89,7 +91,7 @@ suspend fun startBeatCounter(
 
 
     run {
-        val beatCounter = MutableStateFlow(0.0)
+//        val beatCounter = MutableStateFlow(0.0)
 
         beatCounter.combine(beatFrame) { beats, beatFrame ->
             beats to beatFrame
@@ -102,9 +104,9 @@ suspend fun startBeatCounter(
 //                    var newBeatCounter = beatCounter.value
                 beatCounter.value %= totalBeats
 
-                decks.forEach {
-                    it.presetSwitching.resetLatch()
-                }
+//                decks.forEach {
+//                    it.presetSwitching.resetLatch()
+//                }
             }
         }
             .launchIn(flowScope)
@@ -129,10 +131,11 @@ suspend fun startBeatCounter(
 //        }
 //            .launchIn(flowScope)
 
-        decks.forEach { deck ->
-            deck.presetSwitching.beatFlow(beatCounter.runningHistoryNotNull())
-                .launchIn(flowScope)
-        }
+//        decks.forEach { deck ->
+//            deck.presetSwitching.beatFlow(beatCounter.runningHistoryNotNull())
+//                .launchIn(flowScope)
+//        }
+
 //        decks.forEach { deck ->
 //            deck.presetSwitching
 //                .beatFlow(

@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger { }
 //    ).trim().toInt()
 //}
 
-private suspend fun parseNestdropXml(
+suspend fun parseNestdropXml(
     retries: Int = 0
 ): NestdropSettings {
     val nestdropSettings: NestdropSettings = try {
@@ -33,7 +33,7 @@ private suspend fun parseNestdropXml(
         logger.error(e) { "failed to parse XML" }
         delay(100)
         if (retries < 5) {
-            return parseNestdropXml( retries + 1)
+            return parseNestdropXml(retries + 1)
         } else {
             throw e
         }
@@ -42,11 +42,12 @@ private suspend fun parseNestdropXml(
 }
 
 suspend fun loadNestdropConfig(
+    nestdropSettings: NestdropSettings,
     presetQueues: PresetQueues,
     decks: List<Deck>
 ) {
-    val nestdropSettings = parseNestdropXml()
-    logger.info { "loaded xml from $nestdropConfig" }
+//    val nestdropSettings = parseNestdropXml()
+//    logger.info { "loaded xml from $nestdropConfig" }
 
 //    val numberOfDecks = loadNumberOfDecks()
     val numberOfDecks = nestdropSettings.mainWindow.settingsGeneral.nbDecks

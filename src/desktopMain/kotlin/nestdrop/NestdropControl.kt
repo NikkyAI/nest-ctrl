@@ -101,11 +101,18 @@ sealed interface NestdropControl {
 
         private val valueLabel = MutableStateFlow("")
 
-        private val syncedFlow = OscSynced.ValueSingle(
+        private val syncedFlow = object : OscSynced.ValueSingle<Float>(
             address = sliderAddress,
             initialValue = initialValue,
             target = OscSynced.Target.Nestdrop,
-        )
+        ) {
+            override fun convertArg(input: Any): Float =
+                when (input) {
+                    is Float -> input
+                    is Number -> input.toFloat()
+                    else -> error("input should be a number")
+                }
+        }
 
         suspend fun doReset() {
             stateFlow.value = defaultValue

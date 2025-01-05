@@ -30,9 +30,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -45,11 +51,11 @@ import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdrop.deck.loadDeckSettings
 import nestdrop.loadNestdropConfig
+import nestdrop.parseNestdropXml
 import nestdrop.setupSpriteFX
 import org.jetbrains.compose.resources.painterResource
-import osc.initializeSyncedValues
 import osc.runNestDropSend
-import osc.startNestdropListener
+import osc.startNestdropOSC
 import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
@@ -153,14 +159,30 @@ object Main {
 
 //        OSCMessage("thiswillfail", "string", 'c', "" to "")
 
-        flowScope.launch(Dispatchers.IO) {
+        run {
             logger.info { "loading nestdrop XML" }
-            loadNestdropConfig(presetQueues, decks)
-            nestdropConfig.asWatchChannel(KWatchChannel.Mode.SingleFile).consumeEach {
-                if (it.kind == KWatchEvent.Kind.Modified) {
-                    loadNestdropConfig(presetQueues, decks)
+            loadNestdropConfig(parseNestdropXml(), presetQueues, decks)
+
+            nestdropConfig
+                .asWatchChannel(KWatchChannel.Mode.SingleFile)
+                .consumeAsFlow().mapNotNull {
+                    if (it.kind == KWatchEvent.Kind.Modified) {
+                        try {
+                            parseNestdropXml()
+                        } catch (e: Exception) {
+                            logger.error(e) { "failed to load XML after file modification was detected" }
+                            null
+                        }
+                    } else {
+                        null
+                    }
                 }
-            }
+                .distinctUntilChanged()
+                .onEach {
+                    logger.info { "parsed (changed) xml from $nestdropConfig" }
+                    loadNestdropConfig(it, presetQueues, decks)
+                }
+                .launchIn(flowScope)
         }
 
 
@@ -207,10 +229,8 @@ object Main {
 //        deck2.imgSprite.index.value--
 
         logger.info { "starting OSC listener" }
-        startNestdropListener()
+        startNestdropOSC()
 
-        logger.info { "initializing OSC synced values" }
-        initializeSyncedValues()
         delay(200)
 //        logger.info { "re-emitting all values" }
     }
@@ -345,7 +365,7 @@ object Main {
                         //                    transparent = true,
                         focusable = false,
                         alwaysOnTop = true,
-                        icon = painterResource (resource =  Res.drawable.blobhai_trans)
+                        icon = painterResource(resource = Res.drawable.blobhai_trans)
                     ) {
                         splashScreen()
                     }
@@ -354,7 +374,7 @@ object Main {
                         onCloseRequest = ::exitApplication,
                         title = "Nest Ctrl",
                         state = rememberWindowState(width = 1600.dp, height = 1200.dp),
-                        icon = painterResource (resource =  Res.drawable.blobhai_trans)
+                        icon = painterResource(resource = Res.drawable.blobhai_trans)
                     ) {
                         App()
                     }
