@@ -10,22 +10,13 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import osc.OscSynced
-import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 val beatFrame = MutableStateFlow(64) // OscSynced.Value("/beats", 64, target = OscSynced.Target.TouchOSC)
 val beatProgress = MutableStateFlow(0f)
 
-// OscSynced.Value("/beatProgress", 0.0f, receive = false, target = OscSynced.Target.TouchOSC).apply {
-//    logSending = false
-//}
-val bpmRounded = MutableStateFlow(120f)
-
-//    OscSynced.Value("/bpmRounded", 120.0f).apply {
-//    logSending = false
-//}
-val bpmRoundedInt = MutableStateFlow(120)
 
 private val logger = KotlinLogging.logger { }
 
@@ -36,36 +27,12 @@ val bpmSynced = OscSynced.ValueSingle<Float>(
 ).also {
     it.logReceived = false
 }
-//val beatCountSynced = OscSynced.ValueSingle<Int>(
-//    "/Controls/sBpmCnt",
-//    0, send = false,
-//    target = OscSynced.Target.Nestdrop,
-//).also {
-//    it.logReceived = false
-//}
+val bpmRounded = MutableStateFlow(120f)
+val bpmInt = MutableStateFlow(120)
 
 val beatCounter = MutableStateFlow(0.0)
 
-suspend fun startBeatCounter(
-//    vararg decks: Deck
-) {
-//    @OptIn(FlowPreview::class)
-//    Link.bpm
-//        .sample(100.milliseconds)
-//        .map { bpm ->
-//            (bpm * 10).roundToInt() / 10.0f
-//        }
-//        .onEach {
-//            bpmRounded.value = it
-//            bpmRoundedInt.value = it.roundToInt()
-//        }
-//        .launchIn(flowScope)
-
-//    beatCountSynced
-//        .onEach {
-//            logger.info { "beat: $it" }
-//        }
-//        .launchIn(flowScope)
+suspend fun startBeatCounter() {
 
     @OptIn(FlowPreview::class)
     bpmSynced
@@ -75,7 +42,7 @@ suspend fun startBeatCounter(
         }
         .onEach {
             bpmRounded.value = it
-            bpmRoundedInt.value = it.roundToInt()
+            bpmInt.value = it.roundToInt()
         }
         .launchIn(flowScope)
     beatProgress
@@ -91,14 +58,11 @@ suspend fun startBeatCounter(
 
 
     run {
-//        val beatCounter = MutableStateFlow(0.0)
 
         beatCounter.combine(beatFrame) { beats, beatFrame ->
             beats to beatFrame
         }.onEach { (beats, totalBeats) ->
             if (beats > totalBeats) {
-//                beats -= totalBeats
-//                    start += ((bpmFromLink.value / 60_000.0) * totalBeats).milliseconds
 
                 logger.trace { "reached $totalBeats beats, resetting to ${beats % totalBeats}" }
 //                    var newBeatCounter = beatCounter.value
@@ -119,41 +83,16 @@ suspend fun startBeatCounter(
             }
             .launchIn(flowScope)
 
-//        beatCountSynced.onEach {
-//            beatCounter.value = (beatCounter.value+1) % beatFrame.value
-//        }
-//            .launchIn(flowScope)
-
-//        beatCounter.combine(beatFrame) { beats, beatFrame ->
-//            beats.toFloat() / beatFrame
-//        }.onEach {
-//            beatProgress.value = it
-//        }
-//            .launchIn(flowScope)
-
-//        decks.forEach { deck ->
-//            deck.presetSwitching.beatFlow(beatCounter.runningHistoryNotNull())
-//                .launchIn(flowScope)
-//        }
-
-//        decks.forEach { deck ->
-//            deck.presetSwitching
-//                .beatFlow(
-//                    beatCountSynced.runningHistoryNotNull()
-//                )
-//                .launchIn(flowScope)
-//        }
-
         flowScope.launch {
             var lastLoop = Clock.System.now()
 //            var beats = 0.0
 //            var deck1Switched = false
 //            var deck2Switched = false
             while (true) {
-                delay(10)
+                delay(1.seconds/60)
                 val now = Clock.System.now()
                 val timeDelta = now - lastLoop
-                lastLoop = Clock.System.now()
+                lastLoop = now
                 val beatsPerMillisecond = bpmSynced.value / 60_000.0
                 val beatsInDuration = beatsPerMillisecond * timeDelta.inWholeMilliseconds
                 beatCounter.value += beatsInDuration

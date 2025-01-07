@@ -76,8 +76,8 @@ class Deck(
         id <= decksEnabled
     }.stateIn(flowScope, SharingStarted.Lazily, false)
 
-//    val color = Color(hexColor)
     val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
+    val disabledColor = color.copy(alpha = 0.25f).compositeOver(Color.Black)
 
     @Immutable
     inner class NdTime {
@@ -451,7 +451,9 @@ class Deck(
         val mode: ImgMode = ImgMode.Overlay,
         val fx: Int = 0,
         val mystery: Int = 0
-    )
+    ) {
+        val label: String = "$name\nFX: $fx"
+    }
 
     @Immutable
     inner class SpriteState {
@@ -843,9 +845,10 @@ class Deck(
 //                    spriteTargetKey.value = spoutPreset?.let {
 //                        SpriteKey(id = it.id, name = it.name, mode = if(it.overlay == true) ImgMode.Overlay else ImgMode.Nested, fx = it.effects ?: 0)
 //                    }
-                    logger.info { "$deckName spout name\n${spoutPreset?.prettyPrint()}" }
-                    fx.value = spoutPreset?.effects ?: 0
-                    name.value = spoutPreset?.label ?: "-"
+                    logger.info { "$deckName spout name: ${spoutPreset?.prettyPrint()}" }
+                    spriteTargetKey.value = SpriteKey(id=-1, name=spoutPreset?.label ?: "-", fx = spoutPreset?.effects ?: 0 )
+//                    fx.value = spoutPreset?.effects ?: 0
+//                    name.value = spoutPreset?.label ?: "-"
                 }
                 .launchIn(flowScope)
 

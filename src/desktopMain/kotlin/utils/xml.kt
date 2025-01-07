@@ -1,6 +1,7 @@
 package utils
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.UnknownChildHandler
 import nl.adaptivity.xmlutil.serialization.XML
@@ -9,6 +10,7 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig.Companion.DEFAULT_UNKNOWN_C
 private val logger = KotlinLogging.logger {}
 
 val xml = XML(
+
 //    serializersModule = SerializersModule {
 //    polymorphic(NestdropSettings.MainWindow.OpenDeckSettings::class) {
 ////        defaultDeserializer {
@@ -33,11 +35,17 @@ val xml = XML(
 
             DEFAULT_UNKNOWN_CHILD_HANDLER.handleUnknownChildRecovering(input, inputKind, descriptor, name, candidates)
         }
+        this.verifyElementOrder = false
+        this.isStrictAttributeNames = false
+        this.isStrictOtherAttributes = false
+        this.ignoreUnknownChildren()
         pedantic = false
         isStrictBoolean = false
 //        autoPolymorphic = true
     }
+//    this.defaultToGenericParser = true
     this.xmlVersion = XmlVersion.XML10
+//    xmlDeclMode = XmlDeclMode.Charset
 //    this.repairNamespaces = true
 //    this.autoPolymorphic = true
 //    this.isInlineCollapsed

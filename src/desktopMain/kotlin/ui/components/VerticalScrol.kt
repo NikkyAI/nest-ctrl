@@ -31,7 +31,7 @@ fun verticalScroll(
             .fillMaxHeight()
 //            .fillMaxSize()
 //            .background(color = Color(180, 180, 180))
-            .padding(10.dp)
+//            .padding(10.dp)
     ) {
 //        val stateVertical = rememberScrollState(0)
         Box(

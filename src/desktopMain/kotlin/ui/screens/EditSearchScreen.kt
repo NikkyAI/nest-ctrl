@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,7 @@ import ui.components.verticalScroll
 
 val customSearches = MutableStateFlow<List<PresetPlaylist>>(emptyList())
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun editSearchesScreen() {
     val searchesCollected by customSearches.collectAsState()
@@ -427,8 +429,17 @@ fun editSearchesScreen() {
                                                 }
                                                 Spacer(modifier = Modifier.weight(0.5f))
 
+                                                val presetTags = presetTags.values.flatten().toSet()
+                                                val categoryTags = presetTags.filter { it.namespace.size > 1 }
+                                                    .map {
+                                                        val name = it.namespace.last()
+                                                        val namespace = it.namespace.dropLast(1)
+                                                        Tag(name = name, namespace = namespace)
+                                                    }
+                                                    .toSet()
                                                 val availableTags =
-                                                    presetTags.values.flatten().toSet().sortedBy { it.toString() }
+                                                    (presetTags + categoryTags)
+                                                        //.sortedBy { it.toString() }
                                                         .sortedWith(
                                                             compareBy<Tag> {
                                                                 it.namespace.first() == "nestdrop"
@@ -462,7 +473,10 @@ fun editSearchesScreen() {
                                                         customSearches.value = searchesMutable.toList()
                                                     },
                                                     renderItem = { item ->
-                                                        Text(item.toString())
+                                                        item.Chip()
+//                                                        Text(item.toString())
+//                                                        Text(item.namespaceLabel + ":", color = Color.LightGray, softWrap = false)
+//                                                        Text(item.name, color = Color.White, softWrap = false, fontWeight = FontWeight.Bold)
                                                     }
                                                 )
                                             },

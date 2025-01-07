@@ -1,6 +1,17 @@
 package tags
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Chip
+import androidx.compose.material.ChipColors
+import androidx.compose.material.ChipDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import flowScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
@@ -55,6 +66,9 @@ data class Tag(
     val name: String,
     val namespace: List<String> = emptyList()
 ) { //}: Comparable<Tag> {
+    val namespaceLabel by lazy {
+        namespace.joinToString(":")
+    }
     val label by lazy { "${namespace.joinToString(":")} : $name" }
     val file by lazy {
         namespace.fold(tagsFolder) { file, namespace ->
@@ -62,6 +76,30 @@ data class Tag(
         }.resolve("$name.txt")
     }
 
+    @Composable
+    fun Chip(
+        onClick: () -> Unit = {},
+        enabled: Boolean = false,
+        @OptIn(ExperimentalMaterialApi::class)
+        colors: ChipColors = ChipDefaults.chipColors()
+    ) {
+        @OptIn(ExperimentalMaterialApi::class)
+        Chip(
+            onClick = onClick,
+            enabled = enabled,
+            colors = colors,
+            modifier = Modifier
+                .height(24.dp)
+        ) {
+            Text("$namespaceLabel:", color = Color.LightGray, softWrap = false)
+            Text(
+                name,
+                color = Color.White,
+                softWrap = false,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
 //    override fun compareTo(other: Tag): Int {
 //        val ordering = (namespace + name).zip(other.namespace + other.name) { first, second ->
 //            first.compareTo(second, ignoreCase = true)
@@ -130,7 +168,7 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
                     Tag(name = name, namespace = namespace)
                 }
 
-            setOfNotNull(categoryTag, subCategoryTag) + queueTags + customTags + customCategories
+            setOfNotNull(categoryTag, subCategoryTag) + queueTags + customTags // + customCategories
         }
     }.launchIn(flowScope)
 

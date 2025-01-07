@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import beatFrame
 import beatProgress
-import bpmRoundedInt
+import bpmInt
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import kotlin.math.max
@@ -67,7 +67,7 @@ fun beatProgressScreen(
     //TODO: display current BPM
 
 //    val bpm by Link.bpm.collectAsState()
-    val bpmRounded by bpmRoundedInt.collectAsState()
+    val bpmRounded by bpmInt.collectAsState()
     val frame by beatFrame.collectAsState()
     val currentBeat = (beatProgress * frame).roundToInt()
 
@@ -96,27 +96,34 @@ fun beatProgressScreen(
 //    }.toMap()
     val deckData = decks.mapNotNull { deck ->
         val enabled by deck.isEnabled.collectAsState()
-        if(!enabled) return@mapNotNull null
+        if (!enabled) return@mapNotNull null
 
         val isLocked by deck.presetSwitching.isLocked.collectAsState()
         val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
 
         val transitionTime by deck.ndTime.transitionTime.collectAsState()
         val beatsPerSecond = 60.0f / bpmRounded.toFloat()
-        val beatsInTransitionTime = transitionTime / beatsPerSecond
+        val beatsInTransitionTime = max(0.2f, transitionTime) / beatsPerSecond
         val sweepAngle = 1.0f / frame * beatsInTransitionTime
 
         val brush = if (!isLocked)
             Brush.sweepGradient(
                 0f to deck.color,
-                sweepAngle*0.2f to deck.dimmedColor,
+                sweepAngle * 0.2f to deck.dimmedColor,
                 sweepAngle to deck.color.copy(alpha = 0.25f).compositeOver(Color.Black),
+//                0f to deck.color.copy(alpha = 0.75f).compositeOver(Color.Black),
+//                sweepAngle*0.2f to deck.color.copy(alpha = 0.5f).compositeOver(Color.Black),
+//                sweepAngle to deck.color.copy(alpha = 0.3f).compositeOver(Color.Black),
             )
         else {
             Brush.sweepGradient(
                 0f to deck.color,
-                sweepAngle*0.2f to deck.dimmedColor,
+                sweepAngle * 0.2f to deck.dimmedColor,
                 sweepAngle to deck.color.copy(alpha = 0.4f).compositeOver(Color.Black),
+//                0f to deck.color,
+//                sweepAngle*0.2f to deck.color.copy(alpha = 0.75f).compositeOver(Color.Black),
+//                sweepAngle*0.6f to deck.color.copy(alpha = 0.5f).compositeOver(Color.Black),
+//                sweepAngle to deck.color.copy(alpha = 0.4f).compositeOver(Color.Black),
             )
         }
         Triple(brush, triggerTime, sweepAngle)
@@ -160,12 +167,12 @@ fun beatProgressScreen(
             ) {
                 deckData.forEach { (brush, triggerTime, sweepAngle) ->
                     rotate(
-                        (triggerTime * 360f )+270f,
+                        (triggerTime * 360f) + 270f,
                     ) {
                         drawArc(
                             brush = brush,
-                            startAngle = 0f , //+ (1.0f / frame * 360f), //triggerTime * 360f - 90f,
-                            sweepAngle = (sweepAngle * 360f) , // - (2.0f / frame * 360f),
+                            startAngle = 0f, //+ (1.0f / frame * 360f), //triggerTime * 360f - 90f,
+                            sweepAngle = (sweepAngle * 360f), // - (2.0f / frame * 360f),
                             useCenter = false,
                             style = strokeTransition,
                         )
@@ -193,7 +200,7 @@ fun beatProgressScreen(
                             1f - tailSweep to Color.Transparent,
                             1f to Color.White,
                         ),
-                        startAngle = (1f-tailSweep)*360f, // 270f - (tailSweep * 360f),
+                        startAngle = (1f - tailSweep) * 360f, // 270f - (tailSweep * 360f),
                         sweepAngle = (tailSweep * 360f),
                         useCenter = false,
                         style = strokeTail,

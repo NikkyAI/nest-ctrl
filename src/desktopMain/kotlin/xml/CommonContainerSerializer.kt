@@ -17,7 +17,7 @@ import nl.adaptivity.xmlutil.serialization.InputKind
 import nl.adaptivity.xmlutil.serialization.PolyInfo
 import nl.adaptivity.xmlutil.serialization.XML
 
-class LibraryClosedSectionsSerializer() : SharedContainerSerializer<NestdropSettings.LibraryClosedSections,NestdropSettings.LibraryClosedSections.LibraryClosedSection>() {
+class LibraryClosedSectionsSerializer() : CommonContainerSerializer<NestdropSettings.LibraryClosedSections,NestdropSettings.LibraryClosedSections.LibraryClosedSection>() {
     override fun constructContainer(list: List<NestdropSettings.LibraryClosedSections.LibraryClosedSection>): NestdropSettings.LibraryClosedSections {
         return NestdropSettings.LibraryClosedSections(list)
     }
@@ -28,7 +28,7 @@ class LibraryClosedSectionsSerializer() : SharedContainerSerializer<NestdropSett
     override val prefix: String = "Section_"
 }
 
-class QueueWindowsSerializer() : SharedContainerSerializer<NestdropSettings.QueueWindows, NestdropSettings.QueueWindows.Queue>() {
+class QueueWindowsSerializer() : CommonContainerSerializer<NestdropSettings.QueueWindows, NestdropSettings.QueueWindows.Queue>() {
     override fun constructContainer(list: List<NestdropSettings.QueueWindows.Queue>): NestdropSettings.QueueWindows {
         return NestdropSettings.QueueWindows(list)
     }
@@ -39,7 +39,7 @@ class QueueWindowsSerializer() : SharedContainerSerializer<NestdropSettings.Queu
     override val prefix: String = "Queue"
 }
 
-class FavoriteListSerializer() : SharedContainerSerializer<NestdropSettings.FavoriteList, NestdropSettings.FavoriteList.Favorite>() {
+class FavoriteListSerializer() : CommonContainerSerializer<NestdropSettings.FavoriteList, NestdropSettings.FavoriteList.Favorite>() {
     override fun constructContainer(list: List<NestdropSettings.FavoriteList.Favorite>): NestdropSettings.FavoriteList {
         return NestdropSettings.FavoriteList(list)
     }
@@ -53,7 +53,7 @@ class FavoriteListSerializer() : SharedContainerSerializer<NestdropSettings.Favo
 /**
  * A common base class that contains the actual code needed to serialize/deserialize the container.
  */
-abstract class SharedContainerSerializer<CONTAINER, ELEMENT> : KSerializer<CONTAINER> {
+abstract class CommonContainerSerializer<CONTAINER, ELEMENT> : KSerializer<CONTAINER> {
     /** We need to have the serializer for the elements */
     abstract val elementSerializer: KSerializer<ELEMENT>// = serializer<NestdropSettings.QueueWindows.Queue>()
 

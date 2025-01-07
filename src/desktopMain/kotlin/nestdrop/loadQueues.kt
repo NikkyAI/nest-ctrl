@@ -23,7 +23,9 @@ suspend fun parseNestdropXml(
 ): NestdropSettings {
     val nestdropSettings: NestdropSettings = try {
         xml.decodeFromString(
-            NestdropSettings.serializer(), nestdropConfig.readText()
+            NestdropSettings.serializer(), nestdropConfig.readText().also {
+                logger.info { "parsing xml: $it" }
+            }
                 .substringAfter(
                     """<?xml version="1.0" encoding="utf-8"?>"""
                 )

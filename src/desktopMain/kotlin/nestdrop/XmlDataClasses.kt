@@ -2,6 +2,7 @@ package nestdrop
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.serialization.XmlChildrenName
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import xml.FavoriteListSerializer
@@ -349,18 +350,22 @@ data class NestdropSettings(
             val active: Boolean,
             @SerialName("MidiDevice")
             val midiDevice: String? = null,
+//            @XmlElement
+//            @SerialName("Presets")
+//            val presetsContainer: Presets,
             @XmlElement
             @SerialName("Presets")
-            val presetsWrappers: Presets,
+            @XmlChildrenName("Presets")
+            val presets: List<Preset>,
         ) {
-            val presets get() = presetsWrappers.presets
-
-            @Serializable
-            data class Presets(
-                @XmlElement
-                @SerialName("Presets")
-                val presets: List<Preset>,
-            ) {
+//            val presets get() = presetsContainer.presets
+//
+//            @Serializable
+//            data class Presets(
+//                @XmlElement
+//                @SerialName("Presets")
+//                val presets: List<Preset>,
+//            ) {
                 @Serializable
                 @XmlSerialName("Preset")
                 data class Preset(
@@ -403,7 +408,7 @@ data class NestdropSettings(
                     @SerialName("Comments")
                     val comments: String? = null,
                 )
-            }
+//            }
 
 
         }
