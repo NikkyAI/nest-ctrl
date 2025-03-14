@@ -22,7 +22,7 @@ scoop install openjdk
 
 https://www.nestimmersion.ca/nestdrop.php
 
-tested with `V2.x.0.23`
+tested with `V2.2.1.3`
 
 # Nestdrop setup
 

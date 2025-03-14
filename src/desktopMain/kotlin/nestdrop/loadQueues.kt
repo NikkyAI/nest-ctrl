@@ -6,6 +6,7 @@ import nestdrop.deck.Deck
 import nestdrop.deck.PresetQueues
 import nestdropConfig
 import utils.xml
+import javax.xml.stream.XMLStreamException
 
 private val logger = KotlinLogging.logger { }
 
@@ -24,7 +25,7 @@ suspend fun parseNestdropXml(
     val nestdropSettings: NestdropSettings = try {
         xml.decodeFromString(
             NestdropSettings.serializer(), nestdropConfig.readText().also {
-                logger.info { "parsing xml: $it" }
+                logger.trace { "parsing xml: $it" }
             }
                 .substringAfter(
                     """<?xml version="1.0" encoding="utf-8"?>"""
@@ -32,7 +33,7 @@ suspend fun parseNestdropXml(
 //            .lines().drop(1).joinToString("/n")
         )
     } catch (e: nl.adaptivity.xmlutil.XmlException) {
-        logger.error(e) { "failed to parse XML" }
+        logger.warn(e) { "failed to parse XML" }
         delay(100)
         if (retries < 5) {
             return parseNestdropXml(retries + 1)

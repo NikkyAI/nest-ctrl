@@ -350,13 +350,17 @@ data class NestdropSettings(
             val active: Boolean,
             @SerialName("MidiDevice")
             val midiDevice: String? = null,
+            @SerialName("IsFileExplorer")
+            val isFileExplorer: String = "False",
+            @SerialName("FileExplorerPath")
+            val fileExplorerPath: String = "",
 //            @XmlElement
 //            @SerialName("Presets")
 //            val presetsContainer: Presets,
             @XmlElement
             @SerialName("Presets")
             @XmlChildrenName("Presets")
-            val presets: List<Preset>,
+            val presets: List<Preset> = emptyList(),
         ) {
 //            val presets get() = presetsContainer.presets
 //

@@ -6,5 +6,6 @@ enum class QueueType {
     Sprite,
     Text,
     MIDI,
-    Settings
+    Settings,
+    NestdropSettings,
 }

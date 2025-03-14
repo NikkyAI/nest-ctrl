@@ -136,5 +136,5 @@ suspend fun scanMilkdrop() {
 private val logger = KotlinLogging.logger {}
 
 private fun List<File>.sortFileNames() = sortedBy { file ->
-    file.nameWithoutExtension.lowercase().replace("_", "#")
+    file.nameWithoutExtension.lowercase().replace("_", "|")
 }

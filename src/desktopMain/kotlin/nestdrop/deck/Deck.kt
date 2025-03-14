@@ -38,11 +38,13 @@ import nestdrop.nestdropSetSprite
 import osc.OSCMessage
 import osc.OscSynced
 import osc.nestdropSendChannel
+import osc.stringify
 import tags.PresetPlaylist
 import tags.pickItemToGenerate
 import tags.presetTagsMapping
 import ui.screens.imgSpritesMap
 import ui.screens.presetsMap
+import utils.className
 import utils.prettyPrint
 import utils.runningHistory
 import utils.runningHistoryNotNull
@@ -115,7 +117,7 @@ class Deck(
         val negative = NestdropControl.Slider(id, "Negative", 0f..1f, 0f)
 
         //        val brightness = NestdropControl.SliderWithResetButton(N, "Brightness", 0.5f..1.5f, 1.0f)
-        val brightness = NestdropControl.SliderWithResetButton(id, "Brightness", 0.5f..1.05f, 1.0f)
+        val brightness = NestdropControl.SliderWithResetButton(id, "Brightness", 0.5f..1.0f, 1.0f)
         val contrast = NestdropControl.SliderWithResetButton(id, "Contrast", 0.5f..1.5f, 1.0f)
         val gamma = NestdropControl.SliderWithResetButton(id, "Gamma", 0.5f..1.5f, 1.0f)
         val hueShift = NestdropControl.SliderWithResetButton(id, "Hue", 0f..2f, 0f)
@@ -384,9 +386,12 @@ class Deck(
 
     @Serializable
     data class PresetData(
-        val id: Int,
+//        val id: Int,
+        val presetId: String,
         val name: String,
-    )
+    ) {
+        val id: Int = presetId.substringAfter("/PresetID/").toIntOrNull() ?: -1
+    }
 
     @Immutable
     inner class Preset {
@@ -397,10 +402,20 @@ class Deck(
         ) {
             override fun convertMessage(message: OSCMessage): PresetData {
                 val input = message.arguments
-                return PresetData(input[0] as Int, input[1] as String)
+                return try {
+                    //
+                    PresetData(input[0] as String, input[1] as String)
+                } catch (e: ClassCastException) {
+                    logger.info { "input:" }
+                    input.forEachIndexed { index, any ->
+                        logger.info { "$index: ${any.className} $any" }
+                    }
+                    logger.error(e) { "fix your types" }
+                    throw e
+                }
             }
         }
-            .stateIn(flowScope, SharingStarted.Eagerly, initialValue = PresetData(-1, "unitialized"))
+            .stateIn(flowScope, SharingStarted.Eagerly, initialValue = PresetData("", "unitialized"))
 
         suspend fun startFlows() {
 //            logger.info { "starting flows for $deckName-preset" }
@@ -432,8 +447,10 @@ class Deck(
 
     @Serializable
     data class SpriteData(
-        val id: Int = -1,
+        val presetId: String = "",
+//        val id: Int = -1,
         val name: String = "unset",
+        val modeInt: Int = 0,
         val mode: ImgMode = ImgMode.Overlay,
         val fx: Int = 0,
         val mystery: Int = 0,
@@ -441,6 +458,7 @@ class Deck(
         val isImg: Boolean = false,
     ) {
         val isSpout = !isImg
+        val id: Int = presetId.substringAfter("/PresetID/").toIntOrNull() ?: -1
         val key = SpriteKey(id, name, mode, fx, mystery)
     }
 
@@ -469,14 +487,35 @@ class Deck(
         ) {
             override fun convertMessage(message: OSCMessage): SpriteData {
                 val args = message.arguments
-                return SpriteData(
-                    id = args[0] as Int,
-                    name = args[1] as String,
-                    mode = ImgMode.valueOf(args[2] as String),
-                    fx = args[3] as Int,
-                    mystery = args[4] as Int,
-                    enabled = (args[5] as Int) == 1,
-                )
+                return try {
+                    // TODO: report this random extra parameter
+                    val modeIntOffset = if(args[2] is Int) 1 else 0
+                    val mode = if(args[2] is Int) {
+                        when(args[2] as Int) {
+                            0 -> ImgMode.Overlay
+                            1 -> ImgMode.Nested
+                            else -> error("")
+                        }
+                    } else {
+                        ImgMode.valueOf(args[2+modeIntOffset] as String)
+                    }
+                    SpriteData(
+                        presetId = args[0] as String,
+                        name = args[1] as String,
+                        modeInt = mode.code,
+                        mode = mode,
+                        fx = args[3+modeIntOffset] as Int,
+                        mystery = args[4+modeIntOffset] as Int,
+                        enabled = (args[5+modeIntOffset] as Int) == 1,
+                    )
+                } catch (e: ClassCastException) {
+                    logger.info { "input: ${message.stringify()}" }
+//                    args.forEachIndexed { index, any ->
+//                        logger.info { "$index: ${any.className} $any" }
+//                    }
+                    logger.error(e) { "fix your types" }
+                    throw e
+                }
             }
         }
 
@@ -507,7 +546,7 @@ class Deck(
 //                    logger.info { "old $previousSpriteData" }
                     val skipSpoutSprite =
                         spriteData.isSpout && spriteData.fx == 0 && spriteData == previousSpriteData.copy(
-                            id = spriteData.id,
+                            presetId = spriteData.presetId,
                             fx = 0
                         )
                     if (skipSpoutSprite) {
