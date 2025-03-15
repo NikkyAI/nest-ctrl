@@ -27,23 +27,89 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import decks
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import nestdrop.PresetLocation
 import nestdrop.deck.Deck
 import nestdrop.nestdropSetPreset
 import presetsFolder
+import scanMilkdrop
 import tags.PresetPlaylist
 import tags.nestdropQueueSearches
 import tags.presetTagsMapping
+import ui.components.fontDseg14
 import ui.components.lazyList
 import ui.components.verticalScroll
 import kotlin.time.Duration
+import kotlin.time.measureTime
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun debugScreen() {
+    var scanRunning by remember {
+        mutableStateOf(false)
+    }
+    var scanDuration by remember {
+        mutableStateOf(Duration.ZERO)
+    }
+    val scope = rememberCoroutineScope()
+    val decksEnabled by Deck.enabled.collectAsState()
+    val customSearches by customSearches.collectAsState()
+    val nestdropQueueSearches by nestdropQueueSearches.collectAsState()
+
+    val combinedSearches = (customSearches + nestdropQueueSearches)
+
+    val presets by presetsMap.collectAsState()
+    val presetTags by presetTagsMapping.collectAsState()
+
+    val state = rememberLazyListState()
+
+    var tagScore by remember { mutableStateOf<PresetPlaylist?>(null) }
+    Column {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "NEST\nCTRL",
+                fontFamily = fontDseg14,
+                fontSize = 30.sp,
+                lineHeight = 45.sp,
+                modifier = Modifier.padding(32.dp)
+            )
+            Spacer(modifier = Modifier.width(30.dp))
+            Text(tagScore?.label ?: "All")
+            Spacer(modifier = Modifier.width(30.dp))
+            Button(
+                {
+                    scope.launch {
+                        scanRunning = true
+                        scope.launch(Dispatchers.IO) {
+                            scanDuration = measureTime {
+                                scanMilkdrop()
+                            }
+                            scanRunning = false
+                        }
+                    }
+                }, enabled = !scanRunning
+            ) {
+                Text("scan presets")
+            }
+
+            if (scanDuration > Duration.ZERO) {
+                Text("Scan took $scanDuration")
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun debugPlaylistsScreen() {
     var scanRunning by remember {
         mutableStateOf(false)
     }

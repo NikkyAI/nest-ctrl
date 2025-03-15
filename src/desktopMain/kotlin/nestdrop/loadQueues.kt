@@ -1,5 +1,6 @@
 package nestdrop
 
+import androidx.compose.ui.unit.lerp
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
 import nestdrop.deck.Deck
@@ -33,11 +34,12 @@ suspend fun parseNestdropXml(
 //            .lines().drop(1).joinToString("/n")
         )
     } catch (e: nl.adaptivity.xmlutil.XmlException) {
-        logger.warn(e) { "failed to parse XML" }
-        delay(100)
         if (retries < 5) {
+            logger.warn { "failed to parse XML: ${e.message}" }
+            delay(100)
             return parseNestdropXml(retries + 1)
         } else {
+            logger.error(e) { "failed to parse XML" }
             throw e
         }
     }

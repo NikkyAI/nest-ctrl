@@ -33,9 +33,17 @@ suspend fun scanMilkdrop() {
             )
         }
         val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }
+//            .also {
+//                logger.debug { "pre-sort: ${it.map { it.name }}" }
+//            }
+            .sortFileNames()
+//            .also {
+//                logger.debug { "post-sort: ${it.map { it.name }}" }
+//            }
 
         val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
-            val subCategoryFiles = subCategoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "milk" }
+            val subCategoryFiles =
+                subCategoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "milk" }
             if (subCategoryFiles.isNotEmpty()) {
                 if (index == 0) {
                     if (categoryPresets.isNotEmpty()) {
@@ -69,33 +77,11 @@ suspend fun scanMilkdrop() {
     }.associateBy { it.name }
 
 
-    val imgPresets = spritesFolder.listFiles().orEmpty().filter { it.isDirectory }.sortFileNames().flatMap { categoryFolder ->
-        val categoryFiles = categoryFolder.listFiles().orEmpty().filter { it.isFile }.filter { it.extension == "png" || it.extension == "jpg" }.sortFileNames()
-        val categoryPresets = categoryFiles.filterNotNull().map { file ->
-            val name = file.name
-            val path = file.toRelativeString(presetsFolder)
-
-            PresetLocation.Img(
-                name = name,
-                id = id++,
-                path = path,
-                category = categoryFolder.name,
-            )
-        }
-        val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }.sortFileNames()
-
-        val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
-            val subCategoryFiles = subCategoryFolder.listFiles().orEmpty().filter { it.extension == "png" || it.extension == "jpg" }.sortFileNames()
-            if (subCategoryFiles.isNotEmpty()) {
-                if (index == 0) {
-                    if (categoryPresets.isNotEmpty()) {
-                        id++
-                    }
-                } else {
-                    id++
-                }
-            }
-            subCategoryFiles.filterNotNull().map { file ->
+    val imgPresets =
+        spritesFolder.listFiles().orEmpty().filter { it.isDirectory }.sortFileNames().flatMap { categoryFolder ->
+            val categoryFiles = categoryFolder.listFiles().orEmpty().filter { it.isFile }
+                .filter { it.extension == "png" || it.extension == "jpg" }.sortFileNames()
+            val categoryPresets = categoryFiles.filterNotNull().map { file ->
                 val name = file.name
                 val path = file.toRelativeString(presetsFolder)
 
@@ -104,13 +90,39 @@ suspend fun scanMilkdrop() {
                     id = id++,
                     path = path,
                     category = categoryFolder.name,
-                    subCategory = subCategoryFolder.name,
                 )
             }
-        }
+            val subCategories = categoryFolder.listFiles().orEmpty().filter { it.isDirectory }.sortFileNames()
 
-        categoryPresets + subCategoryEntries
-    }.associateBy { it.name }
+            val subCategoryEntries = subCategories.flatMapIndexed() { index, subCategoryFolder ->
+                val subCategoryFiles =
+                    subCategoryFolder.listFiles().orEmpty().filter { it.extension == "png" || it.extension == "jpg" }
+                        .sortFileNames()
+                if (subCategoryFiles.isNotEmpty()) {
+                    if (index == 0) {
+                        if (categoryPresets.isNotEmpty()) {
+                            id++
+                        }
+                    } else {
+                        id++
+                    }
+                }
+                subCategoryFiles.filterNotNull().map { file ->
+                    val name = file.name
+                    val path = file.toRelativeString(presetsFolder)
+
+                    PresetLocation.Img(
+                        name = name,
+                        id = id++,
+                        path = path,
+                        category = categoryFolder.name,
+                        subCategory = subCategoryFolder.name,
+                    )
+                }
+            }
+
+            categoryPresets + subCategoryEntries
+        }.associateBy { it.name }
 
     nestdropCategoryTagsSet.value = categoryTagsSet
 
@@ -120,7 +132,7 @@ suspend fun scanMilkdrop() {
     flowScope.launch {
         measureTimedValue {
             imgPresets.values.map { sprite ->
-                async (Dispatchers.IO) {
+                async(Dispatchers.IO) {
                     sprite.image
 //                        .also { img ->
 //                    logger.info { "loaded ${sprite.name} ${img.width}x${img.height}" }
@@ -136,5 +148,5 @@ suspend fun scanMilkdrop() {
 private val logger = KotlinLogging.logger {}
 
 private fun List<File>.sortFileNames() = sortedBy { file ->
-    file.nameWithoutExtension.lowercase().replace("_", "|")
+    file.nameWithoutExtension.lowercase().replace("_", "|")+"_"
 }

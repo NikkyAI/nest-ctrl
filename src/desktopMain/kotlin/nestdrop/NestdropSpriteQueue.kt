@@ -12,13 +12,17 @@ import kotlinx.coroutines.flow.onEach
 
 sealed interface PresetIdState {
     val queue: Queue? get() = null
+//    val index: Int? get() = null
     val index: Int? get() = null
     data class Data(
+//        override val index: Int,
         override val index: Int,
         override val queue: Queue,
         val force: Boolean = false,
 //    val hardCut: Boolean = false,
-    ) : PresetIdState
+    ) : PresetIdState {
+        val id get() = queue.presets.getOrNull(index)?.id
+    }
 
     data object Unset : PresetIdState
 }
@@ -40,11 +44,16 @@ class NestdropSpriteQueue(
         channel.send(state)
     }
 
-    private suspend fun presetId(queue: Queue, index: Int, overlay: Boolean = false) {
-        logger.debug { "presetId $index on ${queue.name} (\"/PresetID/${queue.name}/$index\")" }
+    private suspend fun presetId(queue: Queue, id: Int?, overlay: Boolean = false) {
+        if(id == null) {
+            logger.warn { "failed to find sprite id" }
+            return
+        }
+        logger.debug { "setting presetId $id on ${queue.name} (\"/PresetID/${queue.name}/$id\")" }
         nestdropSendChannel.send(
             OSCMessage(
-                "/PresetID/${queue.name}/$index",
+                "/PresetID/${queue.name}/$id",
+//                "/PresetID/$id",
                 listOf(
                     if (overlay) 0 else 1
                 )
@@ -68,9 +77,10 @@ class NestdropSpriteQueue(
                                 is PresetIdState.Data -> {
                                     if (previous.queue.type == QueueType.Sprite) {
                                         // to unset: send last index again
+                                        logger.debug { "unsetting previous sprite" }
                                         presetId(
                                             queue = previous.queue,
-                                            index = previous.index,
+                                            id = previous.id,
                                             overlay = false
                                         )
                                     } else {
@@ -89,9 +99,12 @@ class NestdropSpriteQueue(
 
                         is PresetIdState.Data -> {
                             if (current.force) {
+                                logger.debug { "force setting sprite" }
                                 presetId(
-                                    current.queue,
-                                    (current.index + 1) % current.queue.presets.size,
+                                    queue = current.queue,
+                                    id = current.id,
+//                                    current.queue.presets.first { it.id != current.id }.id,
+//                                    (current.index + 1) % current.queue.presets.size,
                                     overlay = false
                                 )
                                 delay(25)
@@ -99,15 +112,16 @@ class NestdropSpriteQueue(
                             } else {
 
                                 val presetName = current.queue.presets.getOrNull(current.index)
-                                val previousIndex = previous?.index
-                                val previousPresetName = previousIndex?.let {
+                                val previousId = previous?.index
+                                val previousPresetName = previousId?.let {
                                     previous?.queue?.presets?.getOrNull(it)
                                 }
-                                if (current.index == previousIndex) {
+                                if (current.index == previousId) {
                                     logger.info { "ND: received same preset id again, resetting ${current.queue.name} to $presetName" }
                                     presetId(
-                                        current.queue,
-                                        current.index + 1 % current.queue.presets.size,
+                                        queue = current.queue,
+                                        id = current.id,
+//                                        current.queue.presets.first { it.id != current.id }.id,
                                         overlay = false
                                     )
 //                            presetId(current.queue, current.index)

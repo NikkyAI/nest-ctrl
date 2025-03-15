@@ -450,13 +450,14 @@ class Deck(
         val presetId: String = "",
 //        val id: Int = -1,
         val name: String = "unset",
-        val modeInt: Int = 0,
+        val active: Int = 0,
         val mode: ImgMode = ImgMode.Overlay,
         val fx: Int = 0,
         val mystery: Int = 0,
         val enabled: Boolean = false,
         val isImg: Boolean = false,
     ) {
+        val isActive = active == 1
         val isSpout = !isImg
         val id: Int = presetId.substringAfter("/PresetID/").toIntOrNull() ?: -1
         val key = SpriteKey(id, name, mode, fx, mystery)
@@ -489,21 +490,13 @@ class Deck(
                 val args = message.arguments
                 return try {
                     // TODO: report this random extra parameter
-                    val modeIntOffset = if(args[2] is Int) 1 else 0
-                    val mode = if(args[2] is Int) {
-                        when(args[2] as Int) {
-                            0 -> ImgMode.Overlay
-                            1 -> ImgMode.Nested
-                            else -> error("")
-                        }
-                    } else {
-                        ImgMode.valueOf(args[2+modeIntOffset] as String)
-                    }
+                    val hasActiveParam = args[2] is Int
+                    val modeIntOffset = if(hasActiveParam) 1 else 0
                     SpriteData(
                         presetId = args[0] as String,
                         name = args[1] as String,
-                        modeInt = mode.code,
-                        mode = mode,
+                        active = 1,
+                        mode = ImgMode.valueOf(args[2+modeIntOffset] as String),
                         fx = args[3+modeIntOffset] as Int,
                         mystery = args[4+modeIntOffset] as Int,
                         enabled = (args[5+modeIntOffset] as Int) == 1,
@@ -918,7 +911,11 @@ class Deck(
                     logger.info { "$deckName spout change: $index in ${queue?.name}" }
                     nestdropSpout.send(
                         when {
-                            queue != null && index != -1 -> PresetIdState.Data(index, queue, true)
+                            queue != null && index != -1 -> PresetIdState.Data(
+                                index = index,
+                                queue = queue,
+                                force = true,
+                            )
                             else -> PresetIdState.Unset
                         }
                     )
