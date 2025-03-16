@@ -29,6 +29,7 @@ import kotlinx.serialization.Serializable
 import nestdrop.ImgMode
 import nestdrop.NestdropControl
 import nestdrop.NestdropSpriteQueue
+import nestdrop.Preset
 import nestdrop.PresetIdState
 import nestdrop.PresetLocation
 import nestdrop.Queue
@@ -333,8 +334,6 @@ class Deck(
 //        presetQueues.startFlows()
 //        presetQueue.startFlows()
         preset.startFlows()
-        spriteQueues.startFlows()
-//        spriteQueue.startFlows()
         spriteState.startFlows()
         imgSprite.startFlows()
         imgSpriteFx.startFlows()
@@ -437,13 +436,14 @@ class Deck(
     val preset = Preset()
 
     @Immutable
-    inner class SpriteQueues : MutableStateFlow<List<Queue>> by MutableStateFlow(emptyList()) {
+    inner class SpriteQueues : MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> by MutableStateFlow(emptyList()) {
         suspend fun startFlows() {
 //            logger.info { "initializing $deckName sprite queues" }
         }
     }
 
-    val spriteQueues = SpriteQueues()
+    val imgSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> = MutableStateFlow(emptyList())
+    val spoutSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.SpoutSprite>>> = MutableStateFlow(emptyList())
 
     @Serializable
     data class SpriteData(
@@ -795,7 +795,7 @@ class Deck(
     val imgSpriteFx = ImgSpriteFX()
 
     @Immutable
-    inner class SpoutQueue : MutableStateFlow<Queue?> by MutableStateFlow(null) {
+    inner class SpoutQueue : MutableStateFlow<Queue<nestdrop.Preset.SpoutSprite>?> by MutableStateFlow(null) {
         val index = MutableStateFlow(-1)
         val name = MutableStateFlow("uninitialized")
 
@@ -803,7 +803,7 @@ class Deck(
             logger.info { "starting coroutines on $deckName spout-queue" }
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
-                .combine(spriteQueues) { index, queues ->
+                .combine(spoutSpriteQueues) { index, queues ->
                     queues.getOrNull(index)
                 }
                 .onEach {
@@ -820,7 +820,7 @@ class Deck(
 
     @Immutable
     inner class Spout
-        : MutableStateFlow<nestdrop.Preset?> by MutableStateFlow(null) {
+        : MutableStateFlow<nestdrop.Preset.SpoutSprite?> by MutableStateFlow(null) {
 //        val toggles = List(20) {
 //            MutableStateFlow(false)
 //        }
@@ -913,7 +913,7 @@ class Deck(
                         when {
                             queue != null && index != -1 -> PresetIdState.Data(
                                 index = index,
-                                queue = queue,
+                                queue = queue as Queue<nestdrop.Preset>,
                                 force = true,
                             )
                             else -> PresetIdState.Unset

@@ -27,7 +27,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import nestdrop.deck.PresetQueues
+import nestdrop.deck.Queues
 import tagsFolder
 import ui.screens.presetsMap
 import utils.KWatchEvent
@@ -146,13 +146,17 @@ data class Tag(
 }
 
 
-suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
+suspend fun startTagsFileWatcher(queues: Queues) {
     tagsFolder.mkdirs()
 
-    combine(presetsMap, presetQueues.allQueues, customTagsMapping) { presetsMap, queues, customTags ->
+    combine(presetsMap, queues.presetQueues, customTagsMapping) { presetsMap, queues, customTags ->
         presetTagsMapping.value = presetsMap.mapValues { (_, entry) ->
-            val categoryTag = entry.category.let { Tag(it, listOf("nestdrop")) }
-            val subCategoryTag = entry.subCategory?.let { Tag(it, listOf("nestdrop", entry.category)) }
+//            val categoryTag = entry.categoryPath.let { Tag(it, listOf("nestdrop")) }
+            val categoryTags = entry.categoryPath.mapIndexed { i, category ->
+                Tag(category, listOf("nestdrop") + entry.categoryPath.subList(0, i))
+            }
+
+//            val subCategoryTag = entry.subCategory?.let { Tag(it, listOf("nestdrop", entry.categoryPath)) }
             val queueTags = queues.filter {
 //                    System.err.println(it.presets)
                 it.presets.any { it.name.substringBeforeLast(".milk") == entry.name }
@@ -168,7 +172,7 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
                     Tag(name = name, namespace = namespace)
                 }
 
-            setOfNotNull(categoryTag, subCategoryTag) + queueTags + customTags // + customCategories
+            categoryTags.toSet() + queueTags + customTags // + customCategories
         }
     }.launchIn(flowScope)
 
@@ -178,7 +182,7 @@ suspend fun startTagsFileWatcher(presetQueues: PresetQueues) {
         }
         .launchIn(flowScope)
 
-    presetQueues.allQueues
+    queues.presetQueues
         .onEach { queues ->
             val queueTagsAndSearches = queues.associate { queue ->
 

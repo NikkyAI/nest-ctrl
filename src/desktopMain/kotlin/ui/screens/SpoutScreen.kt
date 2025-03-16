@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import decks
+import nestdrop.Preset
 import nestdrop.Queue
 import nestdrop.deck.Deck
 import ui.components.VerticalRadioButton
@@ -104,7 +105,7 @@ fun spoutScreen() {
                 decks.forEach { deck ->
                     if (deck.id > decksEnabled) return@forEach
 
-                    val queue: Queue? by deck.spoutQueue.collectAsState()
+                    val queue: Queue<Preset.SpoutSprite>? by deck.spoutQueue.collectAsState()
                     val activeIndexState = deck.spout.index
                     val activeIndex by activeIndexState.collectAsState()
                     val preset = queue?.presets?.getOrNull(i)

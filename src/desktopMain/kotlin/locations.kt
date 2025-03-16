@@ -30,7 +30,7 @@ val nestdropFolder
         ?.parsePath()
         ?: userHome.resolve("VJ").resolve("NestDropProV2")
 
-val nestdropConfig: File
+val nestdropConfigFile: File
     get() {
         val filename = (dotenv["NESTDROP_PROFILE"] ?: System.getenv("NESTDROP_PROFILE")) ?: "DefaultUserProfile.xml"
         return nestdropFolder.resolve(filename).canonicalFile

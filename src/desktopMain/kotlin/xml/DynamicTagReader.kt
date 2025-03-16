@@ -20,7 +20,6 @@
 
 package xml
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import nl.adaptivity.xmlutil.EventType
 import nl.adaptivity.xmlutil.XmlDelegatingReader
 import nl.adaptivity.xmlutil.XmlReader
@@ -32,17 +31,15 @@ import nl.adaptivity.xmlutil.serialization.structure.XmlDescriptor
 internal class DynamicTagReader(
     reader: XmlReader,
     descriptor: XmlDescriptor,
-    prefixString: String
+    prefix: String,
 ) : XmlDelegatingReader(reader) {
     private var initDepth = reader.depth
     private val filterDepth: Int
         /**
-         * We want to be safe so only handle the content at relative depth 0. The way that depth is determined
-         * means that the depth is the depth after the tag (and end tags are thus one level lower than the tag (and its
-         * content). We correct for that here.
+         * We want to be safe so only handle the content at relative depth 0.
          */
         get() = when (eventType) {
-            EventType.END_ELEMENT -> delegate.depth - initDepth + 1
+            EventType.END_ELEMENT -> delegate.depth - initDepth
             else -> delegate.depth - initDepth
         }
 
@@ -55,8 +52,7 @@ internal class DynamicTagReader(
      * Store the name of the id attribute that is synthetically generated. This property is initialised
      * this way to allow for name remapping in the format policy.
      */
-    @OptIn(ExperimentalSerializationApi::class)
-    private val idAttrName = (0 until descriptor.elementsCount)
+    private val indexAttribute = (0 until descriptor.elementsCount)
         .first { descriptor.serialDescriptor.getElementName(it) == "index" }
         .let { descriptor.getElementDescriptor(it) }
         .tagName
@@ -65,7 +61,7 @@ internal class DynamicTagReader(
      * This filter is created when we are at the local tag. So we can already determine the value of the
      * synthetic id property. In this case just by removing the prefix.
      */
-    val idValue = delegate.localName.removePrefix(prefixString)
+    val indexValue = delegate.localName.removePrefix(prefix)
 
     /**
      * When we are at relative depth 0 we add an attribute at position 0 (easier than at the end). This allows
@@ -83,7 +79,7 @@ internal class DynamicTagReader(
      */
     override fun getAttributeNamespace(index: Int): String = when (filterDepth) {
         0 -> when (index) {
-            0 -> idAttrName.namespaceURI
+            0 -> indexAttribute.namespaceURI
             else -> super.getAttributeNamespace(index - 1)
         }
 
@@ -96,7 +92,7 @@ internal class DynamicTagReader(
      */
     override fun getAttributePrefix(index: Int): String = when (filterDepth) {
         0 -> when (index) {
-            0 -> idAttrName.prefix
+            0 -> indexAttribute.prefix
             else -> super.getAttributePrefix(index - 1)
         }
 
@@ -109,7 +105,7 @@ internal class DynamicTagReader(
      */
     override fun getAttributeLocalName(index: Int): String = when (filterDepth) {
         0 -> when (index) {
-            0 -> idAttrName.localPart
+            0 -> indexAttribute.localPart
             else -> super.getAttributeLocalName(index - 1)
         }
 
@@ -122,7 +118,7 @@ internal class DynamicTagReader(
      */
     override fun getAttributeValue(index: Int): String = when (filterDepth) {
         0 -> when (index) {
-            0 -> idValue
+            0 -> indexValue
             else -> super.getAttributeValue(index - 1)
         }
 
@@ -135,8 +131,8 @@ internal class DynamicTagReader(
      */
     override fun getAttributeValue(nsUri: String?, localName: String): String? = when {
         filterDepth == 0 &&
-                (nsUri ?: "") == idAttrName.namespaceURI &&
-                localName == idAttrName.localPart -> idValue
+                (nsUri ?: "") == indexAttribute.namespaceURI &&
+                localName == indexAttribute.localPart -> indexValue
 
         else -> super.getAttributeValue(nsUri, localName)
     }

@@ -36,6 +36,7 @@ suspend fun startBeatCounter() {
 
     @OptIn(FlowPreview::class)
     bpmSynced
+        .flow
         .sample(100.milliseconds)
         .map { bpm ->
             (bpm * 10).roundToInt() / 10.0f
@@ -93,7 +94,7 @@ suspend fun startBeatCounter() {
                 val now = Clock.System.now()
                 val timeDelta = now - lastLoop
                 lastLoop = now
-                val beatsPerMillisecond = bpmSynced.value / 60_000.0
+                val beatsPerMillisecond = bpmSynced.flow.value / 60_000.0
                 val beatsInDuration = beatsPerMillisecond * timeDelta.inWholeMilliseconds
                 beatCounter.value += beatsInDuration
             }

@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 sealed interface PresetIdState {
-    val queue: Queue? get() = null
+    val queue: Queue<Preset>? get() = null
 //    val index: Int? get() = null
     val index: Int? get() = null
     data class Data(
 //        override val index: Int,
         override val index: Int,
-        override val queue: Queue,
+        override val queue: Queue<Preset>,
         val force: Boolean = false,
 //    val hardCut: Boolean = false,
     ) : PresetIdState {
@@ -44,7 +44,7 @@ class NestdropSpriteQueue(
         channel.send(state)
     }
 
-    private suspend fun presetId(queue: Queue, id: Int?, overlay: Boolean = false) {
+    private suspend fun presetId(queue: Queue<Preset>, id: Int?, overlay: Boolean = false) {
         if(id == null) {
             logger.warn { "failed to find sprite id" }
             return

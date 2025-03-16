@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,73 +32,6 @@ import tags.Tag
 import tags.presetTagsMapping
 import ui.components.verticalScroll
 
-
-@Composable
-fun presetScreenSingle(deck: Deck) {
-    val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
-    val presetsMap by presetsMap.collectAsState()
-    val tagMap by presetTagsMapping.collectAsState()
-
-    val currentPreset by deck.preset.currentPreset.collectAsState()
-    val presetName = currentPreset.name
-    val presetEntry = presetsMap[presetName]
-
-    Row(
-        modifier = Modifier
-            .width(400.dp)
-            .aspectRatio(4f / 3f)
-            .background(deck.dimmedColor)
-            .padding(4.dp),
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(
-            modifier = Modifier.weight(0.5f)
-        ) {
-            verticalScroll {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier
-//                                .padding(4.dp)
-                ) {
-                    val tags = tagMap[presetName] ?: emptySet()
-                    tags.forEach {
-                        Text(it.label)
-                    }
-                }
-            }
-        }
-
-        Column(
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .weight(0.5f)
-//                .fillMaxHeight()
-        ) {
-            if (presetEntry != null) {
-                val image = remember(presetEntry) { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
-//                        System.err.println("loaded image ${presetEntry.previewPath}")
-                Image(
-                    bitmap = image,
-                    contentDescription = presetEntry.previewPath,
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .fillMaxSize()
-//                        .padding(4.dp)
-                )
-
-                Text(
-                    text = presetName,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-//                                    .padding(horizontal = 4.dp, vertical = 4.dp)
-//                                    .weight(0.6f)
-                )
-            }
-        }
-
-    }
-}
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -152,29 +86,33 @@ fun presetDisplayScreen() {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = presetName,
-                            textAlign = TextAlign.Center,
+                    verticalScroll {
+                        Column(
+//                            horizontalAlignment = Alignment.Start,
                             modifier = Modifier
-                        )
-                    }
-
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        modifier = Modifier
 //                            .fillMaxWidth()
 //                            .weight(0.3f)
-                    ) {
-                        verticalScroll {
+                            ,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = presetName,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                )
+//                                Spacer(Modifier.height(4.dp))
+                            }
+//                        verticalScroll {
                             FlowRow(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+
                             ) {
                                 val tags = tagMap[presetName] ?: emptySet()
                                 tags
@@ -213,6 +151,7 @@ fun presetDisplayScreen() {
 //                                        }
 //                                    }
 //                            }
+//                        }
                         }
                     }
 
@@ -244,3 +183,70 @@ fun presetDisplayScreen() {
         }
     }
 }
+
+//@Composable
+//fun presetScreenSingle(deck: Deck) {
+//    val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
+//    val presetsMap by presetsMap.collectAsState()
+//    val tagMap by presetTagsMapping.collectAsState()
+//
+//    val currentPreset by deck.preset.currentPreset.collectAsState()
+//    val presetName = currentPreset.name
+//    val presetEntry = presetsMap[presetName]
+//
+//    Row(
+//        modifier = Modifier
+//            .width(400.dp)
+//            .aspectRatio(4f / 3f)
+//            .background(deck.dimmedColor)
+//            .padding(4.dp),
+////        verticalAlignment = Alignment.CenterVertically,
+////        horizontalArrangement = Arrangement.SpaceBetween,
+//    ) {
+//        Column(
+//            modifier = Modifier.weight(0.5f)
+//        ) {
+//            verticalScroll {
+//                Column(
+//                    horizontalAlignment = Alignment.Start,
+//                    modifier = Modifier
+////                                .padding(4.dp)
+//                ) {
+//                    val tags = tagMap[presetName] ?: emptySet()
+//                    tags.forEach {
+//                        Text(it.label)
+//                    }
+//                }
+//            }
+//        }
+//
+//        Column(
+//            verticalArrangement = Arrangement.SpaceBetween,
+//            modifier = Modifier
+//                .weight(0.5f)
+////                .fillMaxHeight()
+//        ) {
+//            if (presetEntry != null) {
+//                val image = remember(presetEntry) { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
+////                        System.err.println("loaded image ${presetEntry.previewPath}")
+//                Image(
+//                    bitmap = image,
+//                    contentDescription = presetEntry.previewPath,
+//                    modifier = Modifier
+//                        .aspectRatio(1f)
+//                        .fillMaxSize()
+////                        .padding(4.dp)
+//                )
+//
+//                Text(
+//                    text = presetName,
+//                    textAlign = TextAlign.End,
+//                    modifier = Modifier
+////                                    .padding(horizontal = 4.dp, vertical = 4.dp)
+////                                    .weight(0.6f)
+//                )
+//            }
+//        }
+//
+//    }
+//}

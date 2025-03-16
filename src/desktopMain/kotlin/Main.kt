@@ -29,12 +29,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -44,11 +41,11 @@ import kotlinx.serialization.json.Json
 import nestctrl.generated.resources.Res
 import nestctrl.generated.resources.blobhai_trans
 import nestdrop.deck.Deck
-import nestdrop.deck.PresetQueues
+import nestdrop.deck.Queues
 import nestdrop.deck.loadDeckSettings
 import nestdrop.loadNestdropConfig
-import nestdrop.parseNestdropXml
 import nestdrop.setupSpriteFX
+import nestdrop.watchNestdropConfig
 import org.jetbrains.compose.resources.painterResource
 import osc.runNestDropSend
 import osc.startNestdropOSC
@@ -56,11 +53,9 @@ import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
 import ui.splashScreen
-import utils.KWatchChannel
-import utils.KWatchEvent
-import utils.asWatchChannel
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
@@ -68,7 +63,7 @@ import kotlin.time.measureTime
 private val logger = KotlinLogging.logger { }
 //val decks = MutableStateFlow<List<Deck>>(emptyList())
 
-val presetQueues = PresetQueues()
+val QUEUES = Queues()
 val decks = List(4) { index ->
     when (val n = index + 1) {
         1 -> Deck(n, Color.hsl(0f, 1f, 0.5f)) // 0xFFff0000
@@ -83,7 +78,7 @@ object Main {
 
     @OptIn(FlowPreview::class)
     suspend fun initApplication(
-        presetQueues: PresetQueues,
+        queues: Queues,
     ) {
 //        setupLogging()
 //        logger.info {"testing logging.."}
@@ -122,7 +117,7 @@ object Main {
 
 //        delay(100)
         logger.info { "starting filewatcher ./tags" }
-        startTagsFileWatcher(presetQueues)
+        startTagsFileWatcher(queues)
 
         run {
             logger.info { "starting history writer" }
@@ -155,28 +150,15 @@ object Main {
 
 //        OSCMessage("thiswillfail", "string", 'c', "" to "")
 
-        run {
-            logger.info { "loading nestdrop XML" }
-            loadNestdropConfig(parseNestdropXml(), presetQueues, decks)
+        val nestdropSettingsState = watchNestdropConfig()
 
-            nestdropConfig
-                .asWatchChannel(KWatchChannel.Mode.SingleFile)
-                .consumeAsFlow().mapNotNull {
-                    if (it.kind == KWatchEvent.Kind.Modified) {
-                        try {
-                            parseNestdropXml()
-                        } catch (e: Exception) {
-                            logger.error(e) { "failed to load XML after file modification was detected" }
-                            null
-                        }
-                    } else {
-                        null
-                    }
-                }
-                .distinctUntilChanged()
-                .onEach {
-                    logger.info { "parsed (changed) xml from $nestdropConfig" }
-                    loadNestdropConfig(it, presetQueues, decks)
+        run {
+//            loadNestdropConfig(nestdropSettingsState.value, presetQueues, decks)
+
+            nestdropSettingsState
+                .onEach { nestdropSettings ->
+                    logger.info { "loading nestdrop config" }
+                    loadNestdropConfig(nestdropSettings, queues, decks)
                 }
                 .launchIn(flowScope)
         }
@@ -184,7 +166,7 @@ object Main {
 
         withTimeoutOrNull(45.seconds) {
             logger.info { "waiting for queues to be initialized" }
-            while (!presetQueues.isInitialized.value) {
+            while (!queues.isInitialized.value) {
                 delay(100)
             }
             true
@@ -194,7 +176,7 @@ object Main {
         loadConfig()
         delay(500)
 
-        presetQueues.startFlows()
+        queues.startFlows()
         flowScope.launch {
             decks.forEach { deck ->
                 launch {
@@ -203,7 +185,8 @@ object Main {
             }
         }
 
-        loadDeckSettings(decks)
+        nestdropSettingsState.value.loadDeckSettings(decks)
+        delay(250.milliseconds)
 
 //        decks.forEach {
 //            it.imgSprite.index.value++
@@ -255,7 +238,7 @@ object Main {
                 var showException by remember { mutableStateOf<Throwable?>(null) }
                 LaunchedEffect(Unit) {
                     try {
-                        initApplication(presetQueues)
+                        initApplication(QUEUES)
                         logger.info { "await application" }
                         isSplashScreenShowing = false
                     } catch (e: Exception) {

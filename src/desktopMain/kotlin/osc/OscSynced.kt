@@ -6,6 +6,7 @@ import com.illposed.osc.OSCMessageEvent
 import com.illposed.osc.OSCPacket
 import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,11 +16,12 @@ import kotlinx.coroutines.runBlocking
 private val logger = KotlinLogging.logger { }
 
 
+@OptIn(ExperimentalForInheritanceCoroutinesApi::class)
 sealed interface OscSynced<T : Any> {
     val flow: MutableSharedFlow<T>
     val messageSelector: MessageSelector
     val target: Target
-    var dropFirst: Int
+    val dropFirst: Int
     val label: String
 
     enum class Target(val label: String) {
@@ -43,7 +45,6 @@ sealed interface OscSynced<T : Any> {
 
         suspend fun tryConvertAndSet(value: OSCMessage) {
             val converted = try {
-                @Suppress("UNCHECKED_CAST")
                 convertMessage(value)
             } catch (e: TypeCastException) {
                 logger.error(e) { "failed to convert message ${value.stringify()} (${value::class.qualifiedName})" }
@@ -57,12 +58,15 @@ sealed interface OscSynced<T : Any> {
         }
 
         suspend fun setValue(value: T) {
-            flow.emit(value as T)
+            flow.emit(value)
         }
     }
 
     interface ArgConverter<T : Any> : MessageConverter<T> {
-        fun convertArg(input: Any): T = input as T
+        fun convertArg(input: Any): T {
+            @Suppress("UNCHECKED_CAST")
+            return input as T
+        }
 
         override fun convertMessage(message: OSCMessage): T {
             return convertArg(message.arguments.first())
@@ -80,6 +84,7 @@ sealed interface OscSynced<T : Any> {
 
         //    suspend fun generateOscMessage(value: Any): OSCPacket
         suspend fun generateOscMessagesUntyped(value: Any): List<OSCPacket> {
+            @Suppress("UNCHECKED_CAST")
             return generateOscMessages(value as T)
         }
 
@@ -109,14 +114,14 @@ sealed interface OscSynced<T : Any> {
         override val receive: Boolean,
         override val send: Boolean,
         override val target: Target,
-    ) : MutableStateFlow<T> by state, SendingSingle<T>, ArgConverter<T> {
+        override val dropFirst: Int = 0
+    ) : /*MutableStateFlow<T> by state,*/ SendingSingle<T>, ArgConverter<T> {
         override val flow = state
         override val listenAddress: String = address
         override val sendAddress: String = address
 
         override var logReceived: Boolean = true
         override var logSending: Boolean = true
-        override var dropFirst: Int = 0
 
         override val label: String = address
 
@@ -125,6 +130,7 @@ sealed interface OscSynced<T : Any> {
             initialValue: T,
             receive: Boolean = true,
             send: Boolean = true,
+            dropFirst: Int = 0,
             target: Target,
         ) : this(
             address = address,
@@ -132,6 +138,7 @@ sealed interface OscSynced<T : Any> {
             receive = receive,
             send = send,
             target = target,
+            dropFirst = dropFirst
         )
 
         init {
@@ -147,15 +154,15 @@ sealed interface OscSynced<T : Any> {
         private val mutableFlow: MutableSharedFlow<T>,
         override val receive: Boolean,
         override val send: Boolean,
-        override val target: Target
-    ) : SharedFlow<T> by mutableFlow, SendingSingle<T>, ArgConverter<T> {
+        override val target: Target,
+        override val dropFirst: Int = 0,
+    ) : /*SharedFlow<T> by mutableFlow,*/ SendingSingle<T>, ArgConverter<T> {
         override val flow = mutableFlow
         override val listenAddress: String = address
         override val sendAddress: String = address
 
         override var logReceived: Boolean = true
         override var logSending: Boolean = true
-        override var dropFirst: Int = 0
 
         override val label: String = address
 
@@ -185,6 +192,7 @@ sealed interface OscSynced<T : Any> {
         private val mutableSharedFlow: MutableSharedFlow<T>,
         override val receive: Boolean,
         override val target: Target,
+        override val dropFirst: Int = 0
 //        val argToValue: suspend (String, List<Any>) -> T,
     ) : SharedFlow<T> by mutableSharedFlow, MessageConverter<T> {
         override val flow = mutableSharedFlow
@@ -194,7 +202,6 @@ sealed interface OscSynced<T : Any> {
 //        override val send: Boolean = false
 
         override var logReceived: Boolean = true
-        override var dropFirst: Int = 0
 
         override suspend fun setValue(value: T) {
             mutableSharedFlow.emit(value)

@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlChildrenName
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import xml.Container
+import xml.Element
 import xml.FavoriteListSerializer
 import xml.LibraryClosedSectionsSerializer
 import xml.QueueWindowsSerializer
@@ -303,23 +305,26 @@ data class NestdropSettings(
 
     @Serializable(with = LibraryClosedSectionsSerializer::class)
     data class LibraryClosedSections(
-        val sections: List<LibraryClosedSection>
-    ) {
+        override val elements: List<LibraryClosedSection>
+    ): Container<LibraryClosedSections.LibraryClosedSection> {
         @Serializable
         data class LibraryClosedSection(
-            val index: Int,
+            override val index: Int,
             @XmlSerialName("Value")
             val value: String
-        )
+        ): Element
+        val sections get() = elements
     }
 
     @Serializable(with = QueueWindowsSerializer::class)
     data class QueueWindows(
-        val queues: List<Queue>
-    ) {
+        override val elements: List<Queue>
+    ): Container<QueueWindows.Queue> {
+        val queues get() = elements
+
         @Serializable
         data class Queue(
-            val index: Int,
+            override val index: Int,
             @SerialName("Name")
             val name: String,
             @SerialName("Top")
@@ -341,9 +346,9 @@ data class NestdropSettings(
             @SerialName("Magnetic")
             val magnetic: Boolean,
             @SerialName("BeatOffset")
-            val beatOffset: Int = 1,
+            val beatOffset: Float = 1f,
             @SerialName("BeatMulti")
-            val beatMulti: Int = 1,
+            val beatMulti: Float = 1f,
             @SerialName("DefaultSpriteOverlay")
             val defaultSpriteOverlay: Int = -1,
             @SerialName("Active")
@@ -351,7 +356,7 @@ data class NestdropSettings(
             @SerialName("MidiDevice")
             val midiDevice: String? = null,
             @SerialName("IsFileExplorer")
-            val isFileExplorer: String = "False",
+            val isFileExplorer: Boolean = false,
             @SerialName("FileExplorerPath")
             val fileExplorerPath: String = "",
 //            @XmlElement
@@ -361,7 +366,8 @@ data class NestdropSettings(
             @SerialName("Presets")
             @XmlChildrenName("Presets")
             val presets: List<Preset> = emptyList(),
-        ) {
+        ): Element {
+            fun queueType() = QueueType.entries[type]
 //            val presets get() = presetsContainer.presets
 //
 //            @Serializable
@@ -394,7 +400,7 @@ data class NestdropSettings(
                     @SerialName("SettingCaptureValues")
                     val settingCaptureValues: String? = null,
                     @SerialName("Type")
-                    val type: String? = null,
+                    val type: Int,
                     @SerialName("MidiId")
                     val midiId: Int? = null,
                     @SerialName("MidiAction")
@@ -411,7 +417,10 @@ data class NestdropSettings(
                     val midiHotKey: String? = null,
                     @SerialName("Comments")
                     val comments: String? = null,
-                )
+                ) {
+                    fun presetType() = PresetType.entries.firstOrNull() { it.type == type }
+                        ?: error("unknown preset type $type")
+                }
 //            }
 
 
@@ -420,13 +429,14 @@ data class NestdropSettings(
 
     @Serializable(with = FavoriteListSerializer::class)
     data class FavoriteList(
-        val favorites: List<Favorite>
-    ) {
+        override val elements: List<Favorite>,
+    ): Container<FavoriteList.Favorite> {
+        val favorites: List<Favorite> get() = elements
         @Serializable
         data class Favorite(
-            val index: Int,
+            override val index: Int,
             val favorites: List<Preset> = emptyList()
-        ) {
+        ): Element {
             @Serializable
             data class Preset(
                 @SerialName("Name")

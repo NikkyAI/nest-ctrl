@@ -20,11 +20,9 @@
 
 package xml
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import nl.adaptivity.xmlutil.XmlDelegatingWriter
 import nl.adaptivity.xmlutil.XmlWriter
 import nl.adaptivity.xmlutil.serialization.structure.XmlDescriptor
-
 /**
  * This filter takes the writing of the proper tag and replaces it with writing the dynamic tag. It
  * also ignores the writing of the id attribute. The id attribute is passed as parameter so it is not
@@ -34,9 +32,11 @@ import nl.adaptivity.xmlutil.serialization.structure.XmlDescriptor
 internal class DynamicTagWriter(
     private val writer: XmlWriter,
     descriptor: XmlDescriptor,
-    private val idValue: String,
-    private val prefixString: String,
-) : XmlDelegatingWriter(writer) {
+    private val indexValue: String,
+
+    private val prefix: String,
+) :
+    XmlDelegatingWriter(writer) {
     private val initDepth = writer.depth
     private val filterDepth: Int
         /**
@@ -46,8 +46,7 @@ internal class DynamicTagWriter(
          */
         get() = writer.depth - initDepth
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private val idAttrName = (0 until descriptor.elementsCount)
+    private val indexAttribute = (0 until descriptor.elementsCount)
         .first { descriptor.serialDescriptor.getElementName(it) == "index" }
         .let { descriptor.getElementDescriptor(it) }
         .tagName
@@ -58,7 +57,7 @@ internal class DynamicTagWriter(
      */
     override fun startTag(namespace: String?, localName: String, prefix: String?) {
         when (filterDepth) {
-            0 -> super.startTag("", "$prefixString$idValue", "")
+            0    -> super.startTag("", "${this.prefix}$indexValue", "")
             else -> super.startTag(namespace, localName, prefix)
         }
     }
@@ -69,10 +68,9 @@ internal class DynamicTagWriter(
     override fun attribute(namespace: String?, name: String, prefix: String?, value: String) {
         when {
             filterDepth == 1 &&
-                    (namespace ?: "") == idAttrName.namespaceURI &&
-                    name == idAttrName.localPart
-            -> Unit
-
+                    (namespace ?: "") == indexAttribute.namespaceURI &&
+                    name == indexAttribute.localPart
+                -> Unit
             else -> super.attribute(namespace, name, prefix, value)
         }
 
@@ -83,7 +81,7 @@ internal class DynamicTagWriter(
      */
     override fun endTag(namespace: String?, localName: String, prefix: String?) {
         when (filterDepth) {
-            1 -> super.endTag("", "$prefixString$idValue", "")
+            1    -> super.endTag("", "${this.prefix}$indexValue", "")
             else -> super.endTag(namespace, localName, prefix)
         }
     }

@@ -52,7 +52,7 @@ fun imgSpritesScreenNew() {
 
     val maxQueueLength = spriteLocations.size
 
-    val groupedByCategories = spriteLocations.groupBy { it.category to it.subCategory }
+    val groupedByCategories = spriteLocations.groupBy { it.categoryPath }
 
     Column {
         Row(
@@ -85,8 +85,8 @@ fun imgSpritesScreenNew() {
             }
         }
         lazyList {
-            groupedByCategories.forEach { (category, subCategory), sprites ->
-                stickyHeader(key = "$category-$subCategory") {
+            groupedByCategories.forEach { (categoryPath, sprites) ->
+                stickyHeader(key = categoryPath.joinToString("/")) {
                     Row(
                         modifier = Modifier
                             .background(
@@ -100,10 +100,11 @@ fun imgSpritesScreenNew() {
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(category, modifier = Modifier.padding(16.dp))
-                        if (subCategory != null) {
-                            Text(" > ", modifier = Modifier.padding(16.dp))
-                            Text(subCategory, modifier = Modifier.padding(16.dp))
+                        categoryPath.forEachIndexed() { i, pathFragment ->
+                            if (i > 0) {
+                                Text(" > ", modifier = Modifier.padding(16.dp))
+                            }
+                            Text(pathFragment, modifier = Modifier.padding(16.dp))
                         }
                     }
                 }

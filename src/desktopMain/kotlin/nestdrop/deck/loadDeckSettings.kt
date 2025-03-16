@@ -2,27 +2,18 @@ package nestdrop.deck
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import nestdrop.NestdropSettings
-import nestdropConfig
-import utils.xml
 
 private val logger = KotlinLogging.logger { }
 
-fun loadDeckSettings(decks: List<Deck>) {
-    val nestdropSettings = xml.decodeFromString(
-        NestdropSettings.serializer(), nestdropConfig.readText()
-            .substringAfter(
-                """<?xml version="1.0" encoding="utf-8"?>"""
-            )
-//            .lines().drop(1).joinToString("/n")
-    )
+fun NestdropSettings.loadDeckSettings(decks: List<Deck>) {
     decks.forEach { deck ->
         logger.info { "loading settings from ${deck.deckName}" }
 //        val deckSettings = parseDeckConfig(deck.N)
         val deckSettings = when(deck.id) {
-            1 -> nestdropSettings.mainWindow.settingsDeck1
-            2 -> nestdropSettings.mainWindow.settingsDeck2
-            3 -> nestdropSettings.mainWindow.settingsDeck3
-            4 -> nestdropSettings.mainWindow.settingsDeck4
+            1 -> mainWindow.settingsDeck1
+            2 -> mainWindow.settingsDeck2
+            3 -> mainWindow.settingsDeck3
+            4 -> mainWindow.settingsDeck4
             else -> error("unsupported deck number")
         }
 

@@ -14,16 +14,15 @@ sealed class PresetLocation {
         override val id: Int,
         val path: String,
         val previewPath: String,
-        val category: String,
-        val subCategory: String? = null,
+        val categoryPath: List<String>,
+//        val subCategory: String? = null,
     ): PresetLocation()
 
     data class Img(
         val name: String,
         override val id: Int,
         val path: String,
-        val category: String,
-        val subCategory: String? = null,
+        val categoryPath: List<String>,
     ): PresetLocation() {
         val image by lazy {
             val img = Image.makeFromEncoded(spritesFolder.resolve(path).readBytes())

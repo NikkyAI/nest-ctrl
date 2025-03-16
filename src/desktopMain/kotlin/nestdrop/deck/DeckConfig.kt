@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withTimeoutOrNull
-import presetQueues
 import tags.nestdropQueueSearches
 import ui.screens.customSearches
 import ui.screens.imgSpritesMap
@@ -23,7 +22,6 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         this@applyConfig.ndStrobe.enabled.value = strobe.enabled
 
         this@applyConfig.presetSwitching.triggerTime.value = triggerTime
-        val presetQueuesV = presetQueues.queues.value
 
         run {
 //            this@applyConfig.presetQueue.autoChange.value = presetQueue.autoChange
@@ -47,8 +45,8 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
 
         run {
 //            //TODO: find a way to load queue by name without blocking here
-            val spriteQueuesValue = withTimeoutOrNull(10.seconds) {
-                spriteQueues.first {
+            val spoutSpriteQueuesValue = withTimeoutOrNull(10.seconds) {
+                spoutSpriteQueues.first {
                     it
                         .also { logger.debug { it } }
                         .isNotEmpty()
@@ -69,10 +67,10 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                 }
             }
             run {
-                logger.debug { "loading spout queue ${deckConfig.spoutQueue.name} from $spriteQueuesValue" }
-                val spoutQueueValue = spriteQueuesValue.firstOrNull() { it.name == deckConfig.spoutQueue.name }
-                    ?: spriteQueuesValue.firstOrNull { it.deck == this@applyConfig.id && it.name.contains("spout") }
-                this@applyConfig.spoutQueue.index.value = spriteQueuesValue.indexOf(spoutQueueValue)
+                logger.debug { "loading spout queue ${deckConfig.spoutQueue.name} from $spoutSpriteQueuesValue" }
+                val spoutQueueValue = spoutSpriteQueuesValue.firstOrNull() { it.name == deckConfig.spoutQueue.name }
+                    ?: spoutSpriteQueuesValue.firstOrNull { it.deck == this@applyConfig.id && it.name.contains("spout") }
+                this@applyConfig.spoutQueue.index.value = spoutSpriteQueuesValue.indexOf(spoutQueueValue)
                     .takeUnless { it == -1 }  // ?: deckConfig.spoutQueue.index.takeUnless { it == -1 }
                     ?: run {
                         logger.error { "$deckName failed to find matching spout queue" }

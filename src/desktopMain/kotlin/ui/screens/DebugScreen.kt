@@ -223,10 +223,10 @@ fun debugPlaylistsScreen() {
 
 
                 lazyList(state = state) {
-                    var lastCategory: Pair<String, String?>? = null
+                    var lastCategory: List<String>? = null
                     renderPresets.forEach { (name, presetEntry, score) ->
                         if (tagScore == null) {
-                            val currentCategory = presetEntry.category to presetEntry.subCategory
+                            val currentCategory = presetEntry.categoryPath
                             if (currentCategory != lastCategory) {
                                 stickyHeader(currentCategory) {
                                     Row(
@@ -244,12 +244,17 @@ fun debugPlaylistsScreen() {
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
 //                            Spacer(modifier = Modifier.width(30.dp))
-                                        Text(currentCategory.first, modifier = Modifier.padding(16.dp))
-                                        val subCategory = currentCategory.second
-                                        if (subCategory != null) {
-                                            Text(" > ", modifier = Modifier.padding(16.dp))
-                                            Text(subCategory, modifier = Modifier.padding(16.dp))
-                                        }
+                                        currentCategory
+                                            .forEachIndexed() { i, pathFragment ->
+                                                if (i > 0) {
+                                                    Text(" > ", modifier = Modifier.padding(16.dp))
+                                                }
+                                                Text(pathFragment, modifier = Modifier.padding(16.dp))
+                                            }
+//                                        if (subCategory != null) {
+//                                            Text(" > ", modifier = Modifier.padding(16.dp))
+//                                            Text(subCategory, modifier = Modifier.padding(16.dp))
+//                                        }
                                     }
                                 }
 

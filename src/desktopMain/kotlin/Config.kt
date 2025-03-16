@@ -156,24 +156,15 @@ val json5 = Json5 {
 suspend fun updateConfig(block: suspend Config.() -> Config) {
     config.value = config.value.block()
 }
+
 suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
     updateConfig {
         when (id) {
-            1 -> {
-                copy(deck1 = deckConfig)
-            }
-            2 -> {
-                copy(deck2 = deckConfig)
-            }
-            3 -> {
-                copy(deck3 = deckConfig)
-            }
-            4 -> {
-                copy(deck4 = deckConfig)
-            }
-            else -> {
-                copy()
-            }
+            1 -> copy(deck1 = deckConfig)
+            2 -> copy(deck2 = deckConfig)
+            3 -> copy(deck3 = deckConfig)
+            4 -> copy(deck4 = deckConfig)
+            else -> copy()
         }
     }
 }

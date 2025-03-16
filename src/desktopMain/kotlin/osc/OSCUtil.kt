@@ -36,10 +36,12 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import utils.runningHistory
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import kotlin.time.Duration.Companion.milliseconds
@@ -226,6 +228,31 @@ suspend fun startNestdropOSC() {
         .filterIsInstance<OscSynced.Sending<*>>()
         .filter { it.send }
         .forEach { oscSyncedValue ->
+
+            if(oscSyncedValue.dropFirst > 0) {
+                var lastValue:  List<OSCPacket> = emptyList()
+                oscSyncedValue
+                    .flow
+                    .take(oscSyncedValue.dropFirst)
+                    .distinctUntilChanged()
+                    .onEach { value ->
+                        val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
+                        val message = "NESTDROP OUT dropping \n" +(lastValue.map {
+                            "last ${it.stringify()}"
+                        } + oscMessages.map {
+                            "next ${it.stringify()}"
+                        }).joinToString("\n")
+
+                        if (oscSyncedValue.logSending) {
+                            logger.debug { message }
+                        } else {
+                            logger.trace { message }
+                        }
+                        lastValue = oscMessages
+                    }
+                    .launchIn(flowScope)
+            }
+
             @OptIn(FlowPreview::class)
             oscSyncedValue
                 .flow
