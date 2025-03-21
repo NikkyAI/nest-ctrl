@@ -59,6 +59,40 @@ fun verticalScroll(
         )
     }
 }
+@Composable
+fun verticalScrollStart(
+    state: ScrollState = rememberScrollState(0),
+    content: @Composable (BoxScope.() -> Unit)
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(
+                    start = 12.dp,
+//                bottom = 12.dp,
+                )
+                .verticalScroll(state)
+        ) {
+
+            content()
+        }
+
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterStart)
+                .fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(state),
+            style = LocalScrollbarStyle.current.copy(
+                thickness = 16.dp,
+                shape = RoundedCornerShape(8.dp)
+
+            )
+        )
+    }
+}
 
 
 @Composable

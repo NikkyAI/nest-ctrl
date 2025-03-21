@@ -2,9 +2,14 @@ package ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import decks
 import nestdrop.deck.Deck
 import tags.nestdropQueueSearches
+import ui.Tabs
 import ui.components.VerticalRadioButton
 import ui.components.verticalScroll
+import ui.mainMenuTabState
 
 @Composable
 fun PlaytlistSelectorScreen(
@@ -55,6 +62,16 @@ fun PlaytlistSelectorScreen(
                             heightDp = with(localDensity) { coordinates.size.height.toDp() }
                         }
                 ) {
+
+//                    Button(
+//                        onClick = {
+//                            debugSelectedPlaylistState.value = search
+//                            mainMenuTabState.value = Tabs.DebugPlaylists
+//                        },
+//                        contentPadding = PaddingValues(horizontal = 4.dp),
+//                    ) {
+//                        Text("Show Presets")
+//                    }
 
                     decks.forEach { deck ->
                         if (deck.id > decksEnabled) return@forEach
@@ -90,16 +107,31 @@ fun PlaytlistSelectorScreen(
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.Start,
                         modifier = Modifier
 //                            .weight(0.3f)
                             .defaultMinSize(300.dp)
                             .padding(horizontal = 20.dp)
                     ) {
+                        OutlinedButton(
+                            onClick = {
+                                debugSelectedPlaylistState.value = search
+                                mainMenuTabState.value = Tabs.DebugPlaylists
+                            },
+                            contentPadding = PaddingValues(horizontal = 4.dp),
+                        ) {
+                            Text("Show Presets")
+                        }
+                        Spacer(
+                            Modifier.width(16.dp)
+                        )
                         Text(
                             text = search.label,
 //                            textAlign = TextAlign.End,
 //                            modifier = Modifier.weight(0.5f)
+                        )
+                        Spacer(
+                            Modifier.weight(2f)
                         )
                     }
                 }

@@ -29,7 +29,6 @@ import kotlinx.serialization.Serializable
 import nestdrop.ImgMode
 import nestdrop.NestdropControl
 import nestdrop.NestdropSpriteQueue
-import nestdrop.Preset
 import nestdrop.PresetIdState
 import nestdrop.PresetLocation
 import nestdrop.Queue
@@ -81,6 +80,8 @@ class Deck(
 
     val dimmedColor = color.copy(alpha = 0.5f).compositeOver(Color.Black)
     val disabledColor = color.copy(alpha = 0.25f).compositeOver(Color.Black)
+    val dimmedColorTransparent = color.copy(alpha = 0.5f) //.compositeOver(Color.Black)
+    val disabledColorTransparent = color.copy(alpha = 0.25f) //.compositeOver(Color.Black)
 
     @Immutable
     inner class NdTime {
@@ -240,6 +241,9 @@ class Deck(
         val triggerTime = MutableStateFlow(0.75f)
         private val switchingLocked = MutableStateFlow(false)
         val isLocked = switchingLocked.asStateFlow()
+        val transitTimeSync = MutableStateFlow(true)
+        val transitTimeBeatframeFraction = MutableStateFlow(0.125f)
+        val transitTimeBeats = MutableStateFlow(8)
 
         private suspend fun doSwitch() {
             // change preset queue
@@ -374,8 +378,15 @@ class Deck(
                     }
                 }.toMap()
 
-                val id = pickItemToGenerate(filtered)
-                nestdropSetPreset(id.id, deck = this@Deck.id)
+                val selectedPreset = pickItemToGenerate(filtered)
+                val pickedWeight = filtered[selectedPreset]
+                logger.debug { "picked ($pickedWeight / ${filtered.values.sum()}) ${selectedPreset.name}  out of ${filtered.size} options" }
+                val selectedPresetTags = presetTags[selectedPreset.name]
+                    .orEmpty()
+                    .filter { it.namespace.first() != "nestdrop" }
+                    .filter { it.namespace.first() != "queue" }
+                logger.debug { "tags: ${selectedPresetTags.joinToString { it.toString() }}" }
+                nestdropSetPreset(selectedPreset.id, deck = this@Deck.id)
             }
         }
 //        val search = MutableStateFlow<TagScoreEval?>(null)
@@ -831,11 +842,6 @@ class Deck(
 //        @Deprecated("use spoutImgTarget")
         val index = MutableStateFlow(-1)
 
-        @Deprecated("use spoutImgTarget")
-        val name = MutableStateFlow("uninitialized")
-
-        @Deprecated("use spoutImgTarget")
-        val fx = MutableStateFlow(0)
         val spriteTargetKey = MutableStateFlow<SpriteKey?>(null)
 
         private val nestdropSpout = NestdropSpriteQueue(
@@ -878,7 +884,7 @@ class Deck(
 //                        SpriteKey(id = it.id, name = it.name, mode = if(it.overlay == true) ImgMode.Overlay else ImgMode.Nested, fx = it.effects ?: 0)
 //                    }
                     logger.info { "$deckName spout name: ${spoutPreset?.prettyPrint()}" }
-                    spriteTargetKey.value = SpriteKey(id=-1, name=spoutPreset?.label ?: "-", fx = spoutPreset?.effects ?: 0 )
+                    spriteTargetKey.value = SpriteKey(id=-1, name=spoutPreset?.shortLabel ?: "-", fx = spoutPreset?.effects ?: 0 )
 //                    fx.value = spoutPreset?.effects ?: 0
 //                    name.value = spoutPreset?.label ?: "-"
                 }

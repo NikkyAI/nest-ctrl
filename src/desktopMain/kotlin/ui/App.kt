@@ -1,16 +1,13 @@
 package ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ButtonDefaults
@@ -27,17 +24,14 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import configFolder
 import decks
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import nestdrop.deck.Deck
 import ui.screens.PlaytlistSelectorScreen
@@ -64,9 +58,9 @@ fun App() {
         Scaffold {
             Row {
                 Column(
-                    modifier = Modifier.width(300.dp),
+                    modifier = Modifier.width(320.dp),
                 ) {
-                    beatProgressScreen(decks)
+                    beatProgressScreen(decks, size = 220.dp)
                     Text("Auto Change")
                     decks.forEach { deck ->
                         if (deck.id > nestdropDeckCount) return@forEach
@@ -239,66 +233,68 @@ enum class Tabs(
     Tagging("Tags"),
     Searches("Playlist\nEditor"),
     NestdropControls("Nestdrop\nSettings"),
-    DebugPlaylists("DebugPlaylists"),
+    DebugPlaylists("Debug\nPlaylists"),
     Debug("Debug"),
     ;
 }
 
+val mainMenuTabState: MutableStateFlow<Tabs> = MutableStateFlow(Tabs.PresetPlaylist)
 @Composable
 fun ColumnScope.tabScreen(
 ) {
     val decksEnabled by Deck.enabled.collectAsState()
-    var currentTab by remember { mutableStateOf(Tabs.PresetPlaylist) }
+    val mainMenuCurrentTab by mainMenuTabState.collectAsState()
     val tabs = Tabs.entries
     Column(modifier = Modifier.fillMaxWidth().weight(0.6f)) {
         TabRow(
-            selectedTabIndex = Tabs.entries.indexOf(currentTab),
-            modifier = Modifier
-                .height(decksEnabled * 40.dp + 20.dp)
-                .padding(PaddingValues())
+            selectedTabIndex = Tabs.entries.indexOf(mainMenuCurrentTab),
+//            modifier = Modifier
+//                .height(decksEnabled * 40.dp + 20.dp)
+//                .padding(PaddingValues())
         ) {
             tabs.forEach { tab ->
                 Tab(
                     text = {
-                        val getName = tab.getName
-                        if (getName != null) {
-                            Column(
-                                verticalArrangement = Arrangement.Top,
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                decks.forEach { deck ->
-                                    if (deck.id > decksEnabled) return@forEach
-                                    val nameMutableStateFlow = getName(deck)
-                                    val name by nameMutableStateFlow.collectAsState("unitialized")
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(deck.dimmedColor)
-                                            .padding(vertical = 0.dp, horizontal = 0.dp)
-                                            .defaultMinSize(minHeight = 36.dp)
-//                                            .height(24.dp),
-                                    ) {
-                                        Text(
-                                            text = name,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(tab.label)
-                            }
-                        } else {
-                            Text(tab.label)
-                        }
+//                        val getName = tab.getName
+//                        if (getName != null) {
+//                            Column(
+//                                verticalArrangement = Arrangement.Top,
+//                                horizontalAlignment = Alignment.CenterHorizontally,
+//                            ) {
+//                                decks.forEach { deck ->
+//                                    if (deck.id > decksEnabled) return@forEach
+//                                    val nameMutableStateFlow = getName(deck)
+//                                    val name by nameMutableStateFlow.collectAsState("unitialized")
+//                                    Row(
+//                                        verticalAlignment = Alignment.CenterVertically,
+//                                        modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .background(deck.dimmedColor)
+//                                            .padding(vertical = 0.dp, horizontal = 0.dp)
+//                                            .defaultMinSize(minHeight = 36.dp)
+////                                            .height(24.dp),
+//                                    ) {
+//                                        Text(
+//                                            text = name,
+//                                            modifier = Modifier
+//                                                .fillMaxWidth()
+//                                        )
+//                                    }
+//                                }
+//                                Spacer(modifier = Modifier.height(10.dp))
+//                                Text(tab.label)
+//                            }
+//                        } else {
+//                            Text(tab.label)
+//                        }
+                        Text(tab.label)
                     },
-                    selected = currentTab == tab,
-                    onClick = { currentTab = tab }
+                    selected = mainMenuCurrentTab == tab,
+                    onClick = { mainMenuTabState.value = tab }
                 )
             }
         }
-        when (currentTab) {
+        when (mainMenuCurrentTab) {
 //            Tabs.PresetQueues -> {
 //                verticalScroll {
 //                    presetQueuesScreen()

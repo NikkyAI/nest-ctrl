@@ -106,10 +106,13 @@ fun debugScreen() {
     }
 }
 
-
+//val debugPlaylistnavigator = rememberListDetailPaneScaffoldNavigator<String>()
+//val debugPlaylistnavigator = rememberListDetailPaneScaffoldNavigator<MyItem>()
+var debugSelectedPlaylistState = MutableStateFlow<PresetPlaylist?>(null)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun debugPlaylistsScreen() {
+    val debugSelectedPlaylist by debugSelectedPlaylistState.collectAsState()
     var scanRunning by remember {
         mutableStateOf(false)
     }
@@ -128,43 +131,11 @@ fun debugPlaylistsScreen() {
 
     val state = rememberLazyListState()
 
-    var tagScore by remember { mutableStateOf<PresetPlaylist?>(null) }
+//    var tagScore by remember { mutableStateOf<PresetPlaylist?>(null) }
+    val tagScore = combinedSearches.firstOrNull() {
+        it.label == debugSelectedPlaylist?.label
+    } ?: debugSelectedPlaylist
     Column {
-        /*
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "NEST\nCTRL",
-                fontFamily = fontDseg14,
-                fontSize = 30.sp,
-                lineHeight = 45.sp,
-                modifier = Modifier.padding(32.dp)
-            )
-            Spacer(modifier = Modifier.width(30.dp))
-            Text(tagScore?.label ?: "All")
-            Spacer(modifier = Modifier.width(30.dp))
-            Button(
-                {
-                    scope.launch {
-                        scanRunning = true
-                        scope.launch(Dispatchers.IO) {
-                            scanDuration = measureTime {
-                                scanPresets()
-                            }
-                            scanRunning = false
-                        }
-                    }
-                }, enabled = !scanRunning
-            ) {
-                Text("scan presets")
-            }
-
-            if (scanDuration > Duration.ZERO) {
-                Text("Scan took $scanDuration")
-            }
-        }
-        */
         val scope = rememberCoroutineScope()
         Row {
             verticalScroll {
@@ -174,7 +145,7 @@ fun debugPlaylistsScreen() {
                 ) {
                     Button(
                         onClick = {
-                            tagScore = null
+                            debugSelectedPlaylistState.value = null
                             scope.launch {
 //                            LaunchedEffect( null) {
                                 state.scrollToItem(0)
@@ -189,7 +160,7 @@ fun debugPlaylistsScreen() {
                     combinedSearches.forEach { it ->
                         Button(
                             onClick = {
-                                tagScore = it
+                                debugSelectedPlaylistState.value = it
                                 scope.launch {
 //                                LaunchedEffect(it.label) {
                                     state.scrollToItem(0)

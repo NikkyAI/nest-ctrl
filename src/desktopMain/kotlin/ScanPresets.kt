@@ -4,8 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import nestdrop.PresetLocation
-import tags.Tag
-import tags.nestdropCategoryTagsSet
 import ui.screens.imgSpritesMap
 import ui.screens.presetsMap
 import java.io.File
@@ -13,9 +11,6 @@ import kotlin.io.path.name
 import kotlin.time.measureTimedValue
 
 suspend fun scanMilkdrop() {
-
-    val categoryTagsSet = mutableSetOf<Tag>()
-
     var id: Int = 0
 
     val milkPresets = run {
@@ -39,7 +34,7 @@ suspend fun scanMilkdrop() {
         }
 
         val rootPresets =
-            presetsFolder.listFiles().orEmpty().filter { it.isFile && it.extension == "milk" }.map { file ->
+            presetsFolder.listFiles().orEmpty().filter { it.isFile && it.extension == "milk" }.sortedBy { it.name.lowercase() }.map { file ->
                 milkLocation(
                     file = file,
                     id = id++
@@ -49,7 +44,7 @@ suspend fun scanMilkdrop() {
             val files = categoryFolder.walkTopDown().filter { it.isFile && it.extension == "milk" }.map {
                 it.relativeToOrSelf(presetsFolder)
             }
-            val sorted = files.sortedBy { it.path }
+            val sorted = files.sortedBy { it.path.lowercase() }
             var previousParent: String? = null
             sorted.map {
                 val parent = it.parent
@@ -196,7 +191,7 @@ suspend fun scanMilkdrop() {
         }
 
         val rootPresets =
-            spritesFolder.listFiles().orEmpty().filter { it.isFile
+            spritesFolder.listFiles().orEmpty().sortedBy { it.name.lowercase() }.orEmpty().filter { it.isFile
                     && it.extension == "png" || it.extension == "jpg"
             }.map { file ->
                 imgLocation(
@@ -210,7 +205,7 @@ suspend fun scanMilkdrop() {
             }.map {
                 it.relativeToOrSelf(spritesFolder)
             }
-            val sorted = files.sortedBy { it.path }
+            val sorted = files.sortedBy { it.path.lowercase() }
             var previousParent: String? = null
             sorted.map {
                 val parent = it.parent
@@ -226,7 +221,7 @@ suspend fun scanMilkdrop() {
         }
         rootPresets + categoryPresets
     }.associateBy { it.name }
-    nestdropCategoryTagsSet.value = categoryTagsSet
+//    nestdropCategoryTagsSet.value = categoryTagsSet
 
     presetsMap.value = milkPresets
     imgSpritesMap.value = imgPresets

@@ -41,7 +41,7 @@ val presetTagsMapping = MutableStateFlow<Map<String, Set<Tag>>>(
 
 val customTagsMapping = MutableStateFlow<Map<Tag, Set<String>>>(emptyMap())
 
-val nestdropCategoryTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
+//val nestdropCategoryTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val customTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val queueTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val nestdropQueueSearches = MutableStateFlow<List<PresetPlaylist>>(emptyList())
@@ -149,28 +149,30 @@ data class Tag(
 suspend fun startTagsFileWatcher(queues: Queues) {
     tagsFolder.mkdirs()
 
-    combine(presetsMap, queues.presetQueues, customTagsMapping) { presetsMap, queues, customTags ->
+    combine(presetsMap, queues.presetQueues, customTagsMapping) { presetsMap, presetQueues, customTagsMapping ->
         presetTagsMapping.value = presetsMap.mapValues { (_, entry) ->
 //            val categoryTag = entry.categoryPath.let { Tag(it, listOf("nestdrop")) }
-            val categoryTags = entry.categoryPath.mapIndexed { i, category ->
-                Tag(category, listOf("nestdrop") + entry.categoryPath.subList(0, i))
-            }
 
-//            val subCategoryTag = entry.subCategory?.let { Tag(it, listOf("nestdrop", entry.categoryPath)) }
-            val queueTags = queues.filter {
+//            val categoryTags = entry.categoryPath.mapIndexed { i, category ->
+//                Tag(category, listOf("nestdrop") + entry.categoryPath.subList(0, i))
+//            }
+            val categoryTag = Tag(entry.categoryPath.first(), listOf("nestdrop") + entry.categoryPath.dropLast(1))
+            val categoryTags = setOf(categoryTag)
+
+            val queueTags = presetQueues.filter {
 //                    System.err.println(it.presets)
                 it.presets.any { it.name.substringBeforeLast(".milk") == entry.name }
             }.map { Tag(it.name, listOf("queue")) }.toSet()
 
-            val customTags = customTags.filterValues { tagEntries ->
+            val customTags = customTagsMapping.filterValues { tagEntries ->
                 entry.name in tagEntries
             }.keys // .map { (it.namespace + it.name).joinToString(":") }
-            val customCategories = customTags.filter { it.namespace.size > 1 }
-                .map {
-                    val name = it.namespace.last()
-                    val namespace = it.namespace.dropLast(1)
-                    Tag(name = name, namespace = namespace)
-                }
+//            val customCategories = customTagsKeys.filter { it.namespace.size > 1 }
+//                .map {
+//                    val name = it.namespace.last()
+//                    val namespace = it.namespace.dropLast(1)
+//                    Tag(name = name, namespace = namespace)
+//                }
 
             categoryTags.toSet() + queueTags + customTags // + customCategories
         }

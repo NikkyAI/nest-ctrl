@@ -3,6 +3,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -29,6 +31,7 @@ val bpmSynced = OscSynced.ValueSingle<Float>(
 }
 val bpmRounded = MutableStateFlow(120f)
 val bpmInt = MutableStateFlow(120)
+val secondsPerBeat = MutableStateFlow(0.5f)
 
 val beatCounter = MutableStateFlow(0.0)
 
@@ -44,8 +47,40 @@ suspend fun startBeatCounter() {
         .onEach {
             bpmRounded.value = it
             bpmInt.value = it.roundToInt()
+            secondsPerBeat.value = 60f / it
         }
         .launchIn(flowScope)
+
+    decks.forEach { deck ->
+
+        combine(
+            secondsPerBeat,
+            beatFrame,
+            deck.presetSwitching.transitTimeSync,
+//            deck.presetSwitching.transitTimeBeatframeFraction,
+            deck.presetSwitching.transitTimeBeats,
+        ) { secondsPerBeat, beatFrame, enabled, transitTimeBeats ->
+            if(enabled) {
+                secondsPerBeat * transitTimeBeats
+            } else {
+                null
+            }
+        }.distinctUntilChanged()
+            .filterNotNull()
+            .map { value ->
+                (value * 10).roundToInt() / 10.0f
+            }
+            .map { value ->
+                value.coerceAtMost(30f)
+            }
+            .distinctUntilChanged()
+            .onEach {
+                logger.info { "updating ${deck.deckName} transit time to $it" }
+                deck.ndTime.transitionTime.value = it
+            }
+            .launchIn(flowScope)
+    }
+
     beatProgress
         .onEach { beatProgress ->
             logger.trace { "beat progress: $beatProgress" }

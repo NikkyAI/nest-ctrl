@@ -1,6 +1,6 @@
 package nestdrop
 
-data class Queue<PRESET: Preset>(
+data class Queue<PRESET : Preset>(
     val index: Int,
     val name: String,
     val type: QueueType,
@@ -15,7 +15,7 @@ data class Queue<PRESET: Preset>(
 //    val xpath = "/NestDropSettings/QueueWindows/*[@Name='$name']"
 }
 
-enum class PresetType(val type: Int){
+enum class PresetType(val type: Int) {
     Mildrop(1),
     ImgSprite(2),
     MIDI(4),
@@ -49,28 +49,32 @@ sealed interface Preset {
         override val id: Int,
         val effects: Int?,
         val overlay: Boolean?,
-    ): Preset {
-        val label = name
+        val comments: String?,
+    ) : Preset {
+        val label = (comments ?: name
             .substringBeforeLast(".jpg")
-            .substringBeforeLast(".png") +
+            .substringBeforeLast(".png")) +
                 if (effects != 0) {
-                    " FX: $effects"
+                    " | FX: $effects"
                 } else {
                     ""
                 }
     }
+
     data class SpoutSprite(
         val index: Int,
         val name: String,
         override val id: Int,
         val effects: Int?,
         val overlay: Boolean?,
-    ): Preset {
-        val label = name +
+        val comments: String?,
+    ) : Preset {
+        val shortLabel = (comments ?: name) +
                 if (effects != 0) {
-                    " FX: $effects"
+                    " | FX: $effects"
                 } else {
                     ""
                 }
+        val encoded get() = "$name fx=$effects overlay=$overlay comments=$comments"
     }
 }

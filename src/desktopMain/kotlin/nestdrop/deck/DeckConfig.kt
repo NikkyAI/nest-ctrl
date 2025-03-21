@@ -22,6 +22,8 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         this@applyConfig.ndStrobe.enabled.value = strobe.enabled
 
         this@applyConfig.presetSwitching.triggerTime.value = triggerTime
+        this@applyConfig.presetSwitching.transitTimeSync.value = transitionTimeBeatSync
+        this@applyConfig.presetSwitching.transitTimeBeats.value = transitTimeBeats
 
         run {
 //            this@applyConfig.presetQueue.autoChange.value = presetQueue.autoChange
@@ -81,7 +83,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                     logger.info { "loading spout sprites from queue for $deckName" }
                     spoutQueueValue?.presets.orEmpty()
                 }.orEmpty()
-                this@applyConfig.spout.index.value = spoutSprites.indexOfFirst { it.label == spout.label }
+                this@applyConfig.spout.index.value = spoutSprites.indexOfFirst { it.encoded == spout.label }
                     .takeUnless { it == -1 } ?: spout.index
             }
         }
@@ -193,10 +195,14 @@ val Deck.configFlow: Flow<DeckConfig>
                     configFlow,
                     presetSwitching.triggerTime,
                     presetSwitching.transitionTime,
-                ) { config, triggerTime, transitionTime ->
+                    presetSwitching.transitTimeSync,
+                    presetSwitching.transitTimeBeats
+                ) { config, triggerTime, transitionTime, transitTimeSync,transitTimeBeats ->
                     config.copy(
                         triggerTime = triggerTime,
                         transitionTime = transitionTime,
+                        transitionTimeBeatSync = transitTimeSync,
+                        transitTimeBeats = transitTimeBeats,
                     )
                 }
             }
@@ -254,12 +260,12 @@ val Deck.configFlow: Flow<DeckConfig>
             }
             .combine(
                 combine(
+                    spout,
                     spout.index,
-                    spout.name,
-                ) { index, name ->
+                ) { spoutSprite, index ->
                     DeckConfig.Spout(
                         index = index,
-                        label = name,
+                        label = spoutSprite?.encoded,
                     )
                 }
             ) { config, spout ->

@@ -62,7 +62,6 @@ fun spoutScreen() {
                             .weight(0.2f)
                     ) {
                         Row(
-
                             modifier = Modifier
                             .background(deck.dimmedColor)
                             .padding(8.dp)
@@ -111,7 +110,6 @@ fun spoutScreen() {
                     val preset = queue?.presets?.getOrNull(i)
                     val queueLength = queue?.presets?.size ?: 0
 
-
                     Row(
                         modifier = Modifier
                             .weight(0.2f),
@@ -142,7 +140,9 @@ fun spoutScreen() {
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                preset.label,
+                                preset.comments?.let {
+                                    "$it (${preset.name})"
+                                } ?: preset.name,
                             )
                         }
                     }

@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.compose")
     kotlin("plugin.serialization")
     kotlin("plugin.power-assert")
+//    kotlin("plugin.parcelize")
     id("dev.reformator.stacktracedecoroutinator")
     id("org.bytedeco.gradle-javacpp-platform") version "1.5.10"
 }
@@ -17,7 +18,6 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
 }
-
 kotlin {
     jvm("desktop")
     sourceSets {
@@ -27,6 +27,16 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
+            implementation(compose.material3)
+////            implementation(compose.material3AdaptiveNavigationSuite)
+            implementation(compose.materialIconsExtended)
+//            implementation(compose.material3AdaptiveNavigationSuite)
+
+            implementation("org.jetbrains.compose.material3.adaptive:adaptive-layout-desktop:_")
+//            implementation("androidx.compose.material3:material3-adaptive-navigation-suite-desktop:_") {
+////                exclude("", "")
+//            }
+//            implementation(compose.runtimeSaveable)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -86,6 +96,8 @@ kotlin {
 
 stacktraceDecoroutinator {
     enabled = false
+    addAndroidRuntimeDependency = false
+    addJvmRuntimeDependency = false
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()  {
@@ -119,6 +131,14 @@ powerAssert {
 
 compose.desktop {
     application {
+        buildTypes.release {
+            proguard {
+                isEnabled = false
+                version = "7.4.0" // may break with compose-navigation
+//                optimize = false
+//                obfuscate = false
+            }
+        }
         mainClass = "Main"
 
         mainJar.set(
@@ -159,7 +179,11 @@ project.afterEvaluate {
             jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
         }
         val createDistributable by getting(AbstractJPackageTask::class) {
-            destinationDir.set(project.file("bin"))
+            destinationDir.set(project.file("bin/debug"))
+//            appImageRootDir.
+        }
+        val createReleaseDistributable by getting(AbstractJPackageTask::class) {
+            destinationDir.set(project.file("bin/release"))
 //            appImageRootDir.
         }
         val runDistributable by getting(AbstractRunDistributableTask::class) {
@@ -185,7 +209,7 @@ project.afterEvaluate {
         }
         val packageDistributable by creating(Zip::class) {
             group = "package"
-            from(getByName("createDistributable"))
+            from(createReleaseDistributable)
             from(project.file("README.md"))
             archiveBaseName.set("nestctrl")
             destinationDirectory.set(project.file("build"))
@@ -209,7 +233,7 @@ project.afterEvaluate {
             doFirst {
                 File(System.getProperty("user.home")).resolve("VJ").resolve("nestctrl").deleteRecursively()
             }
-            from(getByName("createDistributable"))
+            from(createReleaseDistributable)
             from(project.file("README.md"))
             this.destinationDir = File(System.getProperty("user.home")).resolve("VJ")
 //            doLast {

@@ -323,7 +323,7 @@ fun editSearchesScreen() {
                                         default = true,
                                         headerContent = { expanded ->
 
-                                            var boostField by remember {
+                                            var boostField by remember(search.label + "-term-" + termIndex) {
                                                 mutableStateOf("$boost")
                                             }
                                             if (expanded) {

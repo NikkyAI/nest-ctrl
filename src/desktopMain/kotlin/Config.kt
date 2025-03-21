@@ -55,6 +55,9 @@ data class Config(
 data class DeckConfig(
     val triggerTime: Float = 1.0f,
     val transitionTime: Float = 5.0f,
+    val transitionTimeBeatSync: Boolean = true,
+//    val transitionTimeSyncFrameFraction: Float = 0.125f,
+    val transitTimeBeats: Int = 8,
 //    val presetQueues: PresetQueues = PresetQueues(),
     val search: SearchConfig = SearchConfig(),
     val presetQueue: PresetQueue = PresetQueue(),

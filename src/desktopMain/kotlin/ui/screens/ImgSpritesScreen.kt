@@ -31,9 +31,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import decks
+import kotlinx.coroutines.flow.MutableStateFlow
 import nestdrop.deck.Deck
 import ui.components.VerticalRadioButton
 import ui.components.lazyList
+
+val spritesSectionOpenedState = MutableStateFlow<Map<String, Boolean>>(emptyMap())
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -53,6 +56,7 @@ fun imgSpritesScreenNew() {
     val maxQueueLength = spriteLocations.size
 
     val groupedByCategories = spriteLocations.groupBy { it.categoryPath }
+    val spritesSectionOpened by spritesSectionOpenedState.collectAsState()
 
     Column {
         Row(
@@ -67,7 +71,7 @@ fun imgSpritesScreenNew() {
 //                val current by deck.imgSprite.name.collectAsState()
                 val imgStates by deck.spriteState.imgStates.collectAsState() // .name.collectAsState()
                 val enabledImgSprites = imgStates.values
-                val current = enabledImgSprites.joinToString(" | ","[ ", " ]") {
+                val current = enabledImgSprites.joinToString(" | ", "[ ", " ]") {
                     it.name + " FX: " + it.fx
                 }
 
@@ -86,7 +90,9 @@ fun imgSpritesScreenNew() {
         }
         lazyList {
             groupedByCategories.forEach { (categoryPath, sprites) ->
-                stickyHeader(key = categoryPath.joinToString("/")) {
+                val sectionKey = categoryPath.joinToString("/")
+                val isOpened = spritesSectionOpened[sectionKey] ?: true
+                stickyHeader(key = sectionKey) {
                     Row(
                         modifier = Modifier
                             .background(
@@ -100,6 +106,13 @@ fun imgSpritesScreenNew() {
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        Checkbox(
+                            checked = isOpened,
+                            onCheckedChange = { newValue ->
+                                spritesSectionOpenedState.value += (sectionKey to newValue)
+                            },
+                            colors = CheckboxDefaults.colors()
+                        )
                         categoryPath.forEachIndexed() { i, pathFragment ->
                             if (i > 0) {
                                 Text(" > ", modifier = Modifier.padding(16.dp))
@@ -108,8 +121,8 @@ fun imgSpritesScreenNew() {
                         }
                     }
                 }
-
-                items(sprites) { sprite ->
+                if (isOpened) {
+                    items(sprites) { sprite ->
 //                    var heightDp by remember {
 //                        mutableStateOf(0.dp)
 //                    }
@@ -125,100 +138,101 @@ fun imgSpritesScreenNew() {
 //
 //                    }
 
-                    val localDensity = LocalDensity.current
-                    var heightDp by remember {
-                        mutableStateOf(0.dp)
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .onGloballyPositioned { coordinates ->
-                                // Set column height using the LayoutCoordinates
-                                heightDp = with(localDensity) { coordinates.size.height.toDp() }
-                            }
-                    ) {
+                        val localDensity = LocalDensity.current
+                        var heightDp by remember {
+                            mutableStateOf(0.dp)
+                        }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-//                                .weight(0.4f)
+                                .onGloballyPositioned { coordinates ->
+                                    // Set column height using the LayoutCoordinates
+                                    heightDp = with(localDensity) { coordinates.size.height.toDp() }
+                                }
                         ) {
-                            decks.forEach { deck ->
-                                if (deck.id > decksEnabled) return@forEach
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+//                                .weight(0.4f)
+                            ) {
+                                decks.forEach { deck ->
+                                    if (deck.id > decksEnabled) return@forEach
 
-                                val (current, enabledSprites) = spriteStuff.getValue(deck.id)
+                                    val (current, enabledSprites) = spriteStuff.getValue(deck.id)
 //                        val current by deck.imgSprite.spriteImgLocation.collectAsState()
 //                        val enabledSprites by deck.imgSprite.enabledSprites.collectAsState()
 
 //                        val image = remember { imageFromFile(spritesFolder.resolve(sprite.path)) }
 
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
 //                                        .weight(0.1f)
-                                        .padding(horizontal = 20.dp)
-                                ) {
-                                    VerticalRadioButton(
-                                        selected = current?.name == sprite.name,
-                                        onClick = {
-                                            if (current?.name == sprite.name) {
-                                                deck.imgSprite.spriteImgLocation.value = null
-                                            } else {
-                                                deck.imgSprite.spriteImgLocation.value = sprite
-                                            }
-                                        },
-                                        colors = RadioButtonDefaults.colors(
-                                            selectedColor = deck.color,
-                                            unselectedColor = deck.dimmedColor
-                                        ),
-                                        height = heightDp,
+                                            .padding(horizontal = 20.dp)
+                                    ) {
+                                        VerticalRadioButton(
+                                            selected = current?.name == sprite.name,
+                                            onClick = {
+                                                if (current?.name == sprite.name) {
+                                                    deck.imgSprite.spriteImgLocation.value = null
+                                                } else {
+                                                    deck.imgSprite.spriteImgLocation.value = sprite
+                                                }
+                                            },
+                                            colors = RadioButtonDefaults.colors(
+                                                selectedColor = deck.color,
+                                                unselectedColor = deck.dimmedColor
+                                            ),
+                                            height = heightDp,
 //                                connectTop = spriteLocations.indexOf(sprite) > 0, // i > 0,
 //                                connectBottom = spriteLocations.indexOf(sprite) < spriteLocations.size - 1, // i < queueLength - 1,
-                                    )
-                                    Checkbox(
-                                        checked = sprite.name in enabledSprites,
-                                        onCheckedChange = {
-                                            if (sprite.name in enabledSprites) {
-                                                deck.imgSprite.toggles.value -= sprite.name
-                                            } else {
-                                                deck.imgSprite.toggles.value += sprite.name
-                                            }
-                                        },
-                                        colors = CheckboxDefaults.colors(
-                                            checkmarkColor = deck.dimmedColor,
-                                            uncheckedColor = deck.color,
-                                            checkedColor = deck.color,
-                                            disabledColor = Color.DarkGray
-                                        ),
-                                    )
+                                        )
+                                        Checkbox(
+                                            checked = sprite.name in enabledSprites,
+                                            onCheckedChange = {
+                                                if (sprite.name in enabledSprites) {
+                                                    deck.imgSprite.toggles.value -= sprite.name
+                                                } else {
+                                                    deck.imgSprite.toggles.value += sprite.name
+                                                }
+                                            },
+                                            colors = CheckboxDefaults.colors(
+                                                checkmarkColor = deck.dimmedColor,
+                                                uncheckedColor = deck.color,
+                                                checkedColor = deck.color,
+                                                disabledColor = Color.DarkGray
+                                            ),
+                                        )
 
 //                        Text("${presetEntry.id}")
 //                                Text(sprite.name)
+                                    }
                                 }
                             }
-                        }
 
 //                        Spacer(modifier = Modifier.width(40.dp))
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(horizontal = 50.dp)
-//                                .weight(0.6f)
-                        ) {
-                            Column(
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .height(36.dp)
-                                    .width(150.dp)
+                                    .padding(horizontal = 50.dp)
+//                                .weight(0.6f)
                             ) {
-                                Image(bitmap = sprite.image, contentDescription = sprite.path)
+                                Column(
+                                    modifier = Modifier
+                                        .height(36.dp)
+                                        .width(150.dp)
+                                ) {
+                                    Image(bitmap = sprite.image, contentDescription = sprite.path)
+                                }
+                                Text(sprite.id.toString())
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(sprite.name, modifier = Modifier.padding(16.dp, 0.dp))
                             }
-                            Text(sprite.id.toString())
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(sprite.name, modifier = Modifier.padding(16.dp, 0.dp))
-                        }
 
+                        }
                     }
                 }
             }

@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.onEach
 import nestdrop.deck.Effect
 import nestdrop.deck.Trigger
 import nestdrop.deck.Waveform
-import presetsFolder
 
 private val logger = KotlinLogging.logger { }
 
@@ -155,6 +154,7 @@ suspend fun loadNestdropConfig(
                             id = p.id,
                             effects = p.effect ?: 0,
                             overlay = p.overlay,
+                            comments = p.comments?.takeUnless { it.isBlank() }
                         )
                     }
                 )
@@ -182,6 +182,7 @@ suspend fun loadNestdropConfig(
                             id = p.id,
                             effects = p.effect ?: 0,
                             overlay = p.overlay,
+                            comments = p.comments?.takeUnless { it.isBlank() }
                         )
                     }
                 )
@@ -206,7 +207,6 @@ suspend fun loadNestdropConfig(
                     val (time, colors, strobeLfo, audio, unknown) = settingsPreset.settingCapture .orEmpty().split(",").map { it == "1" }
                     var values = settingsPreset.settingCaptureValues.orEmpty().split(",")
 
-                    println(values)
 
                     if(time) {
                         val transitTime = values[0].toFloat()
@@ -220,7 +220,6 @@ suspend fun loadNestdropConfig(
                         val verticalMotion = values[8].toFloat()
                         val stretchSpeed = values[9].toFloat()
 //                        val waveMode = values[10].toFloat()
-                        println(values)
                     }
                     values = values.drop(10)
                     if(colors) {
@@ -236,7 +235,6 @@ suspend fun loadNestdropConfig(
                         val lumaKeyMin = values[9].toFloat()
                         val lumaKeyMax = values[10].toFloat()
                         val alpha = values[11].toFloat()
-                        println(values)
                     }
                     values = values.drop(12)
                     if(audio) {
@@ -247,7 +245,6 @@ suspend fun loadNestdropConfig(
                         val mid = values[3].toFloat()
                         val treble = values[4].toFloat()
                         //TODO: figure out unknown 0 values
-                        println(values)
                     }
                     values = values.drop(5)
                     if(strobeLfo) {
@@ -260,8 +257,6 @@ suspend fun loadNestdropConfig(
                         val pulseWidth = values[5].toFloat()
                         val waveForm = Waveform.entries[values[6].toInt()]
                         val trigger = Trigger.entries[values[7].toInt()]
-
-                        println(values)
                     }
                     values = values.drop(8)
                 }

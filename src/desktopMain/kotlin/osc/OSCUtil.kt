@@ -41,11 +41,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toKotlinInstant
 import utils.runningHistory
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
 
 
 private val logger = KotlinLogging.logger { }
@@ -134,8 +137,9 @@ suspend fun startNestdropOSC() {
                                 syncedValue.messageSelector
                             ) { messageEvent ->
                                 runBlocking {
-                                    val msg = messageEvent.message
                                     if (syncedValue.logReceived) {
+                                        val msg = messageEvent.message
+//                                        val timestamp = messageEvent.time.ntpTime // .fraction.nanoseconds
                                         logger.info { "NESTDROP IN: ${msg.stringify()}" }
                                     }
                                     syncedValue.onMessageEvent(messageEvent)
@@ -237,11 +241,11 @@ suspend fun startNestdropOSC() {
                     .distinctUntilChanged()
                     .onEach { value ->
                         val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
-                        val message = "NESTDROP OUT dropping \n" +(lastValue.map {
+                        val message = "NESTDROP OUT dropping \n      " +(lastValue.map {
                             "last ${it.stringify()}"
                         } + oscMessages.map {
                             "next ${it.stringify()}"
-                        }).joinToString("\n")
+                        }).joinToString("\n      ")
 
                         if (oscSyncedValue.logSending) {
                             logger.debug { message }
