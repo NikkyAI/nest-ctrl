@@ -65,6 +65,7 @@ import ui.components.DropDownPopupIconButton
 import ui.components.verticalScroll
 
 val customSearches = MutableStateFlow<List<PresetPlaylist>>(emptyList())
+val editSearchSelected = MutableStateFlow<Pair<Int, PresetPlaylist>?>(null)
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -74,14 +75,14 @@ fun editSearchesScreen() {
 
     val contentState = rememberScrollState()
 
-    var selectedSearch by remember { mutableStateOf<Pair<Int, PresetPlaylist>?>(null) }
+    val selectedSearch by editSearchSelected.collectAsState()
     val scope = rememberCoroutineScope()
     Row {
         verticalScroll {
             Column {
                 Button(
                     onClick = {
-                        selectedSearch = null
+                        editSearchSelected.value = null
                         scope.launch {
                             contentState.scrollTo(0)
                         }
@@ -93,7 +94,7 @@ fun editSearchesScreen() {
                 searchesCollected.forEachIndexed() { i, clickedSearch ->
                     Button(
                         onClick = {
-                            selectedSearch = i to clickedSearch
+                            editSearchSelected.value = i to clickedSearch
                             scope.launch {
                                 contentState.scrollTo(0)
                             }
@@ -129,7 +130,7 @@ fun editSearchesScreen() {
                                         val newSearch = PresetPlaylist(
                                             label = newSearchField.text, terms = emptyList()
                                         )
-                                        selectedSearch = searchesCollected.size to newSearch
+                                        editSearchSelected.value = searchesCollected.size to newSearch
                                         customSearches.value = searchesCollected + newSearch
                                         newSearchField = TextFieldValue("")
                                     }
@@ -148,7 +149,7 @@ fun editSearchesScreen() {
                                 val newSearch = PresetPlaylist(
                                     label = newSearchField.text, terms = emptyList()
                                 )
-                                selectedSearch = searchesCollected.size to newSearch
+                                editSearchSelected.value = searchesCollected.size to newSearch
                                 customSearches.value = searchesCollected + newSearch
                                 //TODO: autoselect new search ? calculate index
                                 newSearchField = TextFieldValue("")
@@ -161,6 +162,7 @@ fun editSearchesScreen() {
                 } else {
                     selectedSearch?.also { (searchIndex, search) ->
                         var newLabel by rememberSaveable(
+                            searchIndex, search.label,
                             key = "search.$searchIndex.editLabel"
                         ) { mutableStateOf(TextFieldValue(search.label)) }
 
@@ -173,7 +175,7 @@ fun editSearchesScreen() {
                                 deleteButtonWithConfirmation() {
                                     val searchesMutable = searchesCollected.toMutableList()
                                     searchesMutable.removeAt(searchIndex)
-                                    selectedSearch = null
+                                    editSearchSelected.value = null
                                     customSearches.value = searchesMutable.toList()
                                 }
                             }
@@ -187,7 +189,7 @@ fun editSearchesScreen() {
                                         newLabel = newLabel.copy(text = search.label + " Copy")
                                         val newSearch = search.copy(label = newLabel.text)
                                         searchesMutable.add(searchIndex + 1, newSearch)
-                                        selectedSearch = searchIndex + 1 to newSearch
+                                        editSearchSelected.value = searchIndex + 1 to newSearch
                                         customSearches.value = searchesMutable.toList()
                                     },
 //                                    enabled = newLabel.text != search.label
@@ -210,7 +212,7 @@ fun editSearchesScreen() {
                                                 val searchesMutable = searchesCollected.toMutableList()
                                                 val newSearch = search.copy(label = newLabel.text)
                                                 searchesMutable[searchIndex] = newSearch
-                                                selectedSearch = searchIndex to newSearch
+                                                editSearchSelected.value = searchIndex to newSearch
                                                 customSearches.value = searchesMutable.toList()
                                             }
 
@@ -228,7 +230,7 @@ fun editSearchesScreen() {
 
                                         val newSearch = search.copy(label = newLabel.text)
                                         searchesMutable[searchIndex] = newSearch
-                                        selectedSearch = searchIndex to newSearch
+                                        editSearchSelected.value = searchIndex to newSearch
                                         customSearches.value = searchesMutable.toList()
                                     },
                                     enabled = newLabel.text != search.label
@@ -246,7 +248,10 @@ fun editSearchesScreen() {
 
                                     Spacer(modifier = Modifier.weight(0.5f))
 
-                                    var newBoostValue by remember {
+                                    var newBoostValue by rememberSaveable(
+                                        searchIndex,
+                                        "search.$searchIndex.newBoost"
+                                    ) {
                                         mutableStateOf("10.0")
                                     }
                                     Text("Add weighted Term", modifier = Modifier.padding(16.dp))
@@ -277,7 +282,7 @@ fun editSearchesScreen() {
                                                         terms = mutableBoosts.toList()
                                                     )
                                                     searchesMutable[searchIndex] = newSearch
-                                                    selectedSearch = searchIndex to newSearch
+                                                    editSearchSelected.value = searchIndex to newSearch
                                                     customSearches.value = searchesMutable.toList()
                                                 }
 
@@ -306,7 +311,7 @@ fun editSearchesScreen() {
                                                 terms = mutableBoosts.toList()
                                             )
                                             searchesMutable[searchIndex] = newSearch
-                                            selectedSearch = searchIndex to newSearch
+                                            editSearchSelected.value = searchIndex to newSearch
                                             customSearches.value = searchesMutable.toList()
                                         },
                                         enabled = newBoostValue.toDoubleOrNull() != null
@@ -323,7 +328,10 @@ fun editSearchesScreen() {
                                         default = true,
                                         headerContent = { expanded ->
 
-                                            var boostField by remember(search.label + "-term-" + termIndex) {
+                                            var boostField by rememberSaveable(
+                                                searchIndex, termIndex, boost,
+                                                key = "search.$searchIndex.term.$termIndex.boost"
+                                            ) {
                                                 mutableStateOf("$boost")
                                             }
                                             if (expanded) {
@@ -362,7 +370,7 @@ fun editSearchesScreen() {
                                                                     terms = mutableBoosts.toList()
                                                                 )
                                                                 searchesMutable[searchIndex] = newSearch
-                                                                selectedSearch = searchIndex to newSearch
+                                                                editSearchSelected.value = searchIndex to newSearch
                                                                 customSearches.value = searchesMutable.toList()
                                                             }
 
@@ -384,7 +392,7 @@ fun editSearchesScreen() {
                                                             terms = mutableBoosts.toList()
                                                         )
                                                         searchesMutable[searchIndex] = newSearch
-                                                        selectedSearch = searchIndex to newSearch
+                                                        editSearchSelected.value = searchIndex to newSearch
                                                         customSearches.value = searchesMutable.toList()
                                                     },
                                                     enabled = boostField.toDoubleOrNull()?.let { it != boost } == true
@@ -405,7 +413,7 @@ fun editSearchesScreen() {
                                                         terms = mutableBoosts.toList()
                                                     )
                                                     searchesMutable[searchIndex] = newSearch
-                                                    selectedSearch = searchIndex to newSearch
+                                                    editSearchSelected.value = searchIndex to newSearch
 
                                                     customSearches.value = searchesMutable.toList()
                                                 }
@@ -468,7 +476,7 @@ fun editSearchesScreen() {
                                                             terms = mutableBoosts.toList()
                                                         )
                                                         searchesMutable[searchIndex] = newSearch
-                                                        selectedSearch = searchIndex to newSearch
+                                                        editSearchSelected.value = searchIndex to newSearch
 
                                                         customSearches.value = searchesMutable.toList()
                                                     },
@@ -504,7 +512,7 @@ fun editSearchesScreen() {
                                                             terms = mutableBoosts.toList()
                                                         )
                                                         searchesMutable[searchIndex] = newSearch
-                                                        selectedSearch = searchIndex to newSearch
+                                                        editSearchSelected.value = searchIndex to newSearch
 
                                                         customSearches.value = searchesMutable.toList()
                                                     }

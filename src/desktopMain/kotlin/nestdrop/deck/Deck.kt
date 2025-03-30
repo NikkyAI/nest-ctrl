@@ -42,8 +42,8 @@ import osc.stringify
 import tags.PresetPlaylist
 import tags.pickItemToGenerate
 import tags.presetTagsMapping
-import ui.screens.imgSpritesMap
-import ui.screens.presetsMap
+import imgSpritesMap
+import presetsMap
 import utils.className
 import utils.prettyPrint
 import utils.runningHistory
@@ -380,12 +380,14 @@ class Deck(
 
                 val selectedPreset = pickItemToGenerate(filtered)
                 val pickedWeight = filtered[selectedPreset]
-                logger.debug { "picked ($pickedWeight / ${filtered.values.sum()}) ${selectedPreset.name}  out of ${filtered.size} options" }
-                val selectedPresetTags = presetTags[selectedPreset.name]
-                    .orEmpty()
-                    .filter { it.namespace.first() != "nestdrop" }
-                    .filter { it.namespace.first() != "queue" }
-                logger.debug { "tags: ${selectedPresetTags.joinToString { it.toString() }}" }
+                logger.debug {
+                    val selectedPresetTags = presetTags[selectedPreset.name]
+                        .orEmpty()
+                        .filter { it.namespace.first() != "nestdrop" }
+                        .filter { it.namespace.first() != "queue" }
+
+                    "picked ($pickedWeight / ${filtered.values.sum()}) ${selectedPreset.name}  out of ${filtered.size} options" +
+                            "\n tags: ${selectedPresetTags.joinToString { it.toString() }}" }
                 nestdropSetPreset(selectedPreset.id, deck = this@Deck.id)
             }
         }
@@ -453,7 +455,9 @@ class Deck(
         }
     }
 
-    val imgSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> = MutableStateFlow(emptyList())
+//    @Deprecated("lookup queues from QUEUES.allQueues")
+//    val imgSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> = MutableStateFlow(emptyList())
+    @Deprecated("lookup queues from QUEUES.allQueues")
     val spoutSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.SpoutSprite>>> = MutableStateFlow(emptyList())
 
     @Serializable
@@ -875,11 +879,11 @@ class Deck(
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spoutQueue) { index, queue ->
-                    logger.info { "spout queue index $index" }
+                    logger.info { "spout sprite index $index queue: ${queue?.name}" }
                     queue?.presets?.getOrNull(index)
                 }.onEach { spoutPreset ->
 //                    this.value = spoutPreset
-                    logger.info { "spout queue preset $spoutPreset" }
+                    logger.info { "spout sprite $spoutPreset" }
 //                    spriteTargetKey.value = spoutPreset?.let {
 //                        SpriteKey(id = it.id, name = it.name, mode = if(it.overlay == true) ImgMode.Overlay else ImgMode.Nested, fx = it.effects ?: 0)
 //                    }
@@ -919,7 +923,7 @@ class Deck(
                         when {
                             queue != null && index != -1 -> PresetIdState.Data(
                                 index = index,
-                                queue = queue as Queue<nestdrop.Preset>,
+                                queue = queue!!, // as Queue<nestdrop.Preset>,
                                 force = true,
                             )
                             else -> PresetIdState.Unset

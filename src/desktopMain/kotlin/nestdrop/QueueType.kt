@@ -8,13 +8,13 @@ import kotlinx.serialization.encoding.Encoder
 
 @Serializable(with = QueueTypeSerializer::class)
 enum class QueueType {
-    Undefined,
-    Preset,
-    Sprite,
-    Text,
+    NONE,
+    PRESET,
+    SPRITE,
+    TEXT,
     MIDI,
-    SettingsPresets,
-    NestdropSettings,
+    SETTING,
+    `DECK SETTINGS`,
 }
 
 @Serializer(forClass = QueueType::class)

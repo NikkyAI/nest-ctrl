@@ -36,6 +36,7 @@ import nestdrop.PresetLocation
 import nestdrop.deck.Deck
 import nestdrop.nestdropSetPreset
 import presetsFolder
+import presetsMap
 import scanMilkdrop
 import tags.PresetPlaylist
 import tags.nestdropQueueSearches
@@ -283,8 +284,6 @@ fun debugPlaylistsScreen() {
 }
 
 
-val presetsMap = MutableStateFlow<Map<String, PresetLocation.Milk>>(emptyMap())
-val imgSpritesMap = MutableStateFlow<Map<String, PresetLocation.Img>>(emptyMap())
 
 data class AutoplayState(
     val presetQueue: Boolean,

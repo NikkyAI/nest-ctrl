@@ -306,20 +306,21 @@ data class NestdropSettings(
     @Serializable(with = LibraryClosedSectionsSerializer::class)
     data class LibraryClosedSections(
         override val elements: List<LibraryClosedSection>
-    ): Container<LibraryClosedSections.LibraryClosedSection> {
+    ) : Container<LibraryClosedSections.LibraryClosedSection> {
         @Serializable
         data class LibraryClosedSection(
             override val index: Int,
             @XmlSerialName("Value")
             val value: String
-        ): Element
+        ) : Element
+
         val sections get() = elements
     }
 
     @Serializable(with = QueueWindowsSerializer::class)
     data class QueueWindows(
         override val elements: List<Queue>
-    ): Container<QueueWindows.Queue> {
+    ) : Container<QueueWindows.Queue> {
         val queues get() = elements
 
         @Serializable
@@ -336,7 +337,7 @@ data class NestdropSettings(
             @SerialName("Height")
             val height: Double,
             @SerialName("Type")
-            val type: Int,
+            val typeIndex: Int,
             @SerialName("Deck")
             val deck: Int? = null,
             @SerialName("Open")
@@ -366,77 +367,70 @@ data class NestdropSettings(
             @SerialName("Presets")
             @XmlChildrenName("Presets")
             val presets: List<Preset> = emptyList(),
-        ): Element {
-            fun queueType() = QueueType.entries[type]
-//            val presets get() = presetsContainer.presets
-//
-//            @Serializable
-//            data class Presets(
-//                @XmlElement
-//                @SerialName("Presets")
-//                val presets: List<Preset>,
-//            ) {
-                @Serializable
-                @XmlSerialName("Preset")
-                data class Preset(
-                    @SerialName("Name")
-                    val name: String,
-                    @SerialName("Id")
-                    val id: Int,
-                    @SerialName("Effects")
-                    val effect: Int? = null,
-                    @SerialName("Overlay")
-                    val overlay: Boolean? = null,
-                    @SerialName("Sprite0")
-                    val sprite0: String? = null,
-                    @SerialName("Sprite1")
-                    val sSprite1: String? = null,
-                    @SerialName("Sprite2")
-                    val sprite2: String? = null,
-                    @SerialName("HotKey")
-                    val hotkey: String? = null,
-                    @SerialName("SettingCapture")
-                    val settingCapture: String? = null,
-                    @SerialName("SettingCaptureValues")
-                    val settingCaptureValues: String? = null,
-                    @SerialName("Type")
-                    val type: Int,
-                    @SerialName("MidiId")
-                    val midiId: Int? = null,
-                    @SerialName("MidiAction")
-                    val midiAction: Int? = null,
-                    @SerialName("MidiMode")
-                    val midiMode: Int? = null,
-                    @SerialName("MidiDeck")
-                    val midiDeck: Int? = null,
-                    @SerialName("MidiPresetType")
-                    val midiPresetType: Int? = null,
-                    @SerialName("MidiPresetQueue")
-                    val midiPresetQueue: String? = null,
-                    @SerialName("MidiHotKey")
-                    val midiHotKey: String? = null,
-                    @SerialName("Comments")
-                    val comments: String? = null,
-                ) {
-                    fun presetType() = PresetType.entries.firstOrNull() { it.type == type }
-                        ?: error("unknown preset type $type")
+        ) : Element {
+            fun type() = QueueType.entries[typeIndex]
+
+            @Serializable
+            @XmlSerialName("Preset")
+            data class Preset(
+                @SerialName("Name")
+                val name: String,
+                @SerialName("Id")
+                val id: Int? = null,
+                @SerialName("Effects")
+                val effect: Int? = null,
+                @SerialName("Overlay")
+                val overlay: Boolean? = null,
+                @SerialName("Sprite0")
+                val sprite0: String? = null,
+                @SerialName("Sprite1")
+                val sSprite1: String? = null,
+                @SerialName("Sprite2")
+                val sprite2: String? = null,
+                @SerialName("HotKey")
+                val hotkey: String? = null,
+                @SerialName("SettingCapture")
+                val settingCapture: String? = null,
+                @SerialName("SettingCaptureValues")
+                val settingCaptureValues: String? = null,
+                @SerialName("Type")
+                val typeNumber: Int? = null,
+                @SerialName("MidiId")
+                val midiId: Int? = null,
+                @SerialName("MidiAction")
+                val midiAction: Int? = null,
+                @SerialName("MidiMode")
+                val midiMode: Int? = null,
+                @SerialName("MidiDeck")
+                val midiDeck: Int? = null,
+                @SerialName("MidiPresetType")
+                val midiPresetType: Int? = null,
+                @SerialName("MidiPresetQueue")
+                val midiPresetQueue: String? = null,
+                @SerialName("MidiHotKey")
+                val midiHotKey: String? = null,
+                @SerialName("Comments")
+                val comments: String? = null,
+            ) {
+                fun type() = typeNumber?.let {
+                    PresetType.entries.firstOrNull() { it.type == typeNumber }
+                        ?: error("unknown preset type $typeNumber")
                 }
-//            }
-
-
+            }
         }
     }
 
     @Serializable(with = FavoriteListSerializer::class)
     data class FavoriteList(
         override val elements: List<Favorite>,
-    ): Container<FavoriteList.Favorite> {
+    ) : Container<FavoriteList.Favorite> {
         val favorites: List<Favorite> get() = elements
+
         @Serializable
         data class Favorite(
             override val index: Int,
             val favorites: List<Preset> = emptyList()
-        ): Element {
+        ) : Element {
             @Serializable
             data class Preset(
                 @SerialName("Name")

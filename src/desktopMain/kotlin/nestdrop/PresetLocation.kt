@@ -11,6 +11,7 @@ sealed class PresetLocation {
     abstract val id: Int
     data class Milk(
         val name: String,
+        val nameWithExtension: String,
         override val id: Int,
         val path: String,
         val previewPath: String,
@@ -20,6 +21,7 @@ sealed class PresetLocation {
 
     data class Img(
         val name: String,
+        val nameWithExtension: String,
         override val id: Int,
         val path: String,
         val categoryPath: List<String>,

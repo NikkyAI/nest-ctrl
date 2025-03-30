@@ -1,7 +1,12 @@
 package osc
 
+import QUEUES
+import com.illposed.osc.OSCBadDataEvent
+import com.illposed.osc.OSCBundle
 import com.illposed.osc.OSCMessage
 import com.illposed.osc.OSCPacket
+import com.illposed.osc.OSCPacketEvent
+import com.illposed.osc.OSCPacketListener
 import com.illposed.osc.OSCSerializerAndParserBuilder
 import com.illposed.osc.argument.handler.BlobArgumentHandler
 import com.illposed.osc.argument.handler.BooleanFalseArgumentHandler
@@ -19,6 +24,7 @@ import com.illposed.osc.argument.handler.StringArgumentHandler
 import com.illposed.osc.argument.handler.SymbolArgumentHandler
 import com.illposed.osc.argument.handler.TimeTag64ArgumentHandler
 import com.illposed.osc.argument.handler.UnsignedIntegerArgumentHandler
+import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
 import com.illposed.osc.transport.OSCPortIn
 import com.illposed.osc.transport.OSCPortInBuilder
 import com.illposed.osc.transport.OSCPortOut
@@ -41,14 +47,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toKotlinInstant
-import utils.runningHistory
+import nestdrop.QueueType
+import nestdrop.deck.OSCQueueUpdate
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.Duration.Companion.seconds
 
 
 private val logger = KotlinLogging.logger { }
@@ -99,7 +103,7 @@ suspend fun runNestDropSend() {
             logger.debug { "constructed OSC port" }
             for (oscPacket in nestdropSendChannel) {
                 try {
-                    logger.trace { "ND OUT: ${oscPacket.stringify()}" }
+                    logger.debug { "ND OUT: ${oscPacket.stringify()}" }
                     nestdropPort.send(oscPacket)
                 } catch (e: Exception) {
                     logger.error(e) {}
@@ -132,7 +136,7 @@ suspend fun startNestdropOSC() {
                         .filterIsInstance<OscSynced.Receiving<*>>()
                         .filter { it.receive && it.target == OscSynced.Target.Nestdrop }
                         .fold(inBuilder) { builder, syncedValue ->
-                            logger.info { "adding listener for ${syncedValue.label}" }
+                            logger.debug { "adding listener for ${syncedValue.label}" }
                             builder.addMessageListener(
                                 syncedValue.messageSelector
                             ) { messageEvent ->
@@ -140,68 +144,126 @@ suspend fun startNestdropOSC() {
                                     if (syncedValue.logReceived) {
                                         val msg = messageEvent.message
 //                                        val timestamp = messageEvent.time.ntpTime // .fraction.nanoseconds
-                                        logger.info { "NESTDROP IN: ${msg.stringify()}" }
+                                        logger.debug { "ND IN: ${msg.stringify()}" }
                                     }
                                     syncedValue.onMessageEvent(messageEvent)
                                 }
                             }
                         }
                 }
-//                .addPacketListener(object : OSCPacketListener {
-//                    override fun handlePacket(event: OSCPacketEvent) {
-//                        val packet = event.packet
-//
-//                        handlePacket(packet)
-//                    }
-//
-//                    fun handlePacket(packet: OSCPacket) {
-//                        when (packet) {
-//                            is OSCBundle -> {
-//                                packet.packets.forEach {
-//                                    handlePacket(it)
-//                                }
-//                            }
-//
-//                            is OSCMessage -> {
-//                                handleMessage(packet)
-//                            }
-//                        }
-//                    }
-//
-//                    fun handleMessage(message: OSCMessage) {
-//                        runBlocking {
-////                    logger.debugF { "RESOLUME IN: ${message.stringify()}" }
-//                            val address = message.address
-//
-////                    if(address.endsWith("connected")) {
-////                        logger.infoF { message.stringify() }
-////                    }
-//
-//                            val arguments = message.arguments.joinToString(" ")
-//                            when {
-//                                address.endsWith("sBpm") -> {
-//                                    logger.trace { "receiving: $address ${message.arguments}" }
-//                                }
-//                                address.endsWith("sBpmCnt") -> {
-//                                    logger.trace { "receiving: $address ${message.arguments}" }
-//                                }
-//                                else -> {
-//                                    logger.info { "receiving: $address ${message.arguments}" }
-//                                }
-//                            }
-//
-////                            messages.send(address to arguments)
-//                        }
-//                    }
-//
-//                    override fun handleBadData(event: OSCBadDataEvent) {
-//                        runBlocking {
-//                            logger.warn { "osc bad data: $event" }
-//                        }
-//                        // TODO("Not yet implemented")
-//                    }
-//
-//                })
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/Queue/*"),
+                ) { messageEvent ->
+                    val message = messageEvent.message
+//                    logger.debug { "processing ${message.stringify()}" }
+
+                    if(message.arguments.size == 6) {
+                        val active = message.arguments[0] as Int == 1
+                        val type = message.arguments[1] as String
+                        val beatOffset = message.arguments[2] as Float
+                        val beatMultiplier = message.arguments[3] as Float
+                        val deckNumber = message.arguments[4] as Int
+                        val presetCount = message.arguments[5] as Int
+
+                        val queueName = message.address
+                            .substringAfter("/Queue/")
+
+                        launch {
+                            QUEUES.updateQueueMessages.send(
+                                OSCQueueUpdate.UpdateQueue(
+                                    name = queueName,
+                                    type = QueueType.valueOf(type),
+                                    active = active,
+                                    beatOffset = beatOffset,
+                                    beatMultiplier = beatMultiplier,
+                                    deckNumber = deckNumber,
+                                    presetCount = presetCount,
+                                )
+                            )
+                        }
+                    } else {
+                        logger.error { "unknowns message: ${message.stringify()}" }
+                    }
+                }
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/Queue/*/Deck"),
+                ) { messageEvent ->
+                    val message = messageEvent.message
+//                    logger.debug { "processing ${message.stringify()}" }
+
+                    val deckNumber = message.arguments[0] as Int
+
+                    val queueName = message.address
+                        .substringAfter("/Queue/")
+                        .substringBeforeLast("/")
+
+                    launch {
+                        QUEUES.updateQueueMessages.send(
+                            OSCQueueUpdate.Deck(
+                                name = queueName,
+                                deckNumber = deckNumber,
+                            )
+                        )
+                    }
+                }
+
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/Queue/*/sBof"),
+                ) { messageEvent ->
+                    val message = messageEvent.message
+//                    logger.debug { "processing ${message.stringify()}" }
+
+                    val beatOffset = message.arguments[0] as Float
+
+                    val queueName = message.address
+                        .substringAfter("/Queue/")
+                        .substringBeforeLast("/")
+
+                    launch {
+                        QUEUES.updateQueueMessages.send(
+                            OSCQueueUpdate.BeatOffset(
+                                name = queueName,
+                                beatOffset = beatOffset,
+                            )
+                        )
+                    }
+                }
+
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/Queue/*/sMul"),
+                ) { messageEvent ->
+                    val message = messageEvent.message
+//                    logger.debug { "processing ${message.stringify()}" }
+
+                    val beatMultiplier = message.arguments[0] as Float
+
+                    val queueName = message.address
+                        .substringAfter("/Queue/")
+                        .substringBeforeLast("/")
+
+                    launch {
+                        QUEUES.updateQueueMessages.send(
+                            OSCQueueUpdate.BeatMultiplier(
+                                name = queueName,
+                                beatMultiplier = beatMultiplier,
+                            )
+                        )
+                    }
+                }
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/Queue/*/*"),
+                ) { messageEvent ->
+                    val message = messageEvent.message
+
+                    logger.error { "UNHANDLED on Queue: ${message.stringify()}" }
+                }
+
+                .addMessageListener(
+                    OSCPatternAddressMessageSelector("/Queue/*/*"),
+                ) { messageEvent ->
+                    logger.error { "UNHANDLED OSC MSG: ${messageEvent.message.stringify()}" }
+                }
+//                .addPacketListener(debugListener)
                 .build()
                 .also {
                     logger.info { "start listening on $address" }
@@ -232,16 +294,15 @@ suspend fun startNestdropOSC() {
         .filterIsInstance<OscSynced.Sending<*>>()
         .filter { it.send }
         .forEach { oscSyncedValue ->
-
-            if(oscSyncedValue.dropFirst > 0) {
-                var lastValue:  List<OSCPacket> = emptyList()
+            if (oscSyncedValue.dropFirst > 0) {
+                var lastValue: List<OSCPacket> = emptyList()
                 oscSyncedValue
                     .flow
                     .take(oscSyncedValue.dropFirst)
                     .distinctUntilChanged()
                     .onEach { value ->
                         val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
-                        val message = "NESTDROP OUT dropping \n      " +(lastValue.map {
+                        val message = "NESTDROP OUT dropping \n      " + (lastValue.map {
                             "last ${it.stringify()}"
                         } + oscMessages.map {
                             "next ${it.stringify()}"
@@ -290,4 +351,58 @@ suspend fun startNestdropOSC() {
             }
         }
     }
+}
+
+private val debugListener = object : OSCPacketListener {
+    override fun handlePacket(event: OSCPacketEvent) {
+        val packet = event.packet
+
+        handlePacket(packet)
+    }
+
+    fun handlePacket(packet: OSCPacket) {
+        when (packet) {
+            is OSCBundle -> {
+                packet.packets.forEach {
+                    handlePacket(it)
+                }
+            }
+
+            is OSCMessage -> {
+                handleMessage(packet)
+            }
+        }
+    }
+
+    fun handleMessage(message: OSCMessage) {
+        runBlocking {
+//                    logger.debug { "NESTDROP IN: ${message.stringify()}" }
+            val address = message.address
+
+//            val arguments = message.arguments.joinToString(" ")
+            when {
+                address.endsWith("sBpm") -> {
+//                    logger.trace { "receiving: $address ${message.arguments}" }
+                }
+
+                address.endsWith("sBpmCnt") -> {
+//                    logger.trace { "receiving: $address ${message.arguments}" }
+                }
+
+                else -> {
+                    logger.debug { "NESTDROP IN: $address ${message.arguments}" }
+                }
+            }
+
+//                            messages.send(address to arguments)
+        }
+    }
+
+    override fun handleBadData(event: OSCBadDataEvent) {
+        runBlocking {
+            logger.warn { "osc bad data: $event" }
+        }
+        // TODO("Not yet implemented")
+    }
+
 }

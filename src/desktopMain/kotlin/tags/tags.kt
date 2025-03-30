@@ -13,10 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import flowScope
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -27,13 +29,17 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import nestdrop.Preset
+import nestdrop.Queue
+import nestdrop.QueueType
 import nestdrop.deck.Queues
 import tagsFolder
-import ui.screens.presetsMap
+import presetsMap
 import utils.KWatchEvent
 import utils.asWatchChannel
 import utils.runningHistoryNotNull
 import java.io.File
+import kotlin.time.measureTimedValue
 
 val presetTagsMapping = MutableStateFlow<Map<String, Set<Tag>>>(
     emptyMap()
@@ -45,6 +51,9 @@ val customTagsMapping = MutableStateFlow<Map<Tag, Set<String>>>(emptyMap())
 val customTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val queueTagsSet = MutableStateFlow<Set<Tag>>(emptySet())
 val nestdropQueueSearches = MutableStateFlow<List<PresetPlaylist>>(emptyList())
+val queueTagsInitialized = MutableStateFlow(false)
+
+private val logger = KotlinLogging.logger {}
 
 //@Serializer(forClass = tags.Tag::class)
 object TagSerializer : KSerializer<Tag> {
@@ -149,7 +158,7 @@ data class Tag(
 suspend fun startTagsFileWatcher(queues: Queues) {
     tagsFolder.mkdirs()
 
-    combine(presetsMap, queues.presetQueues, customTagsMapping) { presetsMap, presetQueues, customTagsMapping ->
+    combine(presetsMap, queues.allQueues, customTagsMapping) { presetsMap, queues, customTagsMapping ->
         presetTagsMapping.value = presetsMap.mapValues { (_, entry) ->
 //            val categoryTag = entry.categoryPath.let { Tag(it, listOf("nestdrop")) }
 
@@ -159,9 +168,12 @@ suspend fun startTagsFileWatcher(queues: Queues) {
             val categoryTag = Tag(entry.categoryPath.first(), listOf("nestdrop") + entry.categoryPath.dropLast(1))
             val categoryTags = setOf(categoryTag)
 
-            val queueTags = presetQueues.filter {
+            val queueTags = queues.values
+                .filter { it.type == QueueType.PRESET }
+//                .map { it as Queue<Preset.Milkdrop> }
+                .filter {
 //                    System.err.println(it.presets)
-                it.presets.any { it.name.substringBeforeLast(".milk") == entry.name }
+                it.presets.any { it.name.endsWith(".milk") && it.name == entry.nameWithExtension }
             }.map { Tag(it.name, listOf("queue")) }.toSet()
 
             val customTags = customTagsMapping.filterValues { tagEntries ->
@@ -184,26 +196,34 @@ suspend fun startTagsFileWatcher(queues: Queues) {
         }
         .launchIn(flowScope)
 
-    queues.presetQueues
+    queues.allQueues
         .onEach { queues ->
-            val queueTagsAndSearches = queues.associate { queue ->
+            val queueTagsAndSearches = measureTimedValue {
+                queues
+                    .values
+                    .filter { it.type == QueueType.PRESET && !it.isFileExplorer }
+                    .associate { queue ->
 
-                val tag = Tag(queue.name, listOf("queue"))
-                val search = PresetPlaylist(
-                    label = "Queue ${tag.name}",
-                    terms = listOf(
-                        Term(
-                            boost = 10.0,
-                            matcher = TagMatcher(
-                                include = setOf(tag)
+                        val tag = Tag(queue.name, listOf("queue"))
+                        val search = PresetPlaylist(
+                            label = "Queue ${tag.name}",
+                            terms = listOf(
+                                Term(
+                                    boost = 10.0,
+                                    matcher = TagMatcher(
+                                        include = setOf(tag)
+                                    )
+                                )
                             )
                         )
-                    )
-                )
-                tag to search
-            }
+                        tag to search
+                    }
+            }.apply {
+                logger.info { "processed tags on queues in $duration" }
+            }.value
             queueTagsSet.value = queueTagsAndSearches.keys
             nestdropQueueSearches.value = queueTagsAndSearches.values.toList()
+            queueTagsInitialized.value = true
         }
         .launchIn(flowScope)
 

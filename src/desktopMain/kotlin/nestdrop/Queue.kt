@@ -10,7 +10,10 @@ data class Queue<PRESET : Preset>(
     val beatMultiplier: Float = 1.0f,
 //    val defaultSpriteOverlay: Int = -1,
     val active: Boolean = false,
-    val presets: List<PRESET> = emptyList()
+    val isFileExplorer: Boolean = false,
+    val fileExplorerPath: String = "",
+    val presets: List<PRESET> = emptyList(),
+    val presetCount: Int = presets.size,
 ) {
 //    val xpath = "/NestDropSettings/QueueWindows/*[@Name='$name']"
 }
@@ -25,13 +28,16 @@ enum class PresetType(val type: Int) {
 
 sealed interface Preset {
     abstract val id: Int
+    abstract val name: String
 
     data class Milkdrop(
-        val index: Int,
-        val name: String,
+//        val index: Int,
+        override val name: String,
         override val id: Int,
         val effects: Int?,
         val overlay: Boolean?,
+        val comments: String?,
+        val location: PresetLocation.Milk?,
 //    val settingsCapture: List<Int> = emptyList(),
 //    val settingsCaptureValues: List<Float> = emptyList()
     ) : Preset {
@@ -44,12 +50,13 @@ sealed interface Preset {
     }
 
     data class ImageSprite(
-        val index: Int,
-        val name: String,
+//        val index: Int,
+        override val name: String,
         override val id: Int,
         val effects: Int?,
         val overlay: Boolean?,
         val comments: String?,
+        val location: PresetLocation.Img?,
     ) : Preset {
         val label = (comments ?: name
             .substringBeforeLast(".jpg")
@@ -63,7 +70,7 @@ sealed interface Preset {
 
     data class SpoutSprite(
         val index: Int,
-        val name: String,
+        override val name: String,
         override val id: Int,
         val effects: Int?,
         val overlay: Boolean?,

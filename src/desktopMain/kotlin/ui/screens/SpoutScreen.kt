@@ -2,6 +2,7 @@ package ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -136,13 +137,14 @@ fun spoutScreen() {
                             )
 
                             Text(
-                                "FX: ${preset.effects ?: 0}",
+                                text = "FX: ${preset.effects ?: 0}",
+                                modifier = Modifier.width(50.dp)
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                preset.comments?.let {
-                                    "$it (${preset.name})"
-                                } ?: preset.name,
+                                preset.comments
+//                                    ?.let { "$it (${preset.name})" }
+                                    ?: preset.name,
                             )
                         }
                     }

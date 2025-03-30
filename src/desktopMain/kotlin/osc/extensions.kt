@@ -35,17 +35,17 @@ fun OSCMessage(address: String, arg: Any, vararg args: Any): OSCMessage {
 }
 
 fun OSCMessage(address: String, arg: Int) = OSCMessage(
-    address, listOf(arg), OSCMessageInfo("i")
+    address.replace(" ", "_"), listOf(arg), OSCMessageInfo("i")
 )
 
 fun OSCMessage(address: String, arg: Float) = OSCMessage(
-    address, listOf(arg), OSCMessageInfo("f")
+    address.replace(" ", "_"), listOf(arg), OSCMessageInfo("f")
 )
 
 fun OSCMessage(address: String, arg: String) = OSCMessage(
-    address, listOf(arg), OSCMessageInfo("s")
+    address.replace(" ", "_"), listOf(arg), OSCMessageInfo("s")
 )
 
 fun OSCMessage(address: String, arg: Boolean) = OSCMessage(
-    address, listOf(arg), OSCMessageInfo(if (arg) "T" else "F")
+    address.replace(" ", "_"), listOf(arg), OSCMessageInfo(if (arg) "T" else "F")
 )

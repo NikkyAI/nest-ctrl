@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -33,6 +34,7 @@ import decks
 import nestdrop.PresetLocation
 import nestdrop.deck.Deck
 import nestdropFolder
+import presetsMap
 import tags.Tag
 import tags.presetTagsMapping
 import ui.components.verticalScroll
@@ -45,10 +47,13 @@ import java.io.File
 fun presetDisplayScreen() {
     val decksEnabled by Deck.enabled.collectAsState()
     Row(
-        modifier = Modifier.height(300.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .height(300.dp)
+            .padding(8.dp),
+//        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        /*
         Column(
             modifier = Modifier
 //                .weight(0.1f)
@@ -83,6 +88,7 @@ fun presetDisplayScreen() {
                 Text("Playlist", color = Color.LightGray, textAlign = TextAlign.Right)
             }
         }
+        */
         decks.forEach { deck ->
             if (deck.id > decksEnabled) return@forEach
             PresetDisplay(deck)
@@ -96,146 +102,121 @@ private fun RowScope.PresetDisplay(
     deck: Deck,
 ) {
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
-    val presetsMap by ui.screens.presetsMap.collectAsState()
+    val presetsMap by presetsMap.collectAsState()
     val tagMap by presetTagsMapping.collectAsState()
-    Row(
-        modifier = Modifier.Companion
+
+//                Column {
+//                    Row {
+//                        Text("ID: ", color = Color.LightGray)
+//                        Text(currentPreset.presetId.toString())
+//                    }
+//
+//                    val imgStates by deck.spriteState.imgStates.collectAsState()
+//                    val imgLabel = imgStates.values.firstOrNull()?.label
+//
+//                    Text(imgLabel ?: "-")
+//
+//                    val imgspriteFx by deck.imgSpriteFx.rawFx.collectAsState(0)
+//
+//                    Text("FX: $imgspriteFx")
+//
+//                    val spoutStates by deck.spriteState.spoutStates.collectAsState()
+//                    val spoutLabel = spoutStates.values.firstOrNull()?.label
+//
+//                    Text(spoutLabel ?: "-")
+//
+//                    val currentPlaylist by deck.search.collectAsState()
+//                    Text(currentPlaylist?.label ?: "-")
+//                }
+
+    Column(
+        modifier = Modifier
             .weight(0.25f)
-            .fillMaxSize(0.9f)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .fillMaxSize()
+//            .padding(horizontal = 8.dp, vertical = 0.dp)
             .background(deck.dimmedColor),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.Start,
     ) {
         val currentPreset by deck.preset.currentPreset.collectAsState()
         val presetName = currentPreset.name
-        val presetLocation = presetsMap[presetName]
+        val presetLocation = presetsMap[presetName + ".milk"]
 
-        verticalScrollStart {
-            Column(
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier.padding(4.dp)
-
-                    .width(145.dp)
-                    .padding(8.dp)
-            ) {
-                if (presetLocation != null) {
-                    val image =
-                        remember(presetLocation) { imageFromFile(presetsFolder.resolve(presetLocation.previewPath)) }
-                    Box(
-                        modifier = Modifier
+//        Box(
+//            modifier = Modifier
+//                .height(150.dp)
+//                .padding(horizontal = 8.dp, vertical = 4.dp)
+//
+//        ) {
+        Row(
+            modifier = Modifier
+                .background(deck.disabledColor)
+                .fillMaxWidth()
+                .height(150.dp)
+//                    .padding(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+            if (presetLocation != null) {
+                val image =
+                    remember(presetLocation) { imageFromFile(presetsFolder.resolve(presetLocation.previewPath)) }
+                Box(
+                    modifier = Modifier
 //                                .padding(4.dp)
-                            .background(deck.disabledColor)
-                    ) {
-                        Image(
-                            bitmap = image,
-                            contentDescription = presetLocation.previewPath,
-                            modifier = Modifier
+//                        .width(145.dp)
+                        .background(deck.disabledColor)
+                ) {
+                    Image(
+                        bitmap = image,
+                        contentDescription = presetLocation.previewPath,
+                        modifier = Modifier
 //                                    .size(135.dp)
-                                .aspectRatio(1f, matchHeightConstraintsFirst = false)
-                                .fillMaxSize()
-                                .padding(4.dp)
-                        )
-                    }
+                            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    )
                 }
+            }
 
-                Column {
-                    Row {
-                        Text("ID: ", color = Color.LightGray)
-                        Text(currentPreset.presetId.toString())
-                    }
+            Box(
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
 
-                    val imgStates by deck.spriteState.imgStates.collectAsState()
-                    val imgLabel = imgStates.values.firstOrNull()?.label
-
-                    Text(imgLabel ?: "-")
-
-                    val imgspriteFx by deck.imgSpriteFx.rawFx.collectAsState(0)
-
-                    Text("FX: $imgspriteFx")
-
-                    val spoutStates by deck.spriteState.spoutStates.collectAsState()
-                    val spoutLabel = spoutStates.values.firstOrNull()?.label
-
-                    Text(spoutLabel ?: "-")
-
-                    val currentPlaylist by deck.search.collectAsState()
-                    Text(currentPlaylist?.label ?: "-")
-                }
+                Text(
+                    text = presetName,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                )
             }
         }
+//        }
 
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            verticalScroll {
-                Column(
-//                            horizontalAlignment = Alignment.Start,
-                    modifier = Modifier
-//                            .fillMaxWidth()
-//                            .weight(0.3f)
-                    ,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = presetName,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                        )
-//                                Spacer(Modifier.height(4.dp))
+//        Column {
+
+
+        verticalScroll {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                itemVerticalAlignment = Alignment.Top,
+            ) {
+                val tags = tagMap[presetName + ".milk"] ?: emptySet()
+                tags
+                    .sortedWith(
+                        compareBy<Tag> {
+                            it.namespace.first() == "nestdrop"
+                        }.thenBy {
+                            it.namespace.first() == "queue"
+                        }.thenBy {
+                            it.sortableString()
+                        }
+                    )
+                    .forEach {
+                        it.Chip()
                     }
-//                        verticalScroll {
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        itemVerticalAlignment = Alignment.Top,
-                    ) {
-                        val tags = tagMap[presetName] ?: emptySet()
-                        tags
-                            .sortedWith(
-                                compareBy<Tag> {
-                                    it.namespace.first() == "nestdrop"
-                                }.thenBy {
-                                    it.namespace.first() == "queue"
-                                }.thenBy {
-                                    it.sortableString()
-                                }
-                            )
-                            .forEach {
-                                it.Chip()
-                            }
-                    }
-//                            Column(
-//                                horizontalAlignment = Alignment.Start,
-//                                modifier = Modifier
-//                            ) {
-//                                val tags = tagMap[presetName] ?: emptySet()
-//                                tags
-//                                    .sortedWith(
-//                                        compareBy<Tag> {
-//                                            it.namespace.first() == "nestdrop"
-//                                        }.thenBy {
-//                                            it.namespace.first() == "queue"
-//                                        }.thenBy {
-//                                            it.sortableString()
-//                                        }
-//                                    )
-//                                    .forEach {
-//                                        Row {
-//                                            Text(it.namespaceLabel + ":", color = Color.LightGray)
-//                                            Text(it.name, color = Color.White)
-//                                        }
-//                                    }
-//                            }
-//                        }
-                }
             }
+        }
+    }
+}
 
 //    Column(
 //        horizontalAlignment = Alignment.Start,
@@ -259,10 +240,6 @@ private fun RowScope.PresetDisplay(
 //            }
 //        }
 //    }
-        }
-
-    }
-}
 
 //@Composable
 //fun presetScreenSingle(deck: Deck) {

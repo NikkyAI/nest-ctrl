@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import nestdrop.deck.Deck
 import ui.screens.PlaytlistSelectorScreen
+import ui.screens.QueueControlScreen
 import ui.screens.autoChangeScreen
 import ui.screens.beatProgressScreen
 import ui.screens.debugPlaylistsScreen
@@ -206,6 +207,7 @@ enum class Tabs(
 //            it.presetQueue.name
 //        }
 //    ),
+    QueueControls("Queue Controls"),
     PresetPlaylist(
         "Preset Playlists",
         { deck ->
@@ -231,7 +233,7 @@ enum class Tabs(
         }
     ),
     Tagging("Tags"),
-    Searches("Playlist\nEditor"),
+    EditPlaylist("Playlist\nEditor"),
     NestdropControls("Nestdrop\nSettings"),
     DebugPlaylists("Debug\nPlaylists"),
     Debug("Debug"),
@@ -245,10 +247,15 @@ fun ColumnScope.tabScreen(
     val decksEnabled by Deck.enabled.collectAsState()
     val mainMenuCurrentTab by mainMenuTabState.collectAsState()
     val tabs = Tabs.entries
-    Column(modifier = Modifier.fillMaxWidth().weight(0.6f)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+//            .background(Color.LightGray)
+//            .weight(0.6f)
+    ) {
         TabRow(
             selectedTabIndex = Tabs.entries.indexOf(mainMenuCurrentTab),
-//            modifier = Modifier
+            modifier = Modifier
 //                .height(decksEnabled * 40.dp + 20.dp)
 //                .padding(PaddingValues())
         ) {
@@ -295,6 +302,11 @@ fun ColumnScope.tabScreen(
             }
         }
         when (mainMenuCurrentTab) {
+            Tabs.QueueControls -> {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    QueueControlScreen()
+                }
+            }
 //            Tabs.PresetQueues -> {
 //                verticalScroll {
 //                    presetQueuesScreen()
@@ -340,7 +352,7 @@ fun ColumnScope.tabScreen(
                 }
             }
 
-            Tabs.Searches -> {
+            Tabs.EditPlaylist -> {
                 Row(modifier = Modifier.fillMaxWidth()) {
 //                    tagSearchScreen()
                     editSearchesScreen()

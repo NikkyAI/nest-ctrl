@@ -14,9 +14,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ExpandCircleDown
+import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +36,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import decks
+import imgSpritesMap
 import kotlinx.coroutines.flow.MutableStateFlow
 import nestdrop.deck.Deck
 import ui.components.VerticalRadioButton
@@ -106,6 +112,17 @@ fun imgSpritesScreenNew() {
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        IconButton(
+                            onClick = {
+                                spritesSectionOpenedState.value += (sectionKey to !isOpened)
+                            }
+                        ) {
+                            if (isOpened) {
+                                Icon(Icons.Outlined.ExpandCircleDown, "expand")
+                            } else {
+                                Icon(Icons.Outlined.RemoveCircleOutline, "expand")
+                            }
+                        }
                         Checkbox(
                             checked = isOpened,
                             onCheckedChange = { newValue ->

@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.RangeSlider
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
@@ -21,7 +24,10 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -192,6 +198,7 @@ fun deckSettingsScreen() {
 @Composable
 fun NestdropControl.Slider.asSlider(deck: Deck) {
     val value by collectAsState()
+    var tempValue by remember(deck.id, propertyName, value) { mutableStateOf(value) }
 //    Column {
     val scope = rememberCoroutineScope()
 
@@ -207,9 +214,12 @@ fun NestdropControl.Slider.asSlider(deck: Deck) {
 //        Text("min\n${range.start}")
         Text("${range.start}", color = deck.color)
         Slider(
-            value = value,
+            value = tempValue,
             onValueChange = {
-                this@asSlider.value = it
+                tempValue = it
+            },
+            onValueChangeFinished = {
+                this@asSlider.value = tempValue
             },
             valueRange = range,
             steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
@@ -280,7 +290,8 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
 //        Text("max\n${range.endInclusive}")
         Text("${range.endInclusive}", color = deck.color)
         Text(
-            text = "value\n%6.3f".format(value),
+//            text = "value\n%6.3f".format(value),
+            text = "%6.3f".format(value),
             modifier = Modifier
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)
@@ -301,10 +312,13 @@ fun NestdropControl.SliderWithResetButton.asSlider(deck: Deck) {
 //    }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
     val minValue by minState.collectAsState()
     val maxValue by maxState.collectAsState()
+    var tmpMin by remember(deck.id, propertyName, minValue) { mutableStateOf(minValue) }
+    var tmpMax by remember(deck.id, propertyName, maxValue) { mutableStateOf(maxValue) }
     val scope = rememberCoroutineScope()
 
     Row(
@@ -319,55 +333,79 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
 
 //        Text("min\n${range.start}")
         Text("${range.start}", color = deck.color)
-        Column(
+        RangeSlider(
+            value = tmpMin..tmpMax,
+            onValueChange = {
+                tmpMin = it.start
+                tmpMax = it.endInclusive
+            },
+            onValueChangeFinished = {
+                if(tmpMin != minValue) {
+                    minState.value = tmpMin
+                }
+                if(tmpMax != maxValue) {
+                    maxState.value = tmpMax
+                }
+            },
+            steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
+            colors = SliderDefaults.colors(
+                thumbColor = deck.color,
+                activeTrackColor = deck.dimmedColor,
+            ),
+
             modifier = Modifier
                 .weight(0.6f)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-//                Text("min")
-                Slider(
-                    value = minValue,
-                    onValueChange = {
-                        minState.value = it
-                    },
-                    valueRange = range,
-                    steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
-                    colors = SliderDefaults.colors(
-                        thumbColor = deck.color,
-                        activeTrackColor = deck.dimmedColor,
-                    ),
-
-                    modifier = Modifier
-                        .weight(0.6f)
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-//                Text("max")
-                Slider(
-                    value = maxValue,
-                    onValueChange = {
-                        maxState.value = it
-                    },
-                    valueRange = range,
-                    steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
-                    colors = SliderDefaults.colors(
-                        thumbColor = deck.color,
-                        activeTrackColor = deck.dimmedColor,
-                    ),
-                    modifier = Modifier
-                        .weight(0.6f)
-                )
-            }
-        }
+        )
+//        Column(
+//            modifier = Modifier
+//                .weight(0.6f)
+//        ) {
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//            ) {
+////                Text("min")
+//                Slider(
+//                    value = minValue,
+//                    onValueChange = {
+//                        minState.value = it
+//                    },
+//                    valueRange = range,
+//                    steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
+//                    colors = SliderDefaults.colors(
+//                        thumbColor = deck.color,
+//                        activeTrackColor = deck.dimmedColor,
+//                    ),
+//
+//                    modifier = Modifier
+//                        .weight(0.6f)
+//                )
+//            }
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//            ) {
+////                Text("max")
+//                Slider(
+//                    value = maxValue,
+//                    onValueChange = {
+//                        maxState.value = it
+//                    },
+//                    valueRange = range,
+//                    steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
+//                    colors = SliderDefaults.colors(
+//                        thumbColor = deck.color,
+//                        activeTrackColor = deck.dimmedColor,
+//                    ),
+//                    modifier = Modifier
+//                        .weight(0.6f)
+//                )
+//            }
+//        }
 //        Text("max\n${range.endInclusive}")
         Text("${range.endInclusive}", color = deck.color)
 
         Text(
-            text = "value\n%5.2f - %5.2f".format(minValue, maxValue),
+//            text = "value\n%5.2f - %5.2f".format(minValue, maxValue),
+            text = "%5.2f .. %5.2f".format(minValue, maxValue),
             modifier = Modifier
                 .weight(0.3f)
                 .padding(8.dp, 0.dp)

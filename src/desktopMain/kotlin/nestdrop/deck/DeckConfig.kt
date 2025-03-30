@@ -9,14 +9,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withTimeoutOrNull
 import tags.nestdropQueueSearches
+import tags.queueTagsInitialized
 import ui.screens.customSearches
-import ui.screens.imgSpritesMap
+import imgSpritesMap
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTimedValue
 
 private val logger = KotlinLogging.logger { }
 
-suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
+suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
     deckConfig.apply {
         this@applyConfig.ndTime.transitionTime.value = transitionTime
         this@applyConfig.ndStrobe.enabled.value = strobe.enabled
@@ -46,17 +48,22 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         }
 
         run {
-//            //TODO: find a way to load queue by name without blocking here
-            val spoutSpriteQueuesValue = withTimeoutOrNull(10.seconds) {
-                spoutSpriteQueues.first {
-                    it
-                        .also { logger.debug { it } }
-                        .isNotEmpty()
+//            //TODO: find a way to load queue by name without blocking here ?
+            logger.debug { "loading spoutQueue on $deckName" }
+            val spoutSpriteQueuesValue = measureTimedValue {
+                withTimeoutOrNull(10.seconds) {
+                    spoutSpriteQueues.first {
+                        it
+                            .also { logger.debug { "spoutSpritesQueue: $it" } }
+                            .isNotEmpty()
+                    }
+                } ?: run {
+                    logger.error { "failed to load spoutSpriteQueues on $deckName" }
+                    emptyList()
                 }
-            } ?: run {
-                logger.error { "failed to load sprite queues on $deckName" }
-                emptyList()
-            }
+            }.apply {
+                logger.info { "loaded spoutSpriteQueues on $deckName in $duration" }
+            }.value
 //            val spriteQueueValue = spriteQueuesValue.firstOrNull() { it.name == spriteQueue.name }
 
             run {
@@ -77,7 +84,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
                     ?: run {
                         logger.error { "$deckName failed to find matching spout queue" }
                         -1
-                          //   ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
+                        //   ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
                     }
                 val spoutSprites = withTimeoutOrNull(500.milliseconds) {
                     logger.info { "loading spout sprites from queue for $deckName" }
@@ -96,17 +103,33 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
         }
         run {
             val customSearches = withTimeoutOrNull(5.seconds) {
-                while (customSearches.value.isEmpty()) {
-                    delay(100)
-                }
-                customSearches.value
-            }.orEmpty()
+                measureTimedValue {
+                    while (customSearches.value.isEmpty()) {
+                        delay(100)
+                    }
+                    customSearches.value
+                }.apply {
+                    logger.info { "loaded customSearches on $deckName in $duration" }
+                }.value
+            } ?: run {
+                logger.error { "failed to load customSearches on $deckName" }
+                emptyList()
+            }
+
             val nestdropQueueSearches = withTimeoutOrNull(5.seconds) {
-                while (nestdropQueueSearches.value.isEmpty()) {
-                    delay(100)
-                }
-                nestdropQueueSearches.value
-            }.orEmpty()
+                measureTimedValue {
+                    while (!queueTagsInitialized.value) {
+                        delay(100)
+                    }
+                    nestdropQueueSearches.value
+                }.apply {
+                    logger.info { "loaded nestdropQueueSearches on $deckName in $duration" }
+                }.value
+            } ?: run {
+                logger.error { "failed to load nestdropQueueSearches on $deckName" }
+                emptyList()
+            }
+
             val combinedSearches = customSearches + nestdropQueueSearches
 
             this@applyConfig.search.autoChange.value = search.autoChange
@@ -117,6 +140,8 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) {
 //            this@applyConfig.bpmSyncMultiplier.value = bpmSync.multiplier
 //        }
     }
+}.run {
+    logger.debug { "applied config on $deckName in $duration" }
 }
 
 //private val Deck.presetQueueFlow
@@ -197,7 +222,7 @@ val Deck.configFlow: Flow<DeckConfig>
                     presetSwitching.transitionTime,
                     presetSwitching.transitTimeSync,
                     presetSwitching.transitTimeBeats
-                ) { config, triggerTime, transitionTime, transitTimeSync,transitTimeBeats ->
+                ) { config, triggerTime, transitionTime, transitTimeSync, transitTimeBeats ->
                     config.copy(
                         triggerTime = triggerTime,
                         transitionTime = transitionTime,

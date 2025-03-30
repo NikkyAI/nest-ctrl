@@ -22,6 +22,10 @@ import kotlinx.coroutines.flow.onEach
 import nestdrop.deck.Effect
 import nestdrop.deck.Trigger
 import nestdrop.deck.Waveform
+import scanFileSystemQueueForImgSprites
+import scanFileSystemQueueForMilk
+import imgSpritesMap
+import presetsMap
 
 private val logger = KotlinLogging.logger { }
 
@@ -105,26 +109,36 @@ suspend fun loadNestdropConfig(
     logger.info { "loading queues from $nestdropConfigFile" }
     try {
         val presetQueues = nestdropSettings.queueWindows.queues
-            .filter { it.deck != null && it.queueType() == QueueType.Preset }
+            .filter { it.deck != null && it.type() == QueueType.PRESET }
             .map { queue ->
                 Queue(
                     index = queue.index,
                     name = queue.name,
-                    type = queue.queueType(),
+                    type = queue.type(),
                     open = queue.open,
                     deck = queue.deck!!,
                     active = queue.active,
                     beatOffset = queue.beatOffset,
                     beatMultiplier = queue.beatMulti,
-                    presets = queue.presets.mapIndexed() { i, p ->
-                        Preset.Milkdrop(
-                            index = i,
-                            name = p.name,
-                            id = p.id,
-                            effects = p.effect ?: 0,
-                            overlay = p.overlay,
-                        )
-                    }
+                    isFileExplorer = queue.isFileExplorer,
+                    fileExplorerPath = queue.fileExplorerPath,
+                    presets =  if(!queue.isFileExplorer) {
+                        queue.presets.mapIndexed() { i, p ->
+                            Preset.Milkdrop(
+//                                index = i,
+                                name = p.name,
+                                id = p.id!!,
+                                effects = p.effect ?: 0,
+                                overlay = p.overlay,
+                                comments = p.comments,
+                                location = presetsMap.value[p.name] // ?: error("failed to load $${p.name}")
+                            )
+                        }
+                    } else {
+                        val presetOverrides = queue.presets
+                        scanFileSystemQueueForMilk(queue.fileExplorerPath)
+//                        emptyList()
+                    },
                 )
             }
             .also {
@@ -134,52 +148,65 @@ suspend fun loadNestdropConfig(
         val imgSpriteQueues = nestdropSettings.queueWindows.queues
             .filter {
                 it.deck != null
-                        && it.queueType() == QueueType.Sprite
-                        && it.presets.all { it.presetType() == PresetType.ImgSprite }
+                        && it.type() == QueueType.SPRITE
+                        && it.presets.all { it.type() == PresetType.ImgSprite }
             }
             .map { queue ->
                 Queue(
                     index = queue.index,
                     name = queue.name,
-                    type = queue.queueType(),
+                    type = queue.type(),
                     open = queue.open,
                     deck = queue.deck!!,
                     active = queue.active,
                     beatOffset = queue.beatOffset,
                     beatMultiplier = queue.beatMulti,
-                    presets = queue.presets.mapIndexed() { i, p ->
-                        Preset.ImageSprite(
-                            index = i,
-                            name = p.name,
-                            id = p.id,
-                            effects = p.effect ?: 0,
-                            overlay = p.overlay,
-                            comments = p.comments?.takeUnless { it.isBlank() }
-                        )
+                    isFileExplorer = queue.isFileExplorer,
+                    fileExplorerPath = queue.fileExplorerPath,
+                    //TODO: if isFileExplorer -> scan folder for entries
+                    presets = if(!queue.isFileExplorer) {
+                        queue.presets.mapIndexed() { i, p ->
+                            Preset.ImageSprite(
+                                name = p.name,
+                                id = p.id!!,
+                                effects = p.effect ?: 0,
+                                overlay = p.overlay,
+                                comments = p.comments?.takeUnless { it.isBlank() },
+
+                                location = imgSpritesMap.value[p.name] // ?: error("failed to load $${p.name}")
+                            )
+                        }
+                    } else {
+                        val presetOverrides = queue.presets
+
+                        scanFileSystemQueueForImgSprites(queue.fileExplorerPath)
                     }
                 )
             }
         val spoutSpriteQueues = nestdropSettings.queueWindows.queues
             .filter {
                 it.deck != null
-                        && it.queueType() == QueueType.Sprite
-                        && it.presets.all { it.presetType() == PresetType.SpoutSprite }
+                        && it.type() == QueueType.SPRITE
+                        && !it.isFileExplorer
+                        && it.presets.all { it.type() == PresetType.SpoutSprite }
             }
             .map { queue ->
                 Queue(
                     index = queue.index,
                     name = queue.name,
-                    type = queue.queueType(),
+                    type = queue.type(),
                     open = queue.open,
                     deck = queue.deck!!,
                     active = queue.active,
                     beatOffset = queue.beatOffset,
                     beatMultiplier = queue.beatMulti,
+//                    isFileExplorer = queue.isFileExplorer,
+//                    fileExplorerPath = queue.fileExplorerPath,
                     presets = queue.presets.mapIndexed() { i, p ->
                         Preset.SpoutSprite(
                             index = i,
                             name = p.name,
-                            id = p.id,
+                            id = p.id!!,
                             effects = p.effect ?: 0,
                             overlay = p.overlay,
                             comments = p.comments?.takeUnless { it.isBlank() }
@@ -189,19 +216,35 @@ suspend fun loadNestdropConfig(
             }
 
         decks.forEach { deck ->
-            deck.imgSpriteQueues.value = imgSpriteQueues.filter { queue ->
-                queue.open && queue.deck == deck.id && queue.type == QueueType.Sprite
-            }
+//            deck.imgSpriteQueues.value = imgSpriteQueues.filter { queue ->
+//                queue.open && queue.deck == deck.id && queue.type == QueueType.SPRITE
+//            }
             deck.spoutSpriteQueues.value = spoutSpriteQueues.filter { queue ->
-                queue.open && queue.deck == deck.id && queue.type == QueueType.Sprite
+                queue.open && queue.deck == deck.id && queue.type == QueueType.SPRITE
             }
         }
-        queues.presetQueues.value = presetQueues
-        queues.allQueues.value = (presetQueues + imgSpriteQueues + spoutSpriteQueues).sortedBy { it.index }
+//        queues.presetQueues.value = presetQueues.associateBy { it.name }
+//        queues.allQueues.update { oldList ->
+//            (presetQueues + imgSpriteQueues + spoutSpriteQueues).map { newQueue ->
+//                oldList.firstOrNull { it.name == newQueue.name }?.let {
+//
+//                }
+//            }
+//
+//            ((presetQueues + imgSpriteQueues + spoutSpriteQueues).sortedBy { it.index })
+//        }
+        queues.updateQueues(
+            presetQueues,
+            imgSpriteQueues,
+            spoutSpriteQueues,
+
+//            (presetQueues + imgSpriteQueues + spoutSpriteQueues).sortedBy { it.index }.associateBy { it.name }
+        )
+//        queues.allQueues.value =
         queues.isInitialized.value = true
 
         nestdropSettings.queueWindows.queues
-            .filter { it.deck != null && it.queueType() == QueueType.SettingsPresets }
+            .filter { it.deck != null && it.type() == QueueType.SETTING }
             .forEach { queue ->
                 queue.presets.forEach { settingsPreset ->
                     val (time, colors, strobeLfo, audio, unknown) = settingsPreset.settingCapture .orEmpty().split(",").map { it == "1" }
@@ -238,7 +281,7 @@ suspend fun loadNestdropConfig(
                     }
                     values = values.drop(12)
                     if(audio) {
-                        println(values)
+//                        println(values)
                         val unknownA = values[0].toFloat()
                         val unknownB = values[1].toFloat()
                         val bass = values[2].toFloat()
@@ -248,7 +291,7 @@ suspend fun loadNestdropConfig(
                     }
                     values = values.drop(5)
                     if(strobeLfo) {
-                        println(values)
+//                        println(values)
                         val strobeEffect = Effect.entries[values[0].toInt()]
                         val color = Color(values[1].toInt())
                         val speed = values[2].toFloat()

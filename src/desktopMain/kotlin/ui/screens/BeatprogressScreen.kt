@@ -335,6 +335,9 @@ fun beatProgressScreen(
                 if (deck.id > decksEnabled) return@forEach
 
                 val triggerTime by deck.presetSwitching.triggerTime.collectAsState()
+                var tmpTriggerTime by remember(deck.id, "presetSwitching.triggerTime", triggerTime) {
+                    mutableStateOf(triggerTime)
+                }
 
                 Row(
                     modifier = Modifier
@@ -348,7 +351,10 @@ fun beatProgressScreen(
                     Slider(
                         value = triggerTime,
                         onValueChange = {
-                            deck.presetSwitching.triggerTime.value = it
+                            tmpTriggerTime = it
+                        },
+                        onValueChangeFinished = {
+                            deck.presetSwitching.triggerTime.value = tmpTriggerTime
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = deck.color,

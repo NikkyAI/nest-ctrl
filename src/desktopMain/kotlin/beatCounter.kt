@@ -22,7 +22,15 @@ val beatProgress = MutableStateFlow(0f)
 
 private val logger = KotlinLogging.logger { }
 
-val bpmSynced = OscSynced.ValueSingle<Float>(
+val controlBeat = OscSynced.ValueSingle<Float>(
+    "/Controls/sBeat",
+    64f, send = false,
+    target = OscSynced.Target.Nestdrop
+).also {
+    it.logReceived = false
+}
+
+val controlBpm = OscSynced.ValueSingle<Float>(
     "/Controls/sBpm",
     120f, send = false,
     target = OscSynced.Target.Nestdrop
@@ -36,9 +44,8 @@ val secondsPerBeat = MutableStateFlow(0.5f)
 val beatCounter = MutableStateFlow(0.0)
 
 suspend fun startBeatCounter() {
-
     @OptIn(FlowPreview::class)
-    bpmSynced
+    controlBpm
         .flow
         .sample(100.milliseconds)
         .map { bpm ->
@@ -55,11 +62,11 @@ suspend fun startBeatCounter() {
 
         combine(
             secondsPerBeat,
-            beatFrame,
+//            beatFrame,
             deck.presetSwitching.transitTimeSync,
 //            deck.presetSwitching.transitTimeBeatframeFraction,
             deck.presetSwitching.transitTimeBeats,
-        ) { secondsPerBeat, beatFrame, enabled, transitTimeBeats ->
+        ) { secondsPerBeat, enabled, transitTimeBeats ->
             if(enabled) {
                 secondsPerBeat * transitTimeBeats
             } else {
@@ -129,7 +136,7 @@ suspend fun startBeatCounter() {
                 val now = Clock.System.now()
                 val timeDelta = now - lastLoop
                 lastLoop = now
-                val beatsPerMillisecond = bpmSynced.flow.value / 60_000.0
+                val beatsPerMillisecond = controlBpm.flow.value / 60_000.0
                 val beatsInDuration = beatsPerMillisecond * timeDelta.inWholeMilliseconds
                 beatCounter.value += beatsInDuration
             }
