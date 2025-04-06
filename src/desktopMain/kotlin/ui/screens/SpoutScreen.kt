@@ -16,10 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import decks
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.launch
 import nestdrop.Preset
 import nestdrop.Queue
 import nestdrop.deck.Deck
@@ -29,6 +32,7 @@ import ui.components.lazyList
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun spoutScreen() {
+    val logger = KotlinLogging.logger {}
     val maxQueueLength = remember(decks.map { it.spoutQueue.name }) {
         decks.maxOfOrNull {
             it.spoutQueue.value?.presets?.size ?: 0
@@ -36,6 +40,7 @@ fun spoutScreen() {
     }
 
     val decksEnabled by Deck.enabled.collectAsState()
+    val scope = rememberCoroutineScope()
     lazyList {
         stickyHeader(key = "header") {
             Row(
@@ -105,9 +110,10 @@ fun spoutScreen() {
                 decks.forEach { deck ->
                     if (deck.id > decksEnabled) return@forEach
 
+                    val spoutStates by deck.spriteState.spoutStates.collectAsState()
                     val queue: Queue<Preset.SpoutSprite>? by deck.spoutQueue.collectAsState()
-                    val activeIndexState = deck.spout.index
-                    val activeIndex by activeIndexState.collectAsState()
+//                    val activeIndexState = deck.spout.index
+//                    val activeIndex by activeIndexState.collectAsState()
                     val preset = queue?.presets?.getOrNull(i)
                     val queueLength = queue?.presets?.size ?: 0
 
@@ -118,14 +124,27 @@ fun spoutScreen() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if(preset != null) {
+                            val isActive = spoutStates.values.any {  key ->
+                                preset.name == key.name && preset.effects == key.fx
+                            }
                             VerticalRadioButton(
-                                selected = (activeIndex == i),
+                                selected = isActive, // (activeIndex == i),
                                 onClick = {
-                                    if (activeIndex == i) {
-                                        activeIndexState.value = -1
-                                    } else {
-                                        activeIndexState.value = i
+                                    scope.launch {
+                                        if(isActive) {
+                                            logger.info { "clearSpout" }
+                                            deck.spout.clearSpout()
+                                        } else {
+                                            logger.info { "setSpout $i ${queue?.name}" }
+                                            deck.spout.setSpout(i, queue!!)
+                                        }
                                     }
+
+//                                    if (activeIndex == i) {
+//                                        activeIndexState.value = -1
+//                                    } else {
+//                                        activeIndexState.value = i
+//                                    }
                                 },
                                 colors = RadioButtonDefaults.colors(
                                     selectedColor = deck.color,

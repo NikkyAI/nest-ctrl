@@ -21,7 +21,7 @@ sealed interface PresetIdState {
         val force: Boolean = false,
 //    val hardCut: Boolean = false,
     ) : PresetIdState {
-        val id get() = queue.presets.getOrNull(index)?.id
+//        val id get() = queue.presets.getOrNull(index)?.id
     }
 
     data object Unset : PresetIdState
@@ -44,15 +44,18 @@ class NestdropSpriteQueue(
         channel.send(state)
     }
 
-    private suspend fun presetId(queue: Queue<out Preset>, id: Int?, overlay: Boolean = false) {
-        if(id == null) {
+    private suspend fun presetId(queue: Queue<out Preset>, index: Int?, overlay: Boolean = false) {
+        if(index == null) {
             logger.warn { "failed to find sprite id" }
             return
         }
-        logger.debug { "setting presetId $id on ${queue.name} (\"/PresetID/${queue.name}/$id\")" }
+        logger.debug { "setting index $index on ${queue.name} (/Queue/${queue.name}/ActIdx/$index)" }
+//        logger.debug { "setting presetId $index on ${queue.name} (\"/PresetID/${queue.name}/$id\")" }
         nestdropSendChannel.send(
             OSCMessage(
-                "/PresetID/${queue.name}/$id",
+                // /PresetID/spout_1/15879 or /Queue/spout_1/ActIdx/0
+                "/Queue/${queue.name}/ActIdx/$index",
+//                "/PresetID/${queue.name}/$id",
 //                "/PresetID/$id",
                 listOf(
                     if (overlay) 0 else 1
@@ -70,7 +73,7 @@ class NestdropSpriteQueue(
             .onEach { current ->
 //                logger.warnF { "previous: $previous" }
 //                logger.warnF { "current: $current" }
-                if (previous != null) {
+//                if (previous != null) {
                     when (current) {
                         is PresetIdState.Unset -> {
                             when (val previous = previous) {
@@ -80,7 +83,7 @@ class NestdropSpriteQueue(
                                         logger.debug { "unsetting previous sprite" }
                                         presetId(
                                             queue = previous.queue,
-                                            id = previous.id,
+                                            index = previous.index,
                                             overlay = false
                                         )
                                     } else {
@@ -102,7 +105,7 @@ class NestdropSpriteQueue(
                                 logger.debug { "force setting sprite" }
                                 presetId(
                                     queue = current.queue,
-                                    id = current.id,
+                                    index = current.index,
 //                                    current.queue.presets.first { it.id != current.id }.id,
 //                                    (current.index + 1) % current.queue.presets.size,
                                     overlay = false
@@ -120,7 +123,7 @@ class NestdropSpriteQueue(
                                     logger.info { "ND: received same preset id again, resetting ${current.queue.name} to $presetName" }
                                     presetId(
                                         queue = current.queue,
-                                        id = current.id,
+                                        index = current.index,
 //                                        current.queue.presets.first { it.id != current.id }.id,
                                         overlay = false
                                     )
@@ -137,11 +140,11 @@ class NestdropSpriteQueue(
                             }
                         }
                     }
-                } else {
-                    logger.debug { "not switching after initializing program" }
-
-                    //TODO switch to another preset and back to ensure it is set correctly
-                }
+//                } else {
+//                    logger.debug { "not switching after initializing program" }
+//
+//                    //TODO switch to another preset and back to ensure it is set correctly
+//                }
                 previous = current
 
             }

@@ -214,6 +214,12 @@ enum class Tabs(
             deck.search.map { s -> s?.label ?: "-" }
         }
     ),
+    SpoutSprites(
+        "Spout Sprites",
+        {
+            it.spriteState.spoutStates.map { it.values.firstOrNull()?.label ?: "-" }
+        }
+    ),
     ImgSprites(
         "IMG Sprites",
         {
@@ -226,12 +232,6 @@ enum class Tabs(
             it.imgSpriteFx.shortLabel
         }
     ),
-    SpoutSprites(
-        "Spout Sprites",
-        {
-            it.spriteState.spoutStates.map { it.values.firstOrNull()?.label ?: "-" }
-        }
-    ),
     Tagging("Tags"),
     EditPlaylist("Playlist\nEditor"),
     NestdropControls("Nestdrop\nSettings"),
@@ -240,7 +240,7 @@ enum class Tabs(
     ;
 }
 
-val mainMenuTabState: MutableStateFlow<Tabs> = MutableStateFlow(Tabs.PresetPlaylist)
+val mainMenuTabState: MutableStateFlow<Tabs> = MutableStateFlow(Tabs.QueueControls)
 @Composable
 fun ColumnScope.tabScreen(
 ) {

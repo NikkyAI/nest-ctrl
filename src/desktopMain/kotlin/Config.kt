@@ -205,7 +205,7 @@ suspend fun loadConfig() {
     config.value.also { config ->
         logger.info { "loaded config" }
         logger.debug { config.prettyPrint() }
-        beatFrame.value = config.beats
+//        beatFrame.value = config.beats
         customSearches.value = config.presetPlaylists
         decks.forEach { deck ->
             when (deck.id) {

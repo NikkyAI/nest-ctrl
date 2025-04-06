@@ -1,6 +1,9 @@
 package nestdrop
 
 import androidx.compose.ui.graphics.Color
+import controlAutoButton
+import controlBeatSlider
+import controlShuffleButton
 import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
@@ -101,6 +104,10 @@ suspend fun loadNestdropConfig(
 ) {
 //    val nestdropSettings = parseNestdropXml()
 //    logger.info { "loaded xml from $nestdropConfig" }
+
+    controlBeatSlider.setValue(nestdropSettings.mainWindow.settingsGeneral.beatThreshold.toFloat())
+    controlShuffleButton.setValue(nestdropSettings.mainWindow.settingsGeneral.shuffleEnable.let { if(it) 1 else 0 })
+    controlAutoButton.setValue(nestdropSettings.mainWindow.settingsGeneral.autoChangeEnable.let { if(it) 1 else 0 })
 
 //    val numberOfDecks = loadNumberOfDecks()
     val numberOfDecks = nestdropSettings.mainWindow.settingsGeneral.nbDecks

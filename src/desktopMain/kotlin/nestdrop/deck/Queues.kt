@@ -128,7 +128,7 @@ class Queues {
     val updateQueueMessages = Channel<OSCQueueUpdate>()
 
     private fun <PRESET : Preset> Queue<PRESET>.updateQueue(update: OSCQueueUpdate): Queue<PRESET> {
-        logger.debug { "osc queue update: $update" }
+//        logger.debug { "osc queue update: $update" }
         return when (update) {
             is OSCQueueUpdate.UpdateQueue -> {
                 //TODO: when isFileExplorerQueue &&

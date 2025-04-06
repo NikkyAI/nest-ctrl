@@ -12,6 +12,9 @@ val tagsFolder = configFolder.resolve("tags").also {
 val configFile = configFolder.resolve("config.json5").also {
     logger.info { "config file: $it" }
 }
+val queueFolder = configFolder.resolve("queues").also {
+    logger.info { "queue folder: $it" }
+}
 
 private fun String.parsePath(): File {
     val rawPath = this

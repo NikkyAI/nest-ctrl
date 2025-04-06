@@ -263,7 +263,7 @@ suspend fun startNestdropOSC() {
                 ) { messageEvent ->
                     logger.error { "UNHANDLED OSC MSG: ${messageEvent.message.stringify()}" }
                 }
-//                .addPacketListener(debugListener)
+                .addPacketListener(debugListener)
                 .build()
                 .also {
                     logger.info { "start listening on $address" }

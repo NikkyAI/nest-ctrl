@@ -185,7 +185,12 @@ object Main {
             }
         }
 
-        nestdropSettingsState.value.loadDeckSettings(decks)
+//        nestdropSettingsState.value.let { settings ->
+//            controlBeatSlider.setValue(settings.mainWindow.settingsGeneral.beatThreshold.toFloat())
+//            controlShuffleButton.setValue(settings.mainWindow.settingsGeneral.shuffleEnable.let { if(it) 1 else 0 })
+//            controlAutoButton.setValue(settings.mainWindow.settingsGeneral.autoChangeEnable.let { if(it) 1 else 0 })
+//            settings.loadDeckSettings(decks)
+//        }
         delay(250.milliseconds)
 
 //        decks.forEach {

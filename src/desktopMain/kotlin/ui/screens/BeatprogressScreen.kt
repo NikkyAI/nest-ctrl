@@ -272,7 +272,7 @@ fun beatProgressScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            beatFrame.value = max(16, frame + 8)
+                            beatFrame.value = max(16f, frame + 8)
                         }
                     },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
@@ -283,7 +283,7 @@ fun beatProgressScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            beatFrame.value = max(16, frame - 8)
+                            beatFrame.value = max(16f, frame - 8)
                         }
                     },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
@@ -294,7 +294,7 @@ fun beatProgressScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            beatFrame.value = 32
+                            beatFrame.value = 32f
                         }
                     },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
@@ -305,7 +305,7 @@ fun beatProgressScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            beatFrame.value = 64
+                            beatFrame.value = 64f
                         }
                     },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
@@ -316,7 +316,7 @@ fun beatProgressScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            beatFrame.value = 128
+                            beatFrame.value = 128f
                         }
                     },
 //                colors = ButtonDefaults.buttonColors(backgroundColor = deck.color),
@@ -360,6 +360,7 @@ fun beatProgressScreen(
                             thumbColor = deck.color,
                             activeTrackColor = deck.dimmedColor,
                         ),
+                        steps = frame.roundToInt() - 1,
                         valueRange = (0f..1f),
 //                            steps = 8 - 1,
                     )

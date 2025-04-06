@@ -86,12 +86,12 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
                         -1
                         //   ?: spriteQueuesValue.indexOfFirst { it.deck == this@applyConfig.N && it.name.contains("spout") }
                     }
-                val spoutSprites = withTimeoutOrNull(500.milliseconds) {
-                    logger.info { "loading spout sprites from queue for $deckName" }
-                    spoutQueueValue?.presets.orEmpty()
-                }.orEmpty()
-                this@applyConfig.spout.index.value = spoutSprites.indexOfFirst { it.encoded == spout.label }
-                    .takeUnless { it == -1 } ?: spout.index
+//                val spoutSprites = withTimeoutOrNull(500.milliseconds) {
+//                    logger.info { "loading spout sprites from queue for $deckName" }
+//                    spoutQueueValue?.presets.orEmpty()
+//                }.orEmpty()
+//                this@applyConfig.spout.index.value = spoutSprites.indexOfFirst { it.encoded == spout.label }
+//                    .takeUnless { it == -1 } ?: spout.index
             }
         }
         run {

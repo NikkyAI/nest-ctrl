@@ -11,28 +11,62 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import osc.OSCMessage
 import osc.OscSynced
+import osc.nestdropSendChannel
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-val beatFrame = MutableStateFlow(64) // OscSynced.Value("/beats", 64, target = OscSynced.Target.TouchOSC)
+//val beatFrame = MutableStateFlow(64) // OscSynced.Value("/beats", 64, target = OscSynced.Target.TouchOSC)
 val beatProgress = MutableStateFlow(0f)
 
 
 private val logger = KotlinLogging.logger { }
 
-val controlBeat = OscSynced.ValueSingle<Float>(
+val controlBeatSlider = OscSynced.ValueSingle<Float>(
     "/Controls/sBeat",
-    64f, send = false,
+    64f,
+//    send = false,
+    dropFirst = 1,
     target = OscSynced.Target.Nestdrop
 ).also {
     it.logReceived = false
 }
 
+
+val controlShuffleButton = OscSynced.ValueSingle<Int>(
+    address = "/Controls/btRandom",
+    initialValue = 0,
+    dropFirst = 1,
+    target = OscSynced.Target.Nestdrop
+)
+val controlAutoButton = OscSynced.ValueSingle<Int>(
+    address = "/Controls/btAuto",
+    initialValue = 0,
+    dropFirst = 1,
+    target = OscSynced.Target.Nestdrop
+)
+val beatFrame = controlBeatSlider.flow
+val controlBeatCounter = OscSynced.ValueSingle<Int>(
+    "/Controls/sBpmCnt",
+    0,
+    send = false,
+    dropFirst = 1,
+    target = OscSynced.Target.Nestdrop
+).also {
+    it.logReceived = false
+}
+suspend fun beatResync() {
+    nestdropSendChannel.send(
+        OSCMessage("/Controls/btResync", 1)
+    )
+}
+
 val controlBpm = OscSynced.ValueSingle<Float>(
     "/Controls/sBpm",
     120f, send = false,
+    dropFirst = 1,
     target = OscSynced.Target.Nestdrop
 ).also {
     it.logReceived = false
@@ -44,6 +78,11 @@ val secondsPerBeat = MutableStateFlow(0.5f)
 val beatCounter = MutableStateFlow(0.0)
 
 suspend fun startBeatCounter() {
+    // force initialization
+    controlShuffleButton.flow.onEach {
+
+    }.launchIn(flowScope)
+
     @OptIn(FlowPreview::class)
     controlBpm
         .flow
@@ -55,6 +94,13 @@ suspend fun startBeatCounter() {
             bpmRounded.value = it
             bpmInt.value = it.roundToInt()
             secondsPerBeat.value = 60f / it
+        }
+        .launchIn(flowScope)
+
+    controlBeatSlider
+        .flow
+        .onEach {
+            beatResync()
         }
         .launchIn(flowScope)
 
@@ -95,7 +141,11 @@ suspend fun startBeatCounter() {
         .launchIn(flowScope)
     beatFrame
         .onEach {
-            config.value = config.value.copy(beats = it)
+            updateConfig {
+                copy(
+                    beats = it.roundToInt()
+                )
+            }
         }
         .launchIn(flowScope)
 
