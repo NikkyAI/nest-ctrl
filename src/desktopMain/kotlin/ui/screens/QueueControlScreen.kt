@@ -339,7 +339,7 @@ fun QueueControlScreen() {
                             horizontalArrangement = Arrangement.End
                         ) {
 
-                            WithTooltipAtPointer(
+                            WithTooltipAbove(
                                 tooltip = {
                                     Text(queue.type.name)
                                 }
@@ -390,7 +390,8 @@ fun QueueControlScreen() {
                         Text("${(beats / queue.beatMultiplier).roundToInt()} Beats")
                         Text("(x${queue.beatMultiplier})")
                     }
-                    WithTooltipAtPointer(
+
+                    WithTooltipAbove(
                         tooltip = { Text("slower") }
                     ) {
 
@@ -404,11 +405,11 @@ fun QueueControlScreen() {
                                 }
                             },
                         ) {
-
                             Icon(Icons.Outlined.KeyboardDoubleArrowDown, "slower")
                         }
                     }
-                    WithTooltipAtPointer(
+
+                    WithTooltipAbove(
                         tooltip = { Text("faster") }
                     ) {
                         IconButton(

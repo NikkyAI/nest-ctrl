@@ -88,7 +88,7 @@ fun App() {
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-                            UpdateCheckerUI(GitHubReleaseFetcher(owner = "nikkyai", repo = "nestctrl"))
+                            UpdateCheckerUI(GitHubReleaseFetcher(owner = "nikkyai", repo = "nest-ctrl"))
 
                             androidx.compose.material3.Text(
                                 "O.S. : " + getOperatingSystem().name.lowercase()

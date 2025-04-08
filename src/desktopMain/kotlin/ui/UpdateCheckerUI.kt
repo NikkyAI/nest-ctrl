@@ -11,6 +11,7 @@ import io.github.kdroidfilter.platformtools.permissionhandler.hasInstallPermissi
 import io.github.kdroidfilter.platformtools.permissionhandler.requestInstallPermission
 import io.github.kdroidfilter.platformtools.releasefetcher.downloader.Downloader
 import io.github.kdroidfilter.platformtools.releasefetcher.github.GitHubReleaseFetcher
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,6 +49,8 @@ import kotlin.system.exitProcess
 //    }
 //}
 
+private val logger = KotlinLogging.logger {}
+
 @Composable
 fun UpdateCheckerUI(fetcher: GitHubReleaseFetcher) {
 
@@ -75,6 +78,7 @@ fun UpdateCheckerUI(fetcher: GitHubReleaseFetcher) {
 
         CoroutineScope(Dispatchers.IO).launch {
             fetcher.checkForUpdate { version, notes ->
+//                logger.info { "updateChecker: $version, $notes" }
                 isChecking = false
                 latestVersion = version
                 changelog = notes

@@ -16,7 +16,7 @@ plugins {
 
 //val appVersionCode = 1
 val appVersion = (project.properties["tag"] as? String)?.substringAfter("v")
-    ?: "0.0.1"
+    ?: "0.1.0"
 logger.lifecycle("appVersion: $appVersion")
 
 repositories {
@@ -38,7 +38,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
 //            implementation(compose.material3AdaptiveNavigationSuite)
 
-            implementation("org.jetbrains.compose.material3.adaptive:adaptive-layout-desktop:_")
+//            implementation("org.jetbrains.compose.material3.adaptive:adaptive-layout-desktop:_")
 //            implementation("androidx.compose.material3:material3-adaptive-navigation-suite-desktop:_") {
 ////                exclude("", "")
 //            }
@@ -46,6 +46,11 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+        }
+        commonMain {
+            kotlin.srcDirs(
+                layout.buildDirectory.dir("generated/main")
+            )
         }
 
         desktopMain.dependencies {
@@ -104,6 +109,17 @@ kotlin {
 //    testImplementation(compose.desktop.uiTestJUnit4)
         }
     }
+}
+
+afterEvaluate {
+    val constFile = layout.buildDirectory.file("generated/main/Constants.kt").get().asFile
+    constFile.parentFile!!.mkdirs()
+    constFile.writeText("""
+        object Constants {
+            val APP_VERSION: String = "$appVersion"
+            val isRelease: Boolean = ${project.properties.contains("tag")}
+        }
+    """.trimIndent())
 }
 
 stacktraceDecoroutinator {
