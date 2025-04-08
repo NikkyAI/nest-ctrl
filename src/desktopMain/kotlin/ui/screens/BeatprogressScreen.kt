@@ -1,6 +1,7 @@
 package ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -135,13 +136,14 @@ fun beatProgressScreen(
 
     Column {
         Row(
-            modifier = Modifier
-//            .padding(16.dp, 8.dp)
+            modifier = Modifier,
+//            .padding(16.dp, 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             Column(
                 modifier = Modifier
-//                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 8.dp)
             ) {
 
                 Text(
@@ -317,17 +319,17 @@ fun beatProgressScreen(
                     )
                 }
             }
-            val maxRange = min(1.0f, 30f / (frame * secondsPerBeat))
+//            val maxRange = min(1.0f, 30f / (frame * secondsPerBeat))
             Row(
 //                        modifier = Modifier.width(200.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("Transition Time")
-                Spacer(Modifier.weight(1.0f))
-                Text(
-                    text = "max: %3.2f".format(maxRange),
-                    textAlign = TextAlign.Center,
-                )
+//                Spacer(Modifier.weight(1.0f))
+//                Text(
+//                    text = "max: %3.2f".format(maxRange),
+//                    textAlign = TextAlign.Center,
+//                )
             }
             decks.forEach { deck ->
                 if (deck.id > decksEnabled) return@forEach
@@ -337,14 +339,15 @@ fun beatProgressScreen(
                 val transitTimeSync by deck.presetSwitching.transitTimeSync.collectAsState()
                 val transitTimeBeats by deck.presetSwitching.transitTimeBeats.collectAsState()
                 Row(
-//                        modifier = Modifier.width(200.dp),
+                    modifier = Modifier.padding(start = 8.dp),
                     verticalAlignment = Alignment.Top,
                 ) {
 
                     Column(
                         modifier = Modifier
-                            .width(50.dp)
-                            .padding(horizontal = 8.dp),
+//                            .width(50.dp)
+//                            .padding(horizontal = 8.dp),
+                        ,
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(

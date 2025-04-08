@@ -61,7 +61,9 @@ fun App() {
             Row {
                 verticalScroll {
                     Column(
-                        modifier = Modifier.width(320.dp).padding(16.dp),
+                        modifier = Modifier
+                            .width(320.dp)
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
