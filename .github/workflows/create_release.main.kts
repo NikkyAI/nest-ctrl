@@ -58,7 +58,7 @@ workflow(
             action = ActionsSetupGradle()
         )
 
-        run(command = "./gradlew packageDistributionForCurrentOS -Ptag=${expr { github.ref_name }} --no-daemon")
+        run(command = "./gradlew packageDistributionForCurrentOS -Ptag='${expr { github.ref_name }}' --no-daemon")
 
 //        uses(
 //            name = "update tag",
