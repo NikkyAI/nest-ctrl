@@ -63,6 +63,8 @@ import osc.OSCMessage
 import osc.nestdropPortSend
 import ui.components.Dseg14ClassicFontFamily
 import ui.components.HorizontalRadioButton
+import ui.components.WithTooltipAbove
+import ui.components.WithTooltipAtPointer
 import ui.components.lazyList
 import utils.runCommand
 import java.io.File
@@ -106,38 +108,52 @@ fun QueueControlScreen() {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = autoPlayEnabled,
-                            onCheckedChange = {
-                                scope.launch {
-                                    controlAutoButton.setValue(if (it) 1 else 0)
+                        WithTooltipAbove(
+                            tooltip = { Text("Auto switch") }
+                        ) {
+                            Checkbox(
+                                checked = autoPlayEnabled,
+                                onCheckedChange = {
+                                    scope.launch {
+                                        controlAutoButton.setValue(if (it) 1 else 0)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
 
                         val controlShuffleInt by controlShuffleButton.flow.collectAsState()
 //                val isRandom = controlShuffleInt == 1
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    if (controlShuffleInt == 1) {
-                                        controlShuffleButton.setValue(0)
-                                    } else {
-                                        controlShuffleButton.setValue(1)
-                                    }
+                        WithTooltipAbove(
+                            tooltip = {
+                                if (controlShuffleInt == 1) {
+                                    Text("auto switch: random")
+                                } else {
+                                    Text("auto switch: sequential")
                                 }
-                            },
+                            }
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        if (controlShuffleInt == 1) {
+                                            controlShuffleButton.setValue(0)
+                                        } else {
+                                            controlShuffleButton.setValue(1)
+                                        }
+                                    }
+                                },
 //                            shape = MaterialTheme.shapes.small,
 //                            colors = ButtonDefaults.outlinedButtonColors(
 //                                contentColor = Color.White
 //                            ),
-                        ) {
-                            if (controlShuffleInt == 1) {
+                            ) {
+                                if (controlShuffleInt == 1) {
 //                                Text("RANDOM")
-                                Icon(Icons.Outlined.Shuffle, "shuffle")
-                            } else {
+                                    Icon(Icons.Outlined.Shuffle, "shuffle")
+                                } else {
 //                                Text("SEQUENTIAL")
-                                Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, "sequential")
+                                    Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, "sequential")
+                                }
                             }
                         }
 
@@ -322,34 +338,41 @@ fun QueueControlScreen() {
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            Box(
-                                modifier = Modifier
-//                                .aspectRatio(1.0f)
-                                    .size(32.dp)
-                                    .background(Color.Black)
-                                    .padding(2.dp)
-                                    .border(
-                                        width = 2.dp,
-                                        color = MaterialTheme.colors.onSurface,
-                                        shape = CutCornerShape(0.dp),
-                                    )
-                                    .padding(2.dp),
-                                contentAlignment = Alignment.Center
+
+                            WithTooltipAtPointer(
+                                tooltip = {
+                                    Text(queue.type.name)
+                                }
                             ) {
-                                when (queue.type) {
-                                    QueueType.PRESET -> Text("P")
-                                    QueueType.SPRITE -> Text("S")
-                                    QueueType.TEXT -> Text("T")
-                                    QueueType.MIDI -> Text("M")
-                                    QueueType.SETTING -> Icon(
-                                        Icons.Outlined.Settings, queue.type.name
-                                    )
+                                Box(
+                                    modifier = Modifier
+//                                .aspectRatio(1.0f)
+                                        .size(32.dp)
+                                        .background(Color.Black)
+                                        .padding(2.dp)
+                                        .border(
+                                            width = 2.dp,
+                                            color = MaterialTheme.colors.onSurface,
+                                            shape = CutCornerShape(0.dp),
+                                        )
+                                        .padding(2.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    when (queue.type) {
+                                        QueueType.PRESET -> Text("P")
+                                        QueueType.SPRITE -> Text("S")
+                                        QueueType.TEXT -> Text("T")
+                                        QueueType.MIDI -> Text("M")
+                                        QueueType.SETTING -> Icon(
+                                            Icons.Outlined.Settings, queue.type.name
+                                        )
 
-                                    QueueType.`DECK SETTINGS` -> Icon(
-                                        Icons.Outlined.Settings, queue.type.name
-                                    )
+                                        QueueType.`DECK SETTINGS` -> Icon(
+                                            Icons.Outlined.Settings, queue.type.name
+                                        )
 
-                                    else -> Text("?")
+                                        else -> Text("?")
+                                    }
                                 }
                             }
 
@@ -367,58 +390,72 @@ fun QueueControlScreen() {
                         Text("${(beats / queue.beatMultiplier).roundToInt()} Beats")
                         Text("(x${queue.beatMultiplier})")
                     }
-                    IconButton(
-                        onClick = {
-                            val newValue = (queue.beatMultiplier / 2) // .coerceAtLeast(1f)
-                            scope.launch {
-                                nestdropPortSend(
-                                    OSCMessage("/Queue/${queue.name}/sBmul", newValue)
-                                )
-                            }
-                        },
+                    WithTooltipAtPointer(
+                        tooltip = { Text("slower") }
                     ) {
 
-                        Icon(Icons.Outlined.KeyboardDoubleArrowDown, "slower")
+                        IconButton(
+                            onClick = {
+                                val newValue = (queue.beatMultiplier / 2) // .coerceAtLeast(1f)
+                                scope.launch {
+                                    nestdropPortSend(
+                                        OSCMessage("/Queue/${queue.name}/sBmul", newValue)
+                                    )
+                                }
+                            },
+                        ) {
+
+                            Icon(Icons.Outlined.KeyboardDoubleArrowDown, "slower")
+                        }
                     }
-                    IconButton(
-                        onClick = {
-                            val newValue = (queue.beatMultiplier * 2) // .coerceAtLeast(1f)
-                            scope.launch {
-                                nestdropPortSend(
-                                    OSCMessage("/Queue/${queue.name}/sBmul", newValue)
-                                )
-                            }
-                        },
+                    WithTooltipAtPointer(
+                        tooltip = { Text("faster") }
                     ) {
-                        Icon(Icons.Outlined.KeyboardDoubleArrowUp, "faster")
+                        IconButton(
+                            onClick = {
+                                val newValue = (queue.beatMultiplier * 2) // .coerceAtLeast(1f)
+                                scope.launch {
+                                    nestdropPortSend(
+                                        OSCMessage("/Queue/${queue.name}/sBmul", newValue)
+                                    )
+                                }
+                            },
+                        ) {
+                            Icon(Icons.Outlined.KeyboardDoubleArrowUp, "faster")
+                        }
                     }
                     Spacer(Modifier.width(8.dp))
 
                     var beatoffset by remember(queue.name, "sBof", queue.beatOffset) {
                         mutableStateOf(queue.beatOffset)
                     }
-                    Slider(
-                        beatoffset,
-                        onValueChange = { newBeatOffset ->
-                            beatoffset = newBeatOffset
-                        },
-                        onValueChangeFinished = {
-                            scope.launch {
-                                nestdropPortSend(
-                                    OSCMessage("/Queue/${queue.name}/sBof", beatoffset)
-                                )
-                            }
-                        },
-                        colors = SliderDefaults.colors(
-                            thumbColor = deck.color,
-                            activeTrackColor = deck.dimmedColor,
-                        ),
 
-                        valueRange = (0f..1f),
-                        steps = 3,
-                        modifier = Modifier
-                            .width(100.dp),
-                    )
+                    WithTooltipAbove(
+                        tooltip = { Text("%.2f".format(queue.beatOffset)) }
+                    ) {
+                        Slider(
+                            beatoffset,
+                            onValueChange = { newBeatOffset ->
+                                beatoffset = newBeatOffset
+                            },
+                            onValueChangeFinished = {
+                                scope.launch {
+                                    nestdropPortSend(
+                                        OSCMessage("/Queue/${queue.name}/sBof", beatoffset)
+                                    )
+                                }
+                            },
+                            colors = SliderDefaults.colors(
+                                thumbColor = deck.color,
+                                activeTrackColor = deck.dimmedColor,
+                            ),
+
+                            valueRange = (0f..1f),
+                            steps = 3,
+                            modifier = Modifier
+                                .width(100.dp),
+                        )
+                    }
                     Text("%.2f".format(queue.beatOffset))
                     Spacer(Modifier.width(16.dp))
 
@@ -428,33 +465,37 @@ fun QueueControlScreen() {
 
                         decks.forEach { deck ->
 //                        if (deck.id > decksEnabled) return@forEach
-                            HorizontalRadioButton(
-                                selected = (queue.deck == deck.id),
-                                onClick = {
-                                    if (queue.deck == deck.id) {
-                                        return@HorizontalRadioButton
-                                    }
-                                    scope.launch {
-                                        nestdropPortSend(
-                                            OSCMessage("/Queue/${queue.name}/Deck", deck.id)
-                                        )
-                                        nestdropPortSend(
-                                            OSCMessage("/Queue/${queue.name}", if (queue.active) 1 else 0)
-                                        )
-                                    }
-                                },
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = deck.color,
-                                    unselectedColor = deck.dimmedColor,
-                                    disabledColor = deck.disabledColor,
-                                ),
-                                connectStart = deck.id in 2..decksEnabled,
-                                connectEnd = deck.id < decksEnabled,
-                                enabled = deck.id <= decksEnabled
+                            WithTooltipAbove(
+                                tooltip = { Text(deck.deckName) }
+                            ) {
+                                HorizontalRadioButton(
+                                    selected = (queue.deck == deck.id),
+                                    onClick = {
+                                        if (queue.deck == deck.id) {
+                                            return@HorizontalRadioButton
+                                        }
+                                        scope.launch {
+                                            nestdropPortSend(
+                                                OSCMessage("/Queue/${queue.name}/Deck", deck.id)
+                                            )
+                                            nestdropPortSend(
+                                                OSCMessage("/Queue/${queue.name}", if (queue.active) 1 else 0)
+                                            )
+                                        }
+                                    },
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = deck.color,
+                                        unselectedColor = deck.dimmedColor,
+                                        disabledColor = deck.disabledColor,
+                                    ),
+                                    connectStart = deck.id in 2..decksEnabled,
+                                    connectEnd = deck.id < decksEnabled,
+                                    enabled = deck.id <= decksEnabled
 //                            height = heightDp,
 //                            connectTop = fxIndex > 0,
 //                            connectBottom = fxIndex < 49,
-                            )
+                                )
+                            }
                         }
                     }
 
@@ -466,60 +507,73 @@ fun QueueControlScreen() {
                     ) {
 
                         if (queue.isFileExplorer) {
-                            IconButton(
-                                onClick = {
-                                    // TODO: send
-                                    scope.launch {
-                                        nestdropPortSend(
-                                            OSCMessage("/Queue/${queue.name}/Refresh", 1)
-                                        )
-                                    }
-                                }
+                            WithTooltipAbove(
+                                tooltip = { Text("refresh presets") }
                             ) {
-                                Icon(
-                                    Icons.Filled.Refresh,
-                                    modifier = Modifier.scale(scaleX = -1f, scaleY = 1f),
-                                    contentDescription = "refresh items"
-                                )
+                                IconButton(
+                                    onClick = {
+                                        // TODO: send
+                                        scope.launch {
+                                            nestdropPortSend(
+                                                OSCMessage("/Queue/${queue.name}/Refresh", 1)
+                                            )
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Refresh,
+                                        modifier = Modifier.scale(scaleX = -1f, scaleY = 1f),
+                                        contentDescription = "refresh items"
+                                    )
+                                }
                             }
                             val folder = File(queue.fileExplorerPath)
                             if (folder.exists()) {
 //                                Spacer(modifier = Modifier.width(50.dp))
-                                IconButton(
-                                    onClick = {
-                                        runCommand("explorer", folder.absolutePath, workingDir = File("."))
-                                    }
+                                WithTooltipAbove(
+                                    tooltip = { Text("open folder in explorer") }
                                 ) {
-                                    Icon(Icons.Outlined.FolderOpen, contentDescription = "open folder")
+                                    IconButton(
+                                        onClick = {
+                                            runCommand("explorer", folder.absolutePath, workingDir = File("."))
+                                        }
+                                    ) {
+                                        Icon(Icons.Outlined.FolderOpen, contentDescription = "open folder")
+                                    }
                                 }
                             }
                         } else {
                             var showConfirmation by mutableStateOf(false)
                             //TODO: confirm ?
-                            IconButton(
-                                onClick = {
-                                    if (!showConfirmation) {
-                                        showConfirmation = true
-                                    } else {
-                                        // TODO: send
-                                        scope.launch {
-                                            nestdropPortSend(
-                                                OSCMessage("/Queue/${queue.name}/Shuffle", 1)
-                                            )
-                                        }
-                                        showConfirmation = false
-                                    }
 
-                                }
+                            WithTooltipAbove(
+                                tooltip = { Text("shuffle items") }
                             ) {
-                                Icon(
-                                    if (showConfirmation) {
-                                        Icons.Filled.Shuffle
-                                    } else {
-                                        Icons.Outlined.Shuffle
-                                    }, "shuffle items",
-                                    tint = Color.Red
-                                )
+                                IconButton(
+                                    onClick = {
+                                        if (!showConfirmation) {
+                                            showConfirmation = true
+                                        } else {
+                                            // TODO: send
+                                            scope.launch {
+                                                nestdropPortSend(
+                                                    OSCMessage("/Queue/${queue.name}/Shuffle", 1)
+                                                )
+                                            }
+                                            showConfirmation = false
+                                        }
+
+                                    }
+                                ) {
+                                    Icon(
+                                        if (showConfirmation) {
+                                            Icons.Filled.Shuffle
+                                        } else {
+                                            Icons.Outlined.Shuffle
+                                        }, "shuffle items",
+                                        tint = Color.Red
+                                    )
+                                }
                             }
                         }
                     }
@@ -533,12 +587,21 @@ fun QueueControlScreen() {
                     ) {
 //                        Spacer(modifier = Modifier.width(25.dp))
 
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    nestdropPortSend(
-                                        OSCMessage("/Queue/${queue.name}", if (queue.active) 0 else 1)
-                                    )
+                        WithTooltipAbove(
+                            tooltip = {
+                                if (queue.active) {
+                                    Text("disable ${queue.name} on ${deck.deckName}")
+                                } else {
+                                    Text("enable ${queue.name} on ${deck.deckName}")
+                                }
+                            }
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        nestdropPortSend(
+                                            OSCMessage("/Queue/${queue.name}", if (queue.active) 0 else 1)
+                                        )
 //                                    if (!queue.active && queue.type == QueueType.PRESET) {
 //                                        activeQueues[queue.deck].orEmpty().filter {
 //                                            it.type == QueueType.PRESET && it.name != queue.name
@@ -548,17 +611,18 @@ fun QueueControlScreen() {
 //                                            )
 //                                        }
 //                                    }
-                                }
-                            },
-                            enabled = !(queue.name.startsWith("spout") && !queue.active)
+                                    }
+                                },
+                                enabled = !(queue.name.startsWith("spout") && !queue.active)
 //                        enabled = queue.type != QueueType.PRESET || activeQueues.isEmpty()
-                        ) {
-                            if (queue.active) {
-                                Icon(Icons.Filled.Pause, "pause")
+                            ) {
+                                if (queue.active) {
+                                    Icon(Icons.Filled.Pause, "pause")
 //                            Text("-", color = Color.White)
-                            } else {
-                                Icon(Icons.Outlined.PlayArrow, "play")
+                                } else {
+                                    Icon(Icons.Outlined.PlayArrow, "play")
 //                        Text("+", color = Color.White)
+                                }
                             }
                         }
                     }

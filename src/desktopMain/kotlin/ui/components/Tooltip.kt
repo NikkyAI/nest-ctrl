@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WithTooltip(
+fun WithTooltipAtPointer(
     tooltip: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -25,8 +25,9 @@ fun WithTooltip(
         tooltip = {
             Surface(
                 modifier = Modifier.shadow(4.dp),
-                color = MaterialTheme.colors.surface,
+                color = MaterialTheme.colors.background,
                 shape = RoundedCornerShape(4.dp),
+                elevation = 2.dp
 //                border = BorderStroke(width = 1.dp, Color.White)
             ) {
                 Box(
@@ -36,8 +37,8 @@ fun WithTooltip(
                 }
             }
         },
-        modifier = Modifier.padding(start = 40.dp),
-        delayMillis = 600, // In milliseconds
+        modifier = Modifier, //.padding(start = 40.dp),
+        delayMillis = 100, // In milliseconds
         tooltipPlacement = TooltipPlacement.CursorPoint(
             alignment = Alignment.BottomEnd,
             offset = DpOffset(
@@ -46,6 +47,39 @@ fun WithTooltip(
             ),
         )
     ) {
-       content()
+        content()
+    }
+}
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun WithTooltipAbove(
+    tooltip: @Composable () -> Unit,
+    content: @Composable () -> Unit
+) {
+    TooltipArea(
+        tooltip = {
+            Surface(
+                modifier = Modifier.shadow(4.dp),
+                color = MaterialTheme.colors.background,
+                shape = RoundedCornerShape(4.dp),
+                elevation = 2.dp
+//                border = BorderStroke(width = 1.dp, Color.White)
+            ) {
+                Box(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    tooltip()
+                }
+            }
+        },
+        modifier = Modifier, //.padding(start = 40.dp),
+        delayMillis = 100, // In milliseconds
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.TopCenter,
+            alignment = Alignment.TopCenter,
+            offset = DpOffset(0.dp, 0.dp),
+        )
+    ) {
+        content()
     }
 }

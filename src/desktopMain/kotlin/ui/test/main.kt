@@ -49,7 +49,7 @@ fun main() = singleWindowApplication(
                                 )
                             }
                         },
-                        modifier = Modifier.padding(start = 40.dp),
+                        modifier = Modifier, //.padding(start = 40.dp),
                         delayMillis = 600, // In milliseconds
                         tooltipPlacement = TooltipPlacement.CursorPoint(
                             alignment = Alignment.BottomEnd,
