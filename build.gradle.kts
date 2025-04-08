@@ -1,3 +1,4 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
 import org.jetbrains.compose.desktop.application.tasks.AbstractRunDistributableTask
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -12,6 +13,11 @@ plugins {
     id("dev.reformator.stacktracedecoroutinator")
     id("org.bytedeco.gradle-javacpp-platform") version "1.5.10"
 }
+
+//val appVersionCode = 1
+val appVersion = (project.properties["tag"] as? String)?.substringAfter("v")
+    ?: "0.0.1"
+logger.lifecycle("appVersion: $appVersion")
 
 repositories {
     mavenCentral()
@@ -85,6 +91,12 @@ kotlin {
 //    implementation("io.klogging:slf4j-klogging:_")
             implementation("ch.qos.logback:logback-classic:_")
 
+            implementation("io.github.kdroidfilter:platformtools.core:_")
+            implementation("io.github.kdroidfilter:platformtools.appmanager:_")
+            implementation("io.github.kdroidfilter:platformtools.releasefetcher:_")
+            implementation("io.github.kdroidfilter:platformtools.darkmodedetector:_")
+            implementation("io.github.kdroidfilter:platformtools.permissionhandler:_")
+
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:_")
             implementation("dev.reformator.stacktracedecoroutinator:stacktrace-decoroutinator-jvm-legacy:_")
 
@@ -153,19 +165,45 @@ compose.desktop {
             "-Xmx1G",
             "--add-opens", "java.base/java.lang=ALL-UNNAMED"
         )
+
+//        nativeDistributions {
+//            targetFormats(TargetFormat.Pkg, TargetFormat.Msi, TargetFormat.Deb)
+//            packageName = "io.github.kdroidfilter.updatersample"
+//            packageVersion = appVersion
+//            description = "App with AutoUpdater"
+//            copyright = ""
+//            vendor = "KDroidFilter"
+//            windows {
+//                dirChooser = true
+//                perUserInstall = true
+//                menuGroup = "start-menu-group"
+//            }
+//            macOS {
+//                bundleID = "io.github.kdroidfilter.updatersample"
+//                dockName = "App with AutoUpdater"
+//            }
+//
+//        }
+
         nativeDistributions {
-//            targetFormats(
+            targetFormats(
 //                TargetFormat.Dmg,
-//                TargetFormat.Msi,
+                TargetFormat.Msi,
+//                TargetFormat.Exe,
 //                TargetFormat.Deb,
-//            )
-            packageName = "nestctrl"
-            packageVersion = "0.0.1"
+            )
+            packageName = "moe.nikky.nestctrl"
+            packageVersion = appVersion
+            vendor = "nikkyai"
 //            this.vendor = null
+            description = "NEST CTRL"
 
             windows {
                 iconFile.set(project.file("src/commonMain/composeResources/drawable/blobhai_trans_icon.ico"))
                 console = true
+                perUserInstall = true
+                menuGroup = "nestctrl"
+                dirChooser = false
             }
             modules(
                 "java.naming",
@@ -176,6 +214,7 @@ compose.desktop {
 //            includeAllModules = true
         }
     }
+
 }
 
 project.afterEvaluate {

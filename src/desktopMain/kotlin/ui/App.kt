@@ -21,6 +21,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import configFolder
 import decks
+import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
+import io.github.kdroidfilter.platformtools.getAppVersion
+import io.github.kdroidfilter.platformtools.getOperatingSystem
+import io.github.kdroidfilter.platformtools.releasefetcher.github.GitHubReleaseFetcher
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,23 +61,50 @@ fun App() {
     val logger = KotlinLogging.logger {}
     val nestdropDeckCount by Deck.enabled.collectAsState()
 
-    MaterialTheme(colors = darkColors()) {
+    MaterialTheme(
+        colors = if (isSystemInDarkMode()) darkColors() else lightColors()
+    ) {
         Scaffold {
             Row {
                 verticalScroll {
                     Column(
                         modifier = Modifier.width(320.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        beatProgressScreen(decks, size = 220.dp)
-                        Text("Auto Change")
-                        decks.forEach { deck ->
-                            if (deck.id > nestdropDeckCount) return@forEach
-                            autoChangeScreen(deck)
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
+                        Column {
+
+                            beatProgressScreen(decks, size = 220.dp)
+                            Text("Auto Change")
+                            decks.forEach { deck ->
+                                if (deck.id > nestdropDeckCount) return@forEach
+                                autoChangeScreen(deck)
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
 //                        Box(
 //                            contentAlignment = Alignment.BottomStart,
 //                        ) {
+
+                        }
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                            UpdateCheckerUI(GitHubReleaseFetcher(owner = "nikkyai", repo = "nestctrl"))
+
+                            androidx.compose.material3.Text(
+                                "O.S. : " + getOperatingSystem().name.lowercase()
+                                    .replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onBackground
+                            )
+
+                            androidx.compose.material3.Text(
+                                "Version: " + getAppVersion(),
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onBackground
+                            )
+
+                        }
+
                         Column(
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Bottom,

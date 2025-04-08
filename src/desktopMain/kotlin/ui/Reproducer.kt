@@ -34,7 +34,7 @@ import kotlinx.coroutines.runBlocking
 @Preview
 fun Reproducer() {
 
-    MaterialTheme(colors = darkColors()) {
+    MaterialTheme {
         Scaffold {
             Row {
                 Column(

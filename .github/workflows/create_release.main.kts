@@ -15,22 +15,18 @@
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
-import io.github.typesafegithub.workflows.actions.dylan700.SftpUploadAction_Untyped
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
-import io.github.typesafegithub.workflows.actions.jimeh.UpdateTagsAction_Untyped
 import io.github.typesafegithub.workflows.actions.softprops.ActionGhRelease
 import io.github.typesafegithub.workflows.domain.RunnerType
-import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.Push
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.ConsistencyCheckJobConfig
-import kotlin.script.experimental.jvmhost.JvmScriptEvaluationConfigurationBuilder.Companion.append
 
 workflow(
     name = "package distributable",
     on = listOf(
-        Push(branches = listOf("main"))
+        Push(tags = listOf("v*"))
     ),
     sourceFile = __FILE__,
     consistencyCheckJobConfig = ConsistencyCheckJobConfig.Configuration(
@@ -42,7 +38,8 @@ workflow(
         useLocalBindingsServerAsFallback = false
     )
 ) {
-    job(id = "build_and_package", runsOn = RunnerType.Windows2022) {
+    job(id = "build_release", runsOn = RunnerType.WindowsLatest
+    ) {
         uses(name = "Check out", action = Checkout())
 
         uses(
@@ -61,26 +58,27 @@ workflow(
             action = ActionsSetupGradle()
         )
 
-        run(command = "./gradlew packageDistributable --no-daemon")
+        run(command = "./gradlew packageDistributionForCurrentOS -Ptag=${expr { github.ref_name }} --no-daemon")
 
-        uses(
-            name = "update tag",
-            action = UpdateTagsAction_Untyped(
-                tags_Untyped = "nightly"
-            )
-        )
+//        uses(
+//            name = "update tag",
+//            action = UpdateTagsAction_Untyped(
+//                tags_Untyped = "nightly"
+//            )
+//        )
 
         uses(
             name = "create release",
             action = ActionGhRelease(
-                body = "Nightly Build",
-                draft = false,
-                prerelease = true,
+//                body = "Nightly Build",
+//                draft = false,
+//                prerelease = false,
                 files = listOf(
-                    "build/nestctrl.zip"
+                    "build/compose/binaries/main/msi/*.msi",
+//                    "build/nestctrl.zip"
                 ),
-                name = "Nightly",
-                tagName = "nightly",
+//                name = "Nightly",
+//                tagName = "nightly",
                 failOnUnmatchedFiles = true,
 //                token = expr { github.token },
                 generateReleaseNotes = true,

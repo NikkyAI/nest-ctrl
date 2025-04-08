@@ -7,6 +7,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,7 +18,9 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
@@ -25,6 +28,8 @@ import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
 import dev.reformator.stacktracedecoroutinator.runtime.DecoroutinatorRuntime
+import io.github.kdroidfilter.platformtools.appmanager.WindowsInstallerConfig
+import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -51,7 +56,6 @@ import osc.startNestdropOSC
 import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
-import ui.splashScreen
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
@@ -220,6 +224,7 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        WindowsInstallerConfig.requireAdmin = false
         if (dotenv.get("DEBUG", "false").toBooleanStrictOrNull() == true) {
 //        if(true) {
             val state = DecoroutinatorRuntime.load()
@@ -268,7 +273,9 @@ object Main {
                             height = 800.dp
                         )
                     ) {
-                        MaterialTheme(colors = darkColors()) {
+                        MaterialTheme(
+                            colors = if (isSystemInDarkMode()) darkColors() else lightColors()
+                        ) {
                             Scaffold {
                                 verticalScroll {
                                     Column(
@@ -350,7 +357,19 @@ object Main {
                         alwaysOnTop = true,
                         icon = painterResource(resource = Res.drawable.blobhai_trans)
                     ) {
-                        splashScreen()
+                        MaterialTheme(
+                            colors = if (isSystemInDarkMode()) darkColors() else lightColors()
+                        ) {
+                            Scaffold {
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text("Loading", fontSize = 30.sp, textAlign = TextAlign.Center)
+                                }
+                            }
+                        }
                     }
                 } else {
                     Window(
