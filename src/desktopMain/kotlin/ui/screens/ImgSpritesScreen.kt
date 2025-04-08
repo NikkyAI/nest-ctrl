@@ -140,21 +140,6 @@ fun imgSpritesScreenNew() {
                 }
                 if (isOpened) {
                     items(sprites) { sprite ->
-//                    var heightDp by remember {
-//                        mutableStateOf(0.dp)
-//                    }
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-////                horizontalArrangement = Arrangement.SpaceEvenly,
-//                        modifier = Modifier
-//                            .onGloballyPositioned { coordinates ->
-//                                // Set column height using the LayoutCoordinates
-//                                heightDp = with(localDensity) { coordinates.size.height.toDp() }
-//                            }
-//                    ) {
-//
-//                    }
-
                         val localDensity = LocalDensity.current
                         var heightDp by remember {
                             mutableStateOf(0.dp)

@@ -1,5 +1,6 @@
 package ui.screens
 
+//import androidx.compose.material3.MaterialTheme
 import QUEUES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,13 +30,12 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowDown
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowUp
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Shuffle
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
-//import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,8 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import beatFrame
 import controlAutoButton
-import controlBeatSlider
 import controlBeatCounter
+import controlBeatSlider
 import controlShuffleButton
 import decks
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -170,8 +170,9 @@ fun QueueControlScreen() {
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     (8..128 step 8).forEach {
-                                        Box(modifier = Modifier
-                                            .width(30.dp),
+                                        Box(
+                                            modifier = Modifier
+                                                .width(30.dp),
                                             contentAlignment = Alignment.CenterStart,
                                         ) {
                                             Text(it.toString(), textAlign = TextAlign.Center)
@@ -270,16 +271,25 @@ fun QueueControlScreen() {
                 if (queue.active) {
                     LinearProgressIndicator(
                         progress = {
-                            val modifiedBeats = (beats ) / queue.beatMultiplier
-                            (((beatCount % modifiedBeats) / modifiedBeats) - queue.beatOffset + 1f) % 1f },
+                            val modifiedBeats = (beats) / queue.beatMultiplier
+                            (((beatCount % modifiedBeats) / modifiedBeats) - queue.beatOffset + 1f) % 1f
+                        },
                         modifier = Modifier
                             .scale(scaleX = 1f, scaleY = 3f)
                             .fillMaxWidth()
 //                            .background(deck.color),
                             .padding(start = 4.dp, end = 4.dp, bottom = 2.dp),
 //                        strokeCap = StrokeCap.Square,
-                        color = if(autoPlayEnabled) { deck.color } else { deck.disabledColor },
-                        trackColor = if(autoPlayEnabled) { deck.disabledColor } else { Color.DarkGray }, // MaterialTheme.colors.surface,
+                        color = if (autoPlayEnabled) {
+                            deck.color
+                        } else {
+                            deck.disabledColor
+                        },
+                        trackColor = if (autoPlayEnabled) {
+                            deck.disabledColor
+                        } else {
+                            Color.DarkGray
+                        }, // MaterialTheme.colors.surface,
 //                        drawStopIndicator = { },
 //                        gapSize = 32.dp
                     )
@@ -344,35 +354,19 @@ fun QueueControlScreen() {
                         }
                     }
 
-                    Spacer(Modifier.width(16.dp))
+                    Spacer(Modifier.width(8.dp))
 
 
-                    Text("${(beats / queue.beatMultiplier).roundToInt()} Beats (x${queue.beatMultiplier})".padStart(10, ' '))
-                    Spacer(Modifier.width(16.dp))
-
-                    OutlinedButton(
-                        onClick = {
-                            // TODO: set beat multiplier
-                            val newValue = (queue.beatMultiplier * 2) // .coerceAtLeast(1f)
-                            scope.launch {
-                                nestdropPortSend(
-                                    OSCMessage("/Queue/${queue.name}/sBmul", newValue)
-                                )
-                            }
-                        },
-//                    modifier = Modifier
-//                        .padding(2.dp),
-                        shape = MaterialTheme.shapes.small,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.White
-                        ),
+                    Row(
+                        modifier = Modifier.width(150.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text("x2", color = Color.White)
-                    }
 
-                    OutlinedButton(
+                        Text("${(beats / queue.beatMultiplier).roundToInt()} Beats")
+                        Text("(x${queue.beatMultiplier})")
+                    }
+                    IconButton(
                         onClick = {
-                            // TODO: set beat multiplier
                             val newValue = (queue.beatMultiplier / 2) // .coerceAtLeast(1f)
                             scope.launch {
                                 nestdropPortSend(
@@ -380,15 +374,23 @@ fun QueueControlScreen() {
                                 )
                             }
                         },
-//                    modifier = Modifier
-//                        .padding(2.dp),
-                        shape = MaterialTheme.shapes.small,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.White
-                        ),
                     ) {
-                        Text("/2", color = Color.White)
+
+                        Icon(Icons.Outlined.KeyboardDoubleArrowDown, "slower")
                     }
+                    IconButton(
+                        onClick = {
+                            val newValue = (queue.beatMultiplier * 2) // .coerceAtLeast(1f)
+                            scope.launch {
+                                nestdropPortSend(
+                                    OSCMessage("/Queue/${queue.name}/sBmul", newValue)
+                                )
+                            }
+                        },
+                    ) {
+                        Icon(Icons.Outlined.KeyboardDoubleArrowUp, "faster")
+                    }
+                    Spacer(Modifier.width(8.dp))
 
                     var beatoffset by remember(queue.name, "sBof", queue.beatOffset) {
                         mutableStateOf(queue.beatOffset)
@@ -434,6 +436,9 @@ fun QueueControlScreen() {
                                         nestdropPortSend(
                                             OSCMessage("/Queue/${queue.name}/Deck", deck.id)
                                         )
+                                        nestdropPortSend(
+                                            OSCMessage("/Queue/${queue.name}", if (queue.active) 1 else 0)
+                                        )
                                     }
                                 },
                                 colors = RadioButtonDefaults.colors(
@@ -452,69 +457,79 @@ fun QueueControlScreen() {
                     }
 
 //                logger.info { "queue: ${queue.name}: ${queue.isFileExplorer}" }
-                    if (queue.isFileExplorer) {
-                        IconButton(
-                            onClick = {
-                                // TODO: send
-                                scope.launch {
-                                    nestdropPortSend(
-                                        OSCMessage("/Queue/${queue.name}/Refresh", 1)
-                                    )
-                                }
-                            }
-                        ) {
-                            Icon(
-                                Icons.Filled.Refresh,
-                                modifier = Modifier.scale(scaleX = -1f, scaleY = 1f),
-                                contentDescription = "refresh items"
-                            )
-                        }
-                        val folder = File(queue.fileExplorerPath)
-                        if (folder.exists()) {
-                            Spacer(modifier = Modifier.width(50.dp))
+                    Row(
+                        modifier = Modifier.width(75.dp),
+                        horizontalArrangement = Arrangement.Start
+//                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        if (queue.isFileExplorer) {
                             IconButton(
                                 onClick = {
-                                    runCommand("explorer", folder.absolutePath, workingDir = File("."))
-                                }
-                            ) {
-                                Icon(Icons.Outlined.FolderOpen, contentDescription = "open folder")
-                            }
-                        }
-                    } else {
-                        var showConfirmation by mutableStateOf(false)
-                        //TODO: confirm ?
-                        IconButton(
-                            onClick = {
-                                if (!showConfirmation) {
-                                    showConfirmation = true
-                                } else {
                                     // TODO: send
                                     scope.launch {
                                         nestdropPortSend(
-                                            OSCMessage("/Queue/${queue.name}/Shuffle", 1)
+                                            OSCMessage("/Queue/${queue.name}/Refresh", 1)
                                         )
                                     }
-                                    showConfirmation = false
                                 }
-
+                            ) {
+                                Icon(
+                                    Icons.Filled.Refresh,
+                                    modifier = Modifier.scale(scaleX = -1f, scaleY = 1f),
+                                    contentDescription = "refresh items"
+                                )
                             }
-                        ) {
-                            Icon(
-                                if (showConfirmation) {
-                                    Icons.Filled.Shuffle
-                                } else {
-                                    Icons.Outlined.Shuffle
-                                }, "shuffle items",
-                                tint = Color.Red
-                            )
-                        }
+                            val folder = File(queue.fileExplorerPath)
+                            if (folder.exists()) {
+//                                Spacer(modifier = Modifier.width(50.dp))
+                                IconButton(
+                                    onClick = {
+                                        runCommand("explorer", folder.absolutePath, workingDir = File("."))
+                                    }
+                                ) {
+                                    Icon(Icons.Outlined.FolderOpen, contentDescription = "open folder")
+                                }
+                            }
+                        } else {
+                            var showConfirmation by mutableStateOf(false)
+                            //TODO: confirm ?
+                            IconButton(
+                                onClick = {
+                                    if (!showConfirmation) {
+                                        showConfirmation = true
+                                    } else {
+                                        // TODO: send
+                                        scope.launch {
+                                            nestdropPortSend(
+                                                OSCMessage("/Queue/${queue.name}/Shuffle", 1)
+                                            )
+                                        }
+                                        showConfirmation = false
+                                    }
 
+                                }
+                            ) {
+                                Icon(
+                                    if (showConfirmation) {
+                                        Icons.Filled.Shuffle
+                                    } else {
+                                        Icons.Outlined.Shuffle
+                                    }, "shuffle items",
+                                    tint = Color.Red
+                                )
+                            }
+                        }
                     }
+//                    Spacer(modifier = Modifier.width(25.dp))
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.SpaceBetween,
                         horizontalArrangement = Arrangement.End
                     ) {
+//                        Spacer(modifier = Modifier.width(25.dp))
 
                         IconButton(
                             onClick = {
@@ -522,19 +537,18 @@ fun QueueControlScreen() {
                                     nestdropPortSend(
                                         OSCMessage("/Queue/${queue.name}", if (queue.active) 0 else 1)
                                     )
-                                    if (!queue.active && queue.type == QueueType.PRESET) {
-                                        activeQueues[queue.deck].orEmpty().filter {
-                                            it.type == QueueType.PRESET && it.name != queue.name
-                                        }.forEach { otherQueue ->
-                                            nestdropPortSend(
-                                                OSCMessage("/Queue/${otherQueue.name}", 0)
-                                            )
-                                        }
-
-                                    }
-                                    //TODO: automatically disable the other preset queues
+//                                    if (!queue.active && queue.type == QueueType.PRESET) {
+//                                        activeQueues[queue.deck].orEmpty().filter {
+//                                            it.type == QueueType.PRESET && it.name != queue.name
+//                                        }.forEach { otherQueue ->
+//                                            nestdropPortSend(
+//                                                OSCMessage("/Queue/${otherQueue.name}", 0)
+//                                            )
+//                                        }
+//                                    }
                                 }
                             },
+                            enabled = !(queue.name.startsWith("spout") && !queue.active)
 //                        enabled = queue.type != QueueType.PRESET || activeQueues.isEmpty()
                         ) {
                             if (queue.active) {
@@ -545,17 +559,6 @@ fun QueueControlScreen() {
 //                        Text("+", color = Color.White)
                             }
                         }
-//                    OutlinedButton(
-//                        onClick = {
-//
-//                        },
-//                        shape = MaterialTheme.shapes.extraSmall,
-//                        colors = ButtonDefaults.outlinedButtonColors(
-//                            contentColor = Color.White
-//                        ),
-//                    ) {
-//
-//                    }
                     }
                 }
             }

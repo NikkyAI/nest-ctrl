@@ -9,14 +9,19 @@ import com.illposed.osc.OSCMessage
 import configFolder
 import decks
 import flowScope
+import imgSpritesMap
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -37,23 +42,16 @@ import nestdrop.nestdropSetPreset
 import nestdrop.nestdropSetSprite
 import osc.OSCMessage
 import osc.OscSynced
+import osc.nestdropPortSend
 import osc.nestdropSendChannel
 import osc.stringify
-import tags.PresetPlaylist
-import tags.pickItemToGenerate
-import tags.presetTagsMapping
-import imgSpritesMap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOn
-import nestdrop.Preset
-import osc.nestdropPortSend
 import presetsFolder
 import presetsMap
 import queueFolder
+import tags.PresetPlaylist
+import tags.pickItemToGenerate
+import tags.presetTagsMapping
 import utils.className
-import utils.prettyPrint
 import utils.runningHistory
 import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
@@ -552,7 +550,7 @@ class Deck(
 
     @Serializable
     data class SpriteKey(
-        val id: Int = -1,
+        val id: Int,
         val name: String = "unset",
         val mode: ImgMode = ImgMode.Overlay,
         val fx: Int = 0,
@@ -937,14 +935,16 @@ class Deck(
 //        val spriteTargetKey = MutableStateFlow<SpriteKey?>(null)
 
         private val nestdropSpout = NestdropSpriteQueue(
-            nestdropSendChannel
+            nestdropSendChannel,
+            spriteState.spoutStates,
+            spoutQueue
         )
 
-        suspend fun setSpout(index: Int, queue: Queue<nestdrop.Preset.SpoutSprite>) {
+        suspend fun setSpout(index: Int) {
             nestdropSpout.send(
                 PresetIdState.Data(
                     index = index,
-                    queue = queue, // as Queue<nestdrop.Preset>,
+//                    queue = queue, // as Queue<nestdrop.Preset>,
                     force = false,
                 )
             )

@@ -1,17 +1,17 @@
 package nestdrop.deck
 
-import decks
 import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.sample
 import nestdrop.Preset
 import nestdrop.Queue
 import nestdrop.QueueType
@@ -19,6 +19,7 @@ import osc.OSCMessage
 import osc.nestdropSendChannel
 import scanFileSystemQueueForImgSprites
 import scanFileSystemQueueForMilk
+import kotlin.time.Duration.Companion.milliseconds
 
 
 suspend fun Queue<Preset>.setDeck(deck: Int) {
@@ -150,7 +151,12 @@ class Queues {
                                 beatOffset = update.beatOffset,
                                 beatMultiplier = update.beatMultiplier,
                                 deck = update.deckNumber,
-                                presets = scanFileSystemQueueForMilk(fileExplorerPath) as List<PRESET>,
+                                presets = //if(update.presetCount != presetCount) {
+                                    scanFileSystemQueueForMilk(fileExplorerPath) as List<PRESET>
+//                                } else {
+//                                    presets
+//                                }
+                                ,
                                 presetCount = update.presetCount,
                             )
                         }
@@ -188,11 +194,15 @@ class Queues {
 
     val combinedUpdates = MutableStateFlow<Map<String, OSCQueueUpdate.UpdateQueue>>(emptyMap())
 
+    @OptIn(FlowPreview::class)
     suspend fun startFlows() {
         logger.info { "starting coroutines for preset-queues" }
 
         val updatesFlow = updateQueueMessages
             .consumeAsFlow()
+            .onEach {
+                logger.info { "queue update: $it" }
+            }
             .runningFold(
                 emptyMap<String, OSCQueueUpdate.UpdateQueue>()
             ) { cache, update ->
@@ -235,9 +245,9 @@ class Queues {
 //            imgSpriteQueuesFromConfig,
 //            spoutSpriteQueuesFromConfig,
 //            updateQueueMessages.consumeAsFlow(),
-            updatesFlow,
+            updatesFlow.sample(100.milliseconds),
         ) { queues, /*imgSprites, spoutSprites,*/ updatesMap ->
-            logger.info { "applying updates $updatesMap" }
+            logger.info { "applying updates ${updatesMap.entries.joinToString(",", "{", "}") { "${it.key}: ${it.value}" }}" }
             allQueuesInternal.value = queues.mapValues { (name, queue) ->
                 updatesMap[name]?.let { update ->
                     queue.updateQueue(update)

@@ -42,7 +42,6 @@ import nestctrl.generated.resources.Res
 import nestctrl.generated.resources.blobhai_trans
 import nestdrop.deck.Deck
 import nestdrop.deck.Queues
-import nestdrop.deck.loadDeckSettings
 import nestdrop.loadNestdropConfig
 import nestdrop.setupSpriteFX
 import nestdrop.watchNestdropConfig

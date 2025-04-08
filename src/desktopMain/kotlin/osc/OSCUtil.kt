@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -52,7 +51,7 @@ import nestdrop.deck.OSCQueueUpdate
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 
 private val logger = KotlinLogging.logger { }
@@ -131,33 +130,33 @@ suspend fun startNestdropOSC() {
             receiver = OSCPortInBuilder()
                 .setSocketAddress(address)
                 .setPacketListener(OSCPortIn.defaultPacketListener())
-                .let { inBuilder ->
-                    OscSynced.syncedValues
-                        .filterIsInstance<OscSynced.Receiving<*>>()
-                        .filter { it.receive && it.target == OscSynced.Target.Nestdrop }
-                        .fold(inBuilder) { builder, syncedValue ->
-                            logger.debug { "adding listener for ${syncedValue.label}" }
-                            builder.addMessageListener(
-                                syncedValue.messageSelector
-                            ) { messageEvent ->
-                                runBlocking {
-                                    if (syncedValue.logReceived) {
-                                        val msg = messageEvent.message
-//                                        val timestamp = messageEvent.time.ntpTime // .fraction.nanoseconds
-                                        logger.debug { "ND IN: ${msg.stringify()}" }
-                                    }
-                                    syncedValue.onMessageEvent(messageEvent)
-                                }
-                            }
-                        }
-                }
+//                .let { inBuilder ->
+//                    OscSynced.syncedValues
+//                        .filterIsInstance<OscSynced.Receiving<*>>()
+//                        .filter { it.receive && it.target == OscSynced.Target.Nestdrop }
+//                        .fold(inBuilder) { builder, syncedValue ->
+//                            logger.debug { "adding listener for ${syncedValue.label}" }
+//                            builder.addMessageListener(
+//                                syncedValue.messageSelector
+//                            ) { messageEvent ->
+//                                runBlocking {
+//                                    if (syncedValue.logReceived) {
+//                                        val msg = messageEvent.message
+////                                        val timestamp = messageEvent.time.ntpTime // .fraction.nanoseconds
+//                                        logger.debug { "ND IN: ${msg.stringify()}" }
+//                                    }
+//                                    syncedValue.onMessageEvent(messageEvent)
+//                                }
+//                            }
+//                        }
+//                }
                 .addMessageListener(
                     OSCPatternAddressMessageSelector("/Queue/*"),
                 ) { messageEvent ->
                     val message = messageEvent.message
 //                    logger.debug { "processing ${message.stringify()}" }
 
-                    if(message.arguments.size == 6) {
+                    if (message.arguments.size == 6) {
                         val active = message.arguments[0] as Int == 1
                         val type = message.arguments[1] as String
                         val beatOffset = message.arguments[2] as Float
@@ -263,6 +262,66 @@ suspend fun startNestdropOSC() {
                 ) { messageEvent ->
                     logger.error { "UNHANDLED OSC MSG: ${messageEvent.message.stringify()}" }
                 }
+                .addPacketListener(
+                    object : OSCPacketListener {
+                        val receivingSyncedValues = OscSynced.syncedValues
+                            .filterIsInstance<OscSynced.Receiving<*>>()
+                            .filter { it.receive && it.target == OscSynced.Target.Nestdrop }
+
+                        //                        .fold(inBuilder) { builder, syncedValue ->
+//                            logger.debug { "adding listener for ${syncedValue.label}" }
+//                            builder.addMessageListener(
+//                                syncedValue.messageSelector
+//                            ) { messageEvent ->
+//                                runBlocking {
+//                                    if (syncedValue.logReceived) {
+//                                        val msg = messageEvent.message
+//                                        val timestamp = messageEvent.time.ntpTime // .fraction.nanoseconds
+//                                        logger.debug { "ND IN: ${msg.stringify()}" }
+//                                    }
+//                                    syncedValue.onMessageEvent(messageEvent)
+//                                }
+//                            }
+//                        }
+                        override fun handlePacket(event: OSCPacketEvent) {
+                            handlePacket(event.packet)
+                        }
+
+                        fun handlePacket(packet: OSCPacket) {
+                            when (packet) {
+                                is OSCBundle -> {
+                                    packet.packets.forEach {
+                                        handlePacket(it)
+                                    }
+                                }
+
+                                is OSCMessage -> {
+                                    handleMessage(packet)
+                                }
+                            }
+                        }
+
+                        fun handleMessage(message: OSCMessage) {
+                            receivingSyncedValues.firstOrNull {
+                                it.listenAddress == message.address
+                            }?.also { syncedValue ->
+                                runBlocking {
+                                    if (syncedValue.logReceived) {
+                                        logger.debug { "ND IN: ${message.stringify()}" }
+                                    }
+                                    syncedValue.onMessageEvent(message)
+                                }
+                            }
+                        }
+
+                        override fun handleBadData(event: OSCBadDataEvent) {
+                            runBlocking {
+                                logger.warn { "osc bad data: $event" }
+                            }
+                            // TODO("Not yet implemented")
+                        }
+                    }
+                )
                 .addPacketListener(debugListener)
                 .build()
                 .also {
@@ -294,29 +353,29 @@ suspend fun startNestdropOSC() {
         .filterIsInstance<OscSynced.Sending<*>>()
         .filter { it.send }
         .forEach { oscSyncedValue ->
-            if (oscSyncedValue.dropFirst > 0) {
-                var lastValue: List<OSCPacket> = emptyList()
-                oscSyncedValue
-                    .flow
-                    .take(oscSyncedValue.dropFirst)
-                    .distinctUntilChanged()
-                    .onEach { value ->
-                        val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
-                        val message = "NESTDROP OUT dropping \n      " + (lastValue.map {
-                            "last ${it.stringify()}"
-                        } + oscMessages.map {
-                            "next ${it.stringify()}"
-                        }).joinToString("\n      ")
-
-                        if (oscSyncedValue.logSending) {
-                            logger.debug { message }
-                        } else {
-                            logger.trace { message }
-                        }
-                        lastValue = oscMessages
-                    }
-                    .launchIn(flowScope)
-            }
+//            if (oscSyncedValue.dropFirst > 0) {
+//                var lastValue: List<OSCPacket> = emptyList()
+//                oscSyncedValue
+//                    .flow
+//                    .take(oscSyncedValue.dropFirst)
+//                    .distinctUntilChanged()
+//                    .onEach { value ->
+//                        val oscMessages = oscSyncedValue.generateOscMessagesUntyped(value!!)
+//                        val message = "NESTDROP OUT dropping \n      " + (lastValue.map {
+//                            "last ${it.stringify()}"
+//                        } + oscMessages.map {
+//                            "next ${it.stringify()}"
+//                        }).joinToString("\n      ")
+//
+//                        if (oscSyncedValue.logSending) {
+//                            logger.debug { message }
+//                        } else {
+//                            logger.trace { message }
+//                        }
+//                        lastValue = oscMessages
+//                    }
+//                    .launchIn(flowScope)
+//            }
 
             @OptIn(FlowPreview::class)
             oscSyncedValue
@@ -340,12 +399,13 @@ suspend fun startNestdropOSC() {
         delay(100)
         val lastChanged = MutableStateFlow(Instant.DISTANT_PAST)
         while (true) {
-            if (lastChanged.value < Clock.System.now() - 5.minutes) {
+            if (lastChanged.value < Clock.System.now() - 30.seconds) {
                 logger.warn { "triggering sync controls" }
                 nestdropSendChannel.send(
                     OSCMessage("/Controls", "?")
                 )
-                delay(1.minutes)
+                lastChanged.value = Clock.System.now()
+                delay(10.seconds)
             } else {
                 delay(100)
             }

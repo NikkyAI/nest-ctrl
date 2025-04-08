@@ -2,7 +2,6 @@ package ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -84,17 +83,6 @@ fun spoutScreen() {
                             } else {
                                 Text("-")
                             }
-//                            if (preset != null) {
-//                                Text(
-//                                    preset.label,
-//                                )
-//                                Text(
-//                                    "FX: ${preset.effects ?: 0}",
-//                                )
-//                                Spacer(modifier = Modifier.width(16.dp))
-//                            } else {
-//                                Text("-")
-//                            }
                         }
                     }
                 }
@@ -136,7 +124,7 @@ fun spoutScreen() {
                                             deck.spout.clearSpout()
                                         } else {
                                             logger.info { "setSpout $i ${queue?.name}" }
-                                            deck.spout.setSpout(i, queue!!)
+                                            deck.spout.setSpout(i)
                                         }
                                     }
 

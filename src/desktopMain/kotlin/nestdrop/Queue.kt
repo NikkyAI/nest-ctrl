@@ -49,15 +49,20 @@ sealed interface Preset {
                 }
     }
 
+    interface Sprite: Preset {
+        val effects: Int?
+        val overlay: Boolean?
+    }
+
     data class ImageSprite(
 //        val index: Int,
         override val name: String,
         override val id: Int,
-        val effects: Int?,
-        val overlay: Boolean?,
+        override val effects: Int?,
+        override val overlay: Boolean?,
         val comments: String?,
         val location: PresetLocation.Img?,
-    ) : Preset {
+    ) : Sprite {
         val label = (comments ?: name
             .substringBeforeLast(".jpg")
             .substringBeforeLast(".png")) +
@@ -72,10 +77,10 @@ sealed interface Preset {
         val index: Int,
         override val name: String,
         override val id: Int,
-        val effects: Int?,
-        val overlay: Boolean?,
+        override val effects: Int?,
+        override val overlay: Boolean?,
         val comments: String?,
-    ) : Preset {
+    ) : Sprite {
         val shortLabel = (comments ?: name) +
                 if (effects != 0) {
                     " | FX: $effects"

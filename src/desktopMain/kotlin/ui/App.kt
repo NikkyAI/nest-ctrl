@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import nestdrop.deck.Deck
+import ui.components.verticalScroll
 import ui.screens.PlaytlistSelectorScreen
 import ui.screens.QueueControlScreen
 import ui.screens.autoChangeScreen
@@ -58,56 +59,25 @@ fun App() {
     MaterialTheme(colors = darkColors()) {
         Scaffold {
             Row {
-                Column(
-                    modifier = Modifier.width(320.dp),
-                ) {
-                    beatProgressScreen(decks, size = 220.dp)
-                    Text("Auto Change")
-                    decks.forEach { deck ->
-                        if (deck.id > nestdropDeckCount) return@forEach
-                        autoChangeScreen(deck)
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
+                verticalScroll {
+                    Column(
+                        modifier = Modifier.width(320.dp),
+                    ) {
+                        beatProgressScreen(decks, size = 220.dp)
+                        Text("Auto Change")
+                        decks.forEach { deck ->
+                            if (deck.id > nestdropDeckCount) return@forEach
+                            autoChangeScreen(deck)
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
 //                        Box(
 //                            contentAlignment = Alignment.BottomStart,
 //                        ) {
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Bottom,
-                        modifier = Modifier
-                            .fillMaxWidth(0.9f),
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                logger.info { "opening windows terminal to watch logs" }
-                                runCommand(
-                                    "wt", "new-tab",
-                                    "-p", "Windows Powershell",
-                                    "--title", "NEST CTRL LOGS",
-                                    "-d", configFolder.path,
-                                    "powershell",
-                                    "Get-Content",
-                                    "-Path", "logs/latest.log",
-                                    "-Wait",
-                                    workingDir = configFolder
-                                )
-                            },
-                            contentPadding = PaddingValues(8.dp, 0.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Search,
-                                contentDescription = "Watch Logs (INFO)",
-//                                tint = deck.color,
-                                modifier = Modifier.padding(8.dp)
-                            )
-
-                            Text("Watch Logs (INFO)")
-                        }
-                        MaterialTheme(
-                            colors = darkColors(
-                                primary = MaterialTheme.colors.error,
-                                onSurface = MaterialTheme.colors.error
-                            )
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Bottom,
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f),
                         ) {
                             OutlinedButton(
                                 onClick = {
@@ -119,82 +89,115 @@ fun App() {
                                         "-d", configFolder.path,
                                         "powershell",
                                         "Get-Content",
-                                        "-Path", "logs/latest-debug.log",
+                                        "-Path", "logs/latest.log",
                                         "-Wait",
                                         workingDir = configFolder
                                     )
                                 },
-                                colors = ButtonDefaults.outlinedButtonColors(),
                                 contentPadding = PaddingValues(8.dp, 0.dp),
-//                                border = BorderStroke(
-//                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
-//                                ),
-
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Search,
-                                    contentDescription = "Watch LOgs (DEBUG)",
+                                    contentDescription = "Watch Logs (INFO)",
 //                                tint = deck.color,
                                     modifier = Modifier.padding(8.dp)
                                 )
 
-                                Text("Watch Logs (DEBUG)")
+                                Text("Watch Logs (INFO)")
                             }
-                        }
-                        MaterialTheme(
-                            colors = darkColors(
-                                primary = MaterialTheme.colors.error,
-                                onSurface = MaterialTheme.colors.error
-                            )
-                        ) {
-                            OutlinedButton(
-                                onClick = {
-                                    logger.info { "opening windows terminal to watch logs" }
-                                    runCommand(
-                                        "wt", "new-tab",
-                                        "-p", "Windows Powershell",
-                                        "--title", "NEST CTRL LOGS",
-                                        "-d", configFolder.path,
-                                        "powershell",
-                                        "Get-Content",
-                                        "-Path", "logs/latest-trace.log",
-                                        "-Wait",
-                                        workingDir = configFolder
+                            MaterialTheme(
+                                colors = darkColors(
+                                    primary = MaterialTheme.colors.error,
+                                    onSurface = MaterialTheme.colors.error
+                                )
+                            ) {
+                                OutlinedButton(
+                                    onClick = {
+                                        logger.info { "opening windows terminal to watch logs" }
+                                        runCommand(
+                                            "wt", "new-tab",
+                                            "-p", "Windows Powershell",
+                                            "--title", "NEST CTRL LOGS",
+                                            "-d", configFolder.path,
+                                            "powershell",
+                                            "Get-Content",
+                                            "-Path", "logs/latest-debug.log",
+                                            "-Wait",
+                                            workingDir = configFolder
+                                        )
+                                    },
+                                    colors = ButtonDefaults.outlinedButtonColors(),
+                                    contentPadding = PaddingValues(8.dp, 0.dp),
+//                                border = BorderStroke(
+//                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
+//                                ),
+
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Search,
+                                        contentDescription = "Watch LOgs (DEBUG)",
+//                                tint = deck.color,
+                                        modifier = Modifier.padding(8.dp)
                                     )
-                                },
-                                colors = ButtonDefaults.outlinedButtonColors(),
+
+                                    Text("Watch Logs (DEBUG)")
+                                }
+                            }
+                            MaterialTheme(
+                                colors = darkColors(
+                                    primary = MaterialTheme.colors.error,
+                                    onSurface = MaterialTheme.colors.error
+                                )
+                            ) {
+                                OutlinedButton(
+                                    onClick = {
+                                        logger.info { "opening windows terminal to watch logs" }
+                                        runCommand(
+                                            "wt", "new-tab",
+                                            "-p", "Windows Powershell",
+                                            "--title", "NEST CTRL LOGS",
+                                            "-d", configFolder.path,
+                                            "powershell",
+                                            "Get-Content",
+                                            "-Path", "logs/latest-trace.log",
+                                            "-Wait",
+                                            workingDir = configFolder
+                                        )
+                                    },
+                                    colors = ButtonDefaults.outlinedButtonColors(),
 //                                shape = MaterialTheme.shapes.large,
-                                contentPadding = PaddingValues(8.dp, 0.dp)
+                                    contentPadding = PaddingValues(8.dp, 0.dp)
 //                                border = BorderStroke(
 //                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
 //                                ),
 
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Search,
-                                    contentDescription = "Watch LOgs (TRACE)",
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Search,
+                                        contentDescription = "Watch LOgs (TRACE)",
 //                                tint = deck.color,
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                                        modifier = Modifier.padding(8.dp)
+                                    )
 
-                                Text("Watch Logs (TRACE)")
+                                    Text("Watch Logs (TRACE)")
+                                }
                             }
                         }
+                    }
                 }
-            }
 //                Column {
 //                    decks.forEach {
 //                        presetScreenSingle(it)
 //                    }
 //                }
-            Column {
-                presetDisplayScreen()
-                tabScreen()
+                Column {
+                    presetDisplayScreen()
+                    tabScreen()
+                }
             }
-        }
 
+        }
     }
-}
 }
 
 enum class Tabs(
@@ -241,6 +244,7 @@ enum class Tabs(
 }
 
 val mainMenuTabState: MutableStateFlow<Tabs> = MutableStateFlow(Tabs.QueueControls)
+
 @Composable
 fun ColumnScope.tabScreen(
 ) {

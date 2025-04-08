@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
@@ -356,50 +355,6 @@ fun NestdropControl.RangeSliderWithResetButton.asSlider(deck: Deck) {
             modifier = Modifier
                 .weight(0.6f)
         )
-//        Column(
-//            modifier = Modifier
-//                .weight(0.6f)
-//        ) {
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically,
-//            ) {
-////                Text("min")
-//                Slider(
-//                    value = minValue,
-//                    onValueChange = {
-//                        minState.value = it
-//                    },
-//                    valueRange = range,
-//                    steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
-//                    colors = SliderDefaults.colors(
-//                        thumbColor = deck.color,
-//                        activeTrackColor = deck.dimmedColor,
-//                    ),
-//
-//                    modifier = Modifier
-//                        .weight(0.6f)
-//                )
-//            }
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically,
-//            ) {
-////                Text("max")
-//                Slider(
-//                    value = maxValue,
-//                    onValueChange = {
-//                        maxState.value = it
-//                    },
-//                    valueRange = range,
-//                    steps = ((range.endInclusive - range.start) / 0.1f).toInt() - 1,
-//                    colors = SliderDefaults.colors(
-//                        thumbColor = deck.color,
-//                        activeTrackColor = deck.dimmedColor,
-//                    ),
-//                    modifier = Modifier
-//                        .weight(0.6f)
-//                )
-//            }
-//        }
 //        Text("max\n${range.endInclusive}")
         Text("${range.endInclusive}", color = deck.color)
 

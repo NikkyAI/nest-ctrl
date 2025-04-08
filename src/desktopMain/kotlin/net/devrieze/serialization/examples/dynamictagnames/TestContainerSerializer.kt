@@ -1,10 +1,10 @@
 package net.devrieze.serialization.examples.dynamictagnames
 
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import xml.CommonContainerSerializer
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.serializer
+import xml.CommonContainerSerializer
 
 class TestContainerSerializer() : CommonContainerSerializer<TestContainer, TestElement>() {
     override fun constructContainer(list: List<TestElement>): TestContainer {

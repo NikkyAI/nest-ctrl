@@ -26,7 +26,12 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
-import nl.adaptivity.xmlutil.*
+import nl.adaptivity.xmlutil.EventType
+import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
+import nl.adaptivity.xmlutil.XmlException
+import nl.adaptivity.xmlutil.XmlReader
+import nl.adaptivity.xmlutil.XmlSerializer
+import nl.adaptivity.xmlutil.XmlWriter
 import nl.adaptivity.xmlutil.serialization.InputKind
 import nl.adaptivity.xmlutil.serialization.PolyInfo
 import nl.adaptivity.xmlutil.serialization.XML

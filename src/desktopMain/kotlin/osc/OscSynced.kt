@@ -1,10 +1,7 @@
 package osc
 
-import com.illposed.osc.MessageSelector
 import com.illposed.osc.OSCMessage
-import com.illposed.osc.OSCMessageEvent
 import com.illposed.osc.OSCPacket
-import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +16,7 @@ private val logger = KotlinLogging.logger { }
 @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
 sealed interface OscSynced<T : Any> {
     val flow: MutableSharedFlow<T>
-    val messageSelector: MessageSelector
+//    val messageSelector: MessageSelector
     val target: Target
     val dropFirst: Int
     val label: String
@@ -29,15 +26,14 @@ sealed interface OscSynced<T : Any> {
         ResolumeArena("ResolumeArena"),
     }
 
-    suspend fun onMessageEvent(event: OSCMessageEvent)
-
     interface Receiving<T : Any> : OscSynced<T> {
         override val label: String
             get() = listenAddress
         val receive: Boolean
         var logReceived: Boolean
         val listenAddress: String
-        override val messageSelector: MessageSelector get() = OSCPatternAddressMessageSelector(listenAddress)
+//        override val messageSelector: MessageSelector get() = OSCPatternAddressMessageSelector(listenAddress)
+        suspend fun onMessageEvent(message: OSCMessage)
     }
 
     interface MessageConverter<T : Any> : Receiving<T> {
@@ -53,8 +49,8 @@ sealed interface OscSynced<T : Any> {
             setValue(converted)
         }
 
-        override suspend fun onMessageEvent(event: OSCMessageEvent) {
-            tryConvertAndSet(event.message)
+        override suspend fun onMessageEvent(message: OSCMessage) {
+            tryConvertAndSet(message)
         }
 
         suspend fun setValue(value: T) {

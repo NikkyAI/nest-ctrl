@@ -6,23 +6,22 @@ import flowScope
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import nestdrop.deck.Deck
 
 sealed interface PresetIdState {
-    val queue: Queue<out Preset>? get() = null
-//    val index: Int? get() = null
+//    val queue: Queue<out Preset>? get() = null
     val index: Int? get() = null
+
     data class Data(
-//        override val index: Int,
         override val index: Int,
-        override val queue: Queue<out Preset>,
         val force: Boolean = false,
 //    val hardCut: Boolean = false,
-    ) : PresetIdState {
-//        val id get() = queue.presets.getOrNull(index)?.id
-    }
+    ) : PresetIdState
 
     data object Unset : PresetIdState
 }
@@ -30,7 +29,8 @@ sealed interface PresetIdState {
 
 class NestdropSpriteQueue(
     private val nestdropSendChannel: Channel<OSCPacket>,
-    private val onChange: suspend (Int) -> Unit = {}
+    private val spoutStateMap: StateFlow<Map<String, Deck.SpriteKey>>,
+    private val queue: StateFlow<Queue<out Preset>?>,
 ) {
     companion object {
         private val logger = KotlinLogging.logger { }
@@ -45,7 +45,7 @@ class NestdropSpriteQueue(
     }
 
     private suspend fun presetId(queue: Queue<out Preset>, index: Int?, overlay: Boolean = false) {
-        if(index == null) {
+        if (index == null) {
             logger.warn { "failed to find sprite id" }
             return
         }
@@ -65,87 +65,69 @@ class NestdropSpriteQueue(
     }
 
     suspend fun startFlows() {
-        var previous: PresetIdState? = null
         channel
             .consumeAsFlow()
 //            .runningHistory(PresetIdState.Unset)
 //            .filterNotNull()
-            .onEach { current ->
+            .combine(
+                queue.filterNotNull()
+            ) { current, queue ->
+                val currentActive = spoutStateMap.value.values.toSet()
 //                logger.warnF { "previous: $previous" }
 //                logger.warnF { "current: $current" }
 //                if (previous != null) {
-                    when (current) {
-                        is PresetIdState.Unset -> {
-                            when (val previous = previous) {
-                                is PresetIdState.Data -> {
-                                    if (previous.queue.type == QueueType.SPRITE) {
-                                        // to unset: send last index again
-                                        logger.debug { "unsetting previous sprite" }
-                                        presetId(
-                                            queue = previous.queue,
-                                            index = previous.index,
-                                            overlay = false
-                                        )
-                                    } else {
-                                        logger.error { "previous queue was not a spout/sprite queue: previous: $previous" }
+                when (current) {
+                    is PresetIdState.Unset -> {
+                        currentActive.forEach { key ->
+                            logger.debug { "unsetting previous sprite $key" }
+                            presetId(
+                                queue = queue,
+                                index = queue.presets.indexOfFirst { preset ->
+                                    preset.name == key.name && when(preset) {
+                                        is Preset.Sprite -> {
+                                            preset.effects == key.fx
+                                        }
+                                        else -> true
                                     }
-                                }
 
-                                is PresetIdState.Unset -> {
-                                    // do nothing
-                                }
-
-                                null -> {}
-                            }
-
-                        }
-
-                        is PresetIdState.Data -> {
-                            if (current.force) {
-                                logger.debug { "force setting sprite" }
-                                presetId(
-                                    queue = current.queue,
-                                    index = current.index,
-//                                    current.queue.presets.first { it.id != current.id }.id,
-//                                    (current.index + 1) % current.queue.presets.size,
-                                    overlay = false
-                                )
-                                delay(25)
-                                presetId(current.queue, current.index, overlay = false)
-                            } else {
-
-                                val presetName = current.queue.presets.getOrNull(current.index)
-                                val previousId = previous?.index
-                                val previousPresetName = previousId?.let {
-                                    previous?.queue?.presets?.getOrNull(it)
-                                }
-                                if (current.index == previousId) {
-                                    logger.info { "ND: received same preset id again, resetting ${current.queue.name} to $presetName" }
-                                    presetId(
-                                        queue = current.queue,
-                                        index = current.index,
-//                                        current.queue.presets.first { it.id != current.id }.id,
-                                        overlay = false
-                                    )
-//                            presetId(current.queue, current.index)
-                                    delay(50)
-                                    presetId(current.queue, current.index, overlay = false)
-                                    onChange(current.index)
-                                } else {
-                                    logger.info { "ND: switching ${current.queue.name} to '$presetName' (before: $previousPresetName)" }
-                                    presetId(current.queue, current.index, overlay = false)
-                                    onChange(current.index)
-                                }
-
-                            }
+                                },
+                                overlay = false
+                            )
                         }
                     }
-//                } else {
-//                    logger.debug { "not switching after initializing program" }
-//
-//                    //TODO switch to another preset and back to ensure it is set correctly
-//                }
-                previous = current
+
+                    is PresetIdState.Data -> {
+//                        require(current.queue.name == queue.name) { "queue does not match" }
+                        if (current.force) {
+                            logger.debug { "force setting sprite" }
+                            presetId(
+                                queue = queue,
+                                index = (current.index + 1) % queue.presets.size,
+                                overlay = false
+                            )
+                            delay(25)
+                            presetId(queue, current.index, overlay = false)
+                        } else {
+                            val presetName = queue.presets.getOrNull(current.index)
+                            if (currentActive.any { it.id == current.index }) {
+                                logger.info { "ND: received same preset id again, doing nothing" }
+//                                logger.info { "ND: received same preset id again, resetting ${queue.name} to $presetName" }
+//                                presetId(
+//                                    queue = queue,
+//                                    index = (current.index + 1) % queue.presets.size,
+////                                        current.queue.presets.first { it.id != current.id }.id,
+//                                    overlay = false
+//                                )
+//                                delay(50)
+//                                presetId(queue, current.index, overlay = false)
+                            } else {
+                                logger.info { "ND: switching ${queue.name} to '$presetName'" }
+                                presetId(queue, current.index, overlay = false)
+                            }
+
+                        }
+                    }
+                }
 
             }
             .launchIn(flowScope)

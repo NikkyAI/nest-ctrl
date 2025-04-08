@@ -1,6 +1,7 @@
 package nestdrop.deck
 
 import DeckConfig
+import imgSpritesMap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -11,8 +12,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import tags.nestdropQueueSearches
 import tags.queueTagsInitialized
 import ui.screens.customSearches
-import imgSpritesMap
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTimedValue
 

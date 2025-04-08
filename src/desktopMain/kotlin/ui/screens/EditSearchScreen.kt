@@ -36,7 +36,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -50,7 +49,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -519,81 +517,6 @@ fun editSearchesScreen() {
                                                 }
                                             }
                                         }
-//                                        ExpandableSection(
-//                                            key = "searches.$searchIndex.terms.$termIndex.exclude.expanded",
-//                                            canExpand = matcher.exclude.isNotEmpty(),
-//                                            headerContent = { expand ->
-//                                                if (!expand) {
-//                                                    if (matcher.exclude.isNotEmpty()) {
-//                                                        Text("Exclude ${matcher.exclude}")
-//                                                    } else {
-//                                                        Text("Exclude")
-//                                                    }
-//                                                } else {
-//                                                    Text("Exclude ${matcher.exclude.size}")
-//                                                }
-//                                                Spacer(modifier = Modifier.weight(0.5f))
-//
-//                                                val availableTags =
-//                                                    presetTags.values.flatten().toSet().sortedBy { it.toString() }
-//                                                DropDownPopupIconButton(
-//                                                    icon = { Icon(Icons.Filled.Add, "add") },
-//                                                    items = availableTags,
-//                                                    itemEnabled = { item -> (item !in matcher.include && item !in matcher.exclude) },
-//                                                    onItemClick = { item ->
-//                                                        val searchesMutable = searchesCollected.toMutableList()
-//
-//                                                        val mutableBoosts = search.terms.toMutableList()
-//                                                        mutableBoosts[termIndex] = Term(
-//                                                            matcher = matcher.copy(
-//                                                                exclude = matcher.exclude + item
-//                                                            ),
-//                                                            boost = boost
-//                                                        )
-//
-//                                                        val newSearch = search.copy(
-//                                                            terms = mutableBoosts.toList()
-//                                                        )
-//                                                        searchesMutable[searchIndex] = newSearch
-//                                                        selectedSearch = searchIndex to newSearch
-//
-//                                                        customSearches.value = searchesMutable.toList()
-//                                                    },
-//                                                    renderItem = { item ->
-//                                                        Text(item.toString())
-//                                                    }
-//                                                )
-//                                            },
-////                                    default = true,
-//                                            modifier = Modifier
-//                                        ) {
-//                                            matcher.exclude.forEachIndexed { tagIndex, tag ->
-//                                                Row {
-//                                                    Text(tag.toString())
-//                                                    Spacer(modifier = Modifier.weight(0.5f))
-//
-//                                                    deleteButtonWithConfirmation() {
-//                                                        val searchesMutable = searchesCollected.toMutableList()
-//
-//                                                        val mutableBoosts = search.terms.toMutableList()
-//                                                        mutableBoosts[termIndex] = Term(
-//                                                            matcher = matcher.copy(
-//                                                                exclude = matcher.exclude - tag
-//                                                            ),
-//                                                            boost = boost
-//                                                        )
-//
-//                                                        val newSearch = search.copy(
-//                                                            terms = mutableBoosts.toList()
-//                                                        )
-//                                                        searchesMutable[searchIndex] = newSearch
-//                                                        selectedSearch = searchIndex to newSearch
-//
-//                                                        customSearches.value = searchesMutable.toList()
-//                                                    }
-//                                                }
-//                                            }
-//                                        }
                                     }
                                 }
                             }
@@ -724,16 +647,6 @@ fun AlwaysExpandableSection(
             .background(color = MaterialTheme.colors.surface)
             .fillMaxWidth()
             .padding(start = 8.dp)
-//            .drawBehind {
-//                if (canExpand && isExpanded) {
-//                    drawLine(
-//                        color = lineColor,
-//                        start = Offset(-1.0f, 0.0f),
-//                        end = Offset(-1.0f, size.height),
-//                        strokeWidth = Stroke.HairlineWidth
-//                    )
-//                }
-//            }
     ) {
         Row(modifier = modifier
             .padding(start = 8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

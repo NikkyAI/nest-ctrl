@@ -147,7 +147,7 @@ fun scanFileSystemQueueForMilk(path: String): List<Preset.Milkdrop> {
     // id is sequential, starting at 1
     var id = 1
 
-    logger.info { "scanning $presetsFolder" }
+    logger.debug { "scanning $presetsFolder" }
 
     fun milkLocation(
         file: File,

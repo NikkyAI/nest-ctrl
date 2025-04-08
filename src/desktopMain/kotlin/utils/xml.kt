@@ -1,7 +1,6 @@
 package utils
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.UnknownChildHandler
 import nl.adaptivity.xmlutil.serialization.XML

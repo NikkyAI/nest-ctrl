@@ -1,9 +1,7 @@
 package ui.screens
 
-//import Link
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,18 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,9 +35,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,51 +42,20 @@ import beatFrame
 import beatProgress
 import bpmInt
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
+import ui.components.fontDseg14
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun beatProgressScreen(
     decks: List<Deck>,
     size: Dp = 200.dp,
     strokeWidth: Dp = 32.dp
 ) {
-    val fontDseg14 = FontFamily(
-        androidx.compose.ui.text.platform.Font(
-            resource = "fonts-DSEG_v046/DSEG14-Classic/DSEG14Classic-Regular.ttf",
-            weight = FontWeight.W400,
-            style = FontStyle.Normal
-        )
-    )
-//    val fontDseg14 = FontFamily(
-//        androidx.compose.ui.text.platform.Font(
-//            resource = "fonts-DSEG_v046/DSEG14-Modern/DSEG14Modern-Regular.ttf",
-//            weight = FontWeight.W400,
-//            style = FontStyle.Normal
-//        )
-//    )
-//    val fontDseg14Mini = FontFamily(
-//        androidx.compose.ui.text.platform.Font(
-//            resource = "fonts-DSEG_v046/DSEG14-Classic-MINI/DSEG14ClassicMini-Regular.ttf",
-//            weight = FontWeight.W400,
-//            style = FontStyle.Normal
-//        )
-//    )
-//    val fontDseg14 = FontFamily(
-//        Font(
-//            resource = Res.font.DSEG14_Classic,
-//            weight = FontWeight.W400,
-//            style = FontStyle.Normal
-//        ),
-//    )
 
     val beatProgress by beatProgress.collectAsState(0f)
 //    val beatProgress  = 0f // 0.25f
@@ -121,16 +81,6 @@ fun beatProgressScreen(
     }
 
     val decksEnabled by Deck.enabled.collectAsState()
-//    val decksSwitched =  decks.mapNotNull { deck ->
-//        val enabled = (deck.id <= decksEnabled)
-//
-//        if (!enabled) {
-//            return@mapNotNull null
-//        }
-//
-//        val hasSwitched by deck.presetSwitching.hasSwitched.collectAsState()
-//        deck.id to hasSwitched
-//    }.toMap()
     val deckData = decks.mapNotNull { deck ->
         val enabled by deck.isEnabled.collectAsState()
         if (!enabled) return@mapNotNull null
@@ -406,22 +356,6 @@ fun beatProgressScreen(
                             text = "%3.1fs".format(transitTime),
                             textAlign = TextAlign.Right,
                         )
-//                        Checkbox(
-//                            checked = transitTimeSync,
-//                            onCheckedChange = { isChecked ->
-//                                println("setting transitTimeSync $isChecked")
-//                                deck.presetSwitching.transitTimeSync.value = isChecked
-//                            },
-//                            colors = CheckboxDefaults.colors(
-//                                checkmarkColor = deck.dimmedColor,
-//                                uncheckedColor = deck.color,
-//                                checkedColor = deck.color,
-//                                disabledColor = Color.DarkGray
-//                            ),
-//
-//
-////                            modifier = Modifier.fillMaxWidth(0.1f)
-//                        )
                     }
 
                     FlowRow(
@@ -520,23 +454,7 @@ fun beatProgressScreen(
                                 Text("OFF", fontFamily = fontDseg14)
                             }
                         }
-
                     }
-//                    Slider(
-//                        value = beatTimeFraction,
-//                        onValueChange = {
-//                            deck.presetSwitching.transitTimeBeatframeFraction.value = (it * 100).roundToInt() / 100f
-//                        },
-//                        colors = SliderDefaults.colors(
-//                            thumbColor = deck.color,
-//                            activeTrackColor = deck.dimmedColor,
-//                        ),
-////                            valueRange = (0f..maxRange),
-//                        valueRange = (0f..1f),
-////                            steps = 15,
-//                        enabled = enabledTransitTimeSync,
-//                        modifier = Modifier.fillMaxWidth(0.8f)
-//                    )
                 }
             }
         }

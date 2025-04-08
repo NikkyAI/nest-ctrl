@@ -5,41 +5,44 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowLeft
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowRight
+import androidx.compose.material.icons.outlined.SkipNext
+import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import decks
-import nestdrop.PresetLocation
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import nestdrop.deck.Deck
 import nestdropFolder
+import osc.OSCMessage
+import osc.nestdropSendChannel
 import presetsMap
 import tags.Tag
 import tags.presetTagsMapping
 import ui.components.verticalScroll
-import ui.components.verticalScrollStart
-import java.io.File
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
@@ -48,7 +51,7 @@ fun presetDisplayScreen() {
     val decksEnabled by Deck.enabled.collectAsState()
     Row(
         modifier = Modifier
-            .height(300.dp)
+//            .height(300.dp)
             .padding(8.dp),
 //        verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -104,6 +107,7 @@ private fun RowScope.PresetDisplay(
     val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
     val presetsMap by presetsMap.collectAsState()
     val tagMap by presetTagsMapping.collectAsState()
+    val scope = rememberCoroutineScope()
 
 //                Column {
 //                    Row {
@@ -132,14 +136,78 @@ private fun RowScope.PresetDisplay(
     Column(
         modifier = Modifier
             .weight(0.25f)
-            .fillMaxSize()
+//            .fillMaxWidth()
 //            .padding(horizontal = 8.dp, vertical = 0.dp)
             .background(deck.dimmedColor),
     ) {
         val currentPreset by deck.preset.currentPreset.collectAsState()
         val presetName = currentPreset.name
         val presetLocation = presetsMap[presetName + ".milk"]
+        val playlistLabel by deck.search.map { s -> s?.label ?: "-" }.collectAsState("-")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 2.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(playlistLabel)
+        }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 0.dp),
+//                        horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        nestdropSendChannel.send(
+                            OSCMessage("/Controls/Deck${deck.id}/btBack", 1)
+                        )
+                    }
+                }
+            ) {
+                Icon(Icons.Outlined.SkipPrevious, "skipPrevious")
+            }
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        nestdropSendChannel.send(
+                            OSCMessage("/Controls/Deck${deck.id}/btBack", 0)
+                        )
+                    }
+                }
+            ) {
+                Icon(Icons.Outlined.KeyboardDoubleArrowLeft, "back")
+            }
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        nestdropSendChannel.send(
+                            OSCMessage("/Controls/Deck${deck.id}/btSpace", 0)
+                        )
+                    }
+                }
+            ) {
+                Icon(Icons.Outlined.KeyboardDoubleArrowRight, "next")
+            }
+
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        nestdropSendChannel.send(
+                            OSCMessage("/Controls/Deck${deck.id}/btSpace", 1)
+                        )
+                    }
+                }
+            ) {
+                Icon(Icons.Outlined.SkipNext, "skipNext")
+            }
+        }
 //        Box(
 //            modifier = Modifier
 //                .height(150.dp)
@@ -187,123 +255,35 @@ private fun RowScope.PresetDisplay(
         }
 //        }
 
-//        Column {
-
-
-        verticalScroll {
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                itemVerticalAlignment = Alignment.Top,
-            ) {
-                val tags = tagMap[presetName + ".milk"] ?: emptySet()
-                tags
-                    .sortedWith(
-                        compareBy<Tag> {
-                            it.namespace.first() == "nestdrop"
-                        }.thenBy {
-                            it.namespace.first() == "queue"
-                        }.thenBy {
-                            it.sortableString()
+        Column(
+            modifier = Modifier
+                .height(100.dp)
+        ) {
+            verticalScroll {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    itemVerticalAlignment = Alignment.Top,
+                ) {
+                    val tags = tagMap[presetName + ".milk"] ?: emptySet()
+                    tags
+                        .sortedWith(
+                            compareBy<Tag> {
+                                it.namespace.first() == "nestdrop"
+                            }.thenBy {
+                                it.namespace.first() == "queue"
+                            }.thenBy {
+                                it.sortableString()
+                            }
+                        )
+                        .forEach {
+                            it.Chip()
                         }
-                    )
-                    .forEach {
-                        it.Chip()
-                    }
+                }
             }
         }
     }
 }
-
-//    Column(
-//        horizontalAlignment = Alignment.Start,
-//        modifier = Modifier
-//            .padding(4.dp)
-//            .weight(0.3f)
-//    ) {
-//        verticalScroll {
-//
-//            Column(
-//                horizontalAlignment = Alignment.Start,
-//                verticalArrangement = Arrangement.SpaceBetween,
-//                modifier = Modifier
-////                                .padding(4.dp)
-//            ) {
-//                Text(
-//                    text = presetName,
-//                    textAlign = TextAlign.Start,
-//                    modifier = Modifier
-//                )
-//            }
-//        }
-//    }
-
-//@Composable
-//fun presetScreenSingle(deck: Deck) {
-//    val presetsFolder = nestdropFolder.resolve("Plugins").resolve("Milkdrop2").resolve("Presets")
-//    val presetsMap by presetsMap.collectAsState()
-//    val tagMap by presetTagsMapping.collectAsState()
-//
-//    val currentPreset by deck.preset.currentPreset.collectAsState()
-//    val presetName = currentPreset.name
-//    val presetEntry = presetsMap[presetName]
-//
-//    Row(
-//        modifier = Modifier
-//            .width(400.dp)
-//            .aspectRatio(4f / 3f)
-//            .background(deck.dimmedColor)
-//            .padding(4.dp),
-////        verticalAlignment = Alignment.CenterVertically,
-////        horizontalArrangement = Arrangement.SpaceBetween,
-//    ) {
-//        Column(
-//            modifier = Modifier.weight(0.5f)
-//        ) {
-//            verticalScroll {
-//                Column(
-//                    horizontalAlignment = Alignment.Start,
-//                    modifier = Modifier
-////                                .padding(4.dp)
-//                ) {
-//                    val tags = tagMap[presetName] ?: emptySet()
-//                    tags.forEach {
-//                        Text(it.label)
-//                    }
-//                }
-//            }
-//        }
-//
-//        Column(
-//            verticalArrangement = Arrangement.SpaceBetween,
-//            modifier = Modifier
-//                .weight(0.5f)
-////                .fillMaxHeight()
-//        ) {
-//            if (presetEntry != null) {
-//                val image = remember(presetEntry) { imageFromFile(presetsFolder.resolve(presetEntry.previewPath)) }
-////                        System.err.println("loaded image ${presetEntry.previewPath}")
-//                Image(
-//                    bitmap = image,
-//                    contentDescription = presetEntry.previewPath,
-//                    modifier = Modifier
-//                        .aspectRatio(1f)
-//                        .fillMaxSize()
-////                        .padding(4.dp)
-//                )
-//
-//                Text(
-//                    text = presetName,
-//                    textAlign = TextAlign.End,
-//                    modifier = Modifier
-////                                    .padding(horizontal = 4.dp, vertical = 4.dp)
-////                                    .weight(0.6f)
-//                )
-//            }
-//        }
-//
-//    }
-//}

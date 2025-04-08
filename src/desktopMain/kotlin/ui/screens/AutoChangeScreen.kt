@@ -118,20 +118,22 @@ fun autoChangeScreen(
             .fillMaxWidth()
     ) {
 
-        Row(
-            horizontalArrangement = horizontal,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            autoChangeRow(
-                deck = deck, label = "Preset", checkedMutableStateflow = deck.search.autoChange,
-                onNext = {
-                    deck.search.next()
-                },
-                onWarn = {
-                    deck.presetSwitching.warn()
-                }
-            )
+        if(false) {
+            Row(
+                horizontalArrangement = horizontal,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                autoChangeRow(
+                    deck = deck, label = "Preset", checkedMutableStateflow = deck.search.autoChange,
+                    onNext = {
+                        deck.search.next()
+                    },
+                    onWarn = {
+                        deck.presetSwitching.warn()
+                    }
+                )
+            }
         }
 
         Row(
