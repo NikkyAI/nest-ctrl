@@ -1,10 +1,21 @@
 package ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BrowserUpdated
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.kdroidfilter.platformtools.appmanager.getAppInstaller
 import io.github.kdroidfilter.platformtools.permissionhandler.hasInstallPermission
@@ -15,39 +26,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import ui.components.WithTooltipAbove
 import java.io.File
 import kotlin.system.exitProcess
-
-//@Composable
-//fun App() {
-//    MaterialTheme {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .background(MaterialTheme.colorScheme.background),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//
-//                UpdateCheckerUI(GitHubReleaseFetcher(owner = "kdroidfilter", repo = "AppwithAutoUpdater"))
-//
-//                Text(
-//                    "O.S. : " + getOperatingSystem().name.lowercase().replaceFirstChar { it.uppercase() },
-//                    style = MaterialTheme.typography.bodyLarge,
-//                    color = MaterialTheme.colorScheme.onBackground
-//                )
-//
-//                Text(
-//                    "Version: " + getAppVersion(),
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onBackground
-//                )
-//
-//            }
-//        }
-//    }
-//}
 
 private val logger = KotlinLogging.logger {}
 
@@ -78,7 +59,7 @@ fun UpdateCheckerUI(fetcher: GitHubReleaseFetcher) {
 
         CoroutineScope(Dispatchers.IO).launch {
             fetcher.checkForUpdate { version, notes ->
-//                logger.info { "updateChecker: $version, $notes" }
+                logger.info { "updateChecker: $version, $notes" }
                 isChecking = false
                 latestVersion = version
                 changelog = notes
@@ -89,47 +70,66 @@ fun UpdateCheckerUI(fetcher: GitHubReleaseFetcher) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
 
-        Text(
-            text = "Application Update",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
+//        Text(
+//            text = "Application Update",
+//            style = MaterialTheme.typography.h4,
+//            color = MaterialTheme.colors.primary,
+//            textAlign = TextAlign.Center
+//        )
+//
+//        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-
-                if (!hasInstallPermission()) {
-                    showPermissionDialog = true
-                } else {
-                    checkForUpdates(fetcher)
-                }
-            },
-            enabled = !isChecking && !isInstalling && !isDownloading,
+        WithTooltipAbove(
+            tooltip = { Text("Check for update") }
         ) {
-            if (isChecking) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Checking updates…", style = MaterialTheme.typography.bodyMedium)
-            } else {
-                Text("Check for updates", style = MaterialTheme.typography.bodyMedium)
+            IconButton(
+                onClick = {
+
+                    if (!hasInstallPermission()) {
+                        showPermissionDialog = true
+                    } else {
+                        checkForUpdates(fetcher)
+                    }
+                },
+                enabled = !isChecking
+            ) {
+                Icon(Icons.Outlined.BrowserUpdated, "update")
             }
         }
+//        Button(
+//            onClick = {
+//
+//                if (!hasInstallPermission()) {
+//                    showPermissionDialog = true
+//                } else {
+//                    checkForUpdates(fetcher)
+//                }
+//            },
+//            enabled = !isChecking && !isInstalling && !isDownloading,
+//        ) {
+//            if (isChecking) {
+//                CircularProgressIndicator(
+//                    modifier = Modifier.size(24.dp),
+//                    strokeWidth = 2.dp,
+//                    color = MaterialTheme.colors.onPrimary
+//                )
+//                Spacer(modifier = Modifier.width(8.dp))
+//                Text("Checking updates…", style = MaterialTheme.typography.body1)
+//            } else {
+//                Text("Check for updates", style = MaterialTheme.typography.body1)
+//            }
+//        }
 
         if (showPermissionDialog) {
             AlertDialog(
+                backgroundColor = MaterialTheme.colors.background,
                 onDismissRequest = {
                     showPermissionDialog = false
                 },
@@ -168,6 +168,7 @@ fun UpdateCheckerUI(fetcher: GitHubReleaseFetcher) {
 
         if (showUpdateAvailableDialog && latestVersion != null) {
             AlertDialog(
+//                backgroundColor = MaterialTheme.colors.background,
                 onDismissRequest = {
                     showUpdateAvailableDialog = false
                 },
@@ -325,12 +326,11 @@ fun UpdateCheckerUI(fetcher: GitHubReleaseFetcher) {
 
         installMessage?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+            Text(it, style = MaterialTheme.typography.body2, color = MaterialTheme.colors.secondary)
         }
 
         if (isInstalling) {
             Spacer(modifier = Modifier.height(8.dp))
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
+            CircularProgressIndicator(color = MaterialTheme.colors.secondary)
         }
-    }
 }

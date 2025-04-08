@@ -4,23 +4,17 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import configFolder
 import decks
 import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
 import io.github.kdroidfilter.platformtools.getAppVersion
@@ -68,7 +61,7 @@ fun App() {
             Row {
                 verticalScroll {
                     Column(
-                        modifier = Modifier.width(320.dp),
+                        modifier = Modifier.width(320.dp).padding(16.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
@@ -86,135 +79,150 @@ fun App() {
 
                         }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(horizontalAlignment = Alignment.Start) {
 
+
+                                androidx.compose.material3.Text(
+                                    "O.S. : ", // + getOperatingSystem().name.lowercase()
+                                       // .replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+
+                                androidx.compose.material3.Text(
+                                    "Version: ", // + getAppVersion(),
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                androidx.compose.material3.Text(
+                                    getOperatingSystem().name.lowercase()
+                                        .replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+
+                                androidx.compose.material3.Text(
+                                    getAppVersion(),
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                            }
                             UpdateCheckerUI(GitHubReleaseFetcher(owner = "nikkyai", repo = "nest-ctrl"))
-
-                            androidx.compose.material3.Text(
-                                "O.S. : " + getOperatingSystem().name.lowercase()
-                                    .replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onBackground
-                            )
-
-                            androidx.compose.material3.Text(
-                                "Version: " + getAppVersion(),
-                                style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onBackground
-                            )
-
                         }
 
-                        Column(
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Bottom,
-                            modifier = Modifier
-                                .fillMaxWidth(0.9f),
-                        ) {
-                            OutlinedButton(
-                                onClick = {
-                                    logger.info { "opening windows terminal to watch logs" }
-                                    runCommand(
-                                        "wt", "new-tab",
-                                        "-p", "Windows Powershell",
-                                        "--title", "NEST CTRL LOGS",
-                                        "-d", configFolder.path,
-                                        "powershell",
-                                        "Get-Content",
-                                        "-Path", "logs/latest.log",
-                                        "-Wait",
-                                        workingDir = configFolder
-                                    )
-                                },
-                                contentPadding = PaddingValues(8.dp, 0.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Search,
-                                    contentDescription = "Watch Logs (INFO)",
-//                                tint = deck.color,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-
-                                Text("Watch Logs (INFO)")
-                            }
-                            MaterialTheme(
-                                colors = darkColors(
-                                    primary = MaterialTheme.colors.error,
-                                    onSurface = MaterialTheme.colors.error
-                                )
-                            ) {
-                                OutlinedButton(
-                                    onClick = {
-                                        logger.info { "opening windows terminal to watch logs" }
-                                        runCommand(
-                                            "wt", "new-tab",
-                                            "-p", "Windows Powershell",
-                                            "--title", "NEST CTRL LOGS",
-                                            "-d", configFolder.path,
-                                            "powershell",
-                                            "Get-Content",
-                                            "-Path", "logs/latest-debug.log",
-                                            "-Wait",
-                                            workingDir = configFolder
-                                        )
-                                    },
-                                    colors = ButtonDefaults.outlinedButtonColors(),
-                                    contentPadding = PaddingValues(8.dp, 0.dp),
-//                                border = BorderStroke(
-//                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
-//                                ),
-
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Search,
-                                        contentDescription = "Watch LOgs (DEBUG)",
-//                                tint = deck.color,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-
-                                    Text("Watch Logs (DEBUG)")
-                                }
-                            }
-                            MaterialTheme(
-                                colors = darkColors(
-                                    primary = MaterialTheme.colors.error,
-                                    onSurface = MaterialTheme.colors.error
-                                )
-                            ) {
-                                OutlinedButton(
-                                    onClick = {
-                                        logger.info { "opening windows terminal to watch logs" }
-                                        runCommand(
-                                            "wt", "new-tab",
-                                            "-p", "Windows Powershell",
-                                            "--title", "NEST CTRL LOGS",
-                                            "-d", configFolder.path,
-                                            "powershell",
-                                            "Get-Content",
-                                            "-Path", "logs/latest-trace.log",
-                                            "-Wait",
-                                            workingDir = configFolder
-                                        )
-                                    },
-                                    colors = ButtonDefaults.outlinedButtonColors(),
-//                                shape = MaterialTheme.shapes.large,
-                                    contentPadding = PaddingValues(8.dp, 0.dp)
-//                                border = BorderStroke(
-//                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
-//                                ),
-
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Search,
-                                        contentDescription = "Watch LOgs (TRACE)",
-//                                tint = deck.color,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-
-                                    Text("Watch Logs (TRACE)")
-                                }
-                            }
-                        }
+//                        Column(
+//                            horizontalAlignment = Alignment.Start,
+//                            verticalArrangement = Arrangement.Bottom,
+//                            modifier = Modifier
+//                                .fillMaxWidth(0.9f),
+//                        ) {
+//                            OutlinedButton(
+//                                onClick = {
+//                                    logger.info { "opening windows terminal to watch logs" }
+//                                    runCommand(
+//                                        "wt", "new-tab",
+//                                        "-p", "Windows Powershell",
+//                                        "--title", "NEST CTRL LOGS",
+//                                        "-d", configFolder.path,
+//                                        "powershell",
+//                                        "Get-Content",
+//                                        "-Path", "logs/latest.log",
+//                                        "-Wait",
+//                                        workingDir = configFolder
+//                                    )
+//                                },
+//                                contentPadding = PaddingValues(8.dp, 0.dp),
+//                            ) {
+//                                Icon(
+//                                    imageVector = Icons.Outlined.Search,
+//                                    contentDescription = "Watch Logs (INFO)",
+////                                tint = deck.color,
+//                                    modifier = Modifier.padding(8.dp)
+//                                )
+//
+//                                Text("Watch Logs (INFO)")
+//                            }
+//                            MaterialTheme(
+//                                colors = darkColors(
+//                                    primary = MaterialTheme.colors.error,
+//                                    onSurface = MaterialTheme.colors.error
+//                                )
+//                            ) {
+//                                OutlinedButton(
+//                                    onClick = {
+//                                        logger.info { "opening windows terminal to watch logs" }
+//                                        runCommand(
+//                                            "wt", "new-tab",
+//                                            "-p", "Windows Powershell",
+//                                            "--title", "NEST CTRL LOGS",
+//                                            "-d", configFolder.path,
+//                                            "powershell",
+//                                            "Get-Content",
+//                                            "-Path", "logs/latest-debug.log",
+//                                            "-Wait",
+//                                            workingDir = configFolder
+//                                        )
+//                                    },
+//                                    colors = ButtonDefaults.outlinedButtonColors(),
+//                                    contentPadding = PaddingValues(8.dp, 0.dp),
+////                                border = BorderStroke(
+////                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
+////                                ),
+//
+//                                ) {
+//                                    Icon(
+//                                        imageVector = Icons.Outlined.Search,
+//                                        contentDescription = "Watch LOgs (DEBUG)",
+////                                tint = deck.color,
+//                                        modifier = Modifier.padding(8.dp)
+//                                    )
+//
+//                                    Text("Watch Logs (DEBUG)")
+//                                }
+//                            }
+//                            MaterialTheme(
+//                                colors = darkColors(
+//                                    primary = MaterialTheme.colors.error,
+//                                    onSurface = MaterialTheme.colors.error
+//                                )
+//                            ) {
+//                                OutlinedButton(
+//                                    onClick = {
+//                                        logger.info { "opening windows terminal to watch logs" }
+//                                        runCommand(
+//                                            "wt", "new-tab",
+//                                            "-p", "Windows Powershell",
+//                                            "--title", "NEST CTRL LOGS",
+//                                            "-d", configFolder.path,
+//                                            "powershell",
+//                                            "Get-Content",
+//                                            "-Path", "logs/latest-trace.log",
+//                                            "-Wait",
+//                                            workingDir = configFolder
+//                                        )
+//                                    },
+//                                    colors = ButtonDefaults.outlinedButtonColors(),
+////                                shape = MaterialTheme.shapes.large,
+//                                    contentPadding = PaddingValues(8.dp, 0.dp)
+////                                border = BorderStroke(
+////                                    OutlinedBorderSize, MaterialTheme.colors.onSecondary.copy(alpha = OutlinedBorderOpacity)
+////                                ),
+//
+//                                ) {
+//                                    Icon(
+//                                        imageVector = Icons.Outlined.Search,
+//                                        contentDescription = "Watch LOgs (TRACE)",
+////                                tint = deck.color,
+//                                        modifier = Modifier.padding(8.dp)
+//                                    )
+//
+//                                    Text("Watch Logs (TRACE)")
+//                                }
+//                            }
+//                        }
                     }
                 }
 //                Column {

@@ -141,7 +141,7 @@ fun beatProgressScreen(
 
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+//                    .padding(horizontal = 8.dp)
             ) {
 
                 Text(
@@ -216,7 +216,7 @@ fun beatProgressScreen(
 
             Column(
                 modifier = Modifier
-                    .padding(end = 16.dp)
+//                    .padding(end = 16.dp)
             ) {
                 val scope = rememberCoroutineScope()
 
