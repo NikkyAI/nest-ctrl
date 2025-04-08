@@ -61,8 +61,8 @@ import nestdrop.QueueType
 import nestdrop.deck.Deck
 import osc.OSCMessage
 import osc.nestdropPortSend
+import ui.components.Dseg14ClassicFontFamily
 import ui.components.HorizontalRadioButton
-import ui.components.fontDseg14
 import ui.components.lazyList
 import utils.runCommand
 import java.io.File
@@ -183,6 +183,8 @@ fun QueueControlScreen() {
                         }
                         Text("Beats: $beats")
                     }
+
+                    val fontDseg14 = Dseg14ClassicFontFamily()
 
                     Row {
                         Button(

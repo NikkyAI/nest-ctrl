@@ -129,6 +129,11 @@ powerAssert {
     includedSourceSets = listOf("commonMain", "desktopMain")
 }
 
+compose.resources {
+//    publicResClass = true
+//    packageOfResClass = "me.sample.library.resources"
+//    generateResClass = always
+}
 compose.desktop {
     application {
         buildTypes.release {

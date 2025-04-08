@@ -40,7 +40,7 @@ import scanMilkdrop
 import tags.PresetPlaylist
 import tags.nestdropQueueSearches
 import tags.presetTagsMapping
-import ui.components.fontDseg14
+import ui.components.Dseg14ClassicFontFamily
 import ui.components.lazyList
 import ui.components.verticalScroll
 import kotlin.time.Duration
@@ -75,7 +75,7 @@ fun debugScreen() {
         ) {
             Text(
                 text = "NEST\nCTRL",
-                fontFamily = fontDseg14,
+                fontFamily = Dseg14ClassicFontFamily(),
                 fontSize = 30.sp,
                 lineHeight = 45.sp,
                 modifier = Modifier.padding(32.dp)

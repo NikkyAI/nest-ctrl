@@ -35,6 +35,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontListFontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontVariation
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.toFontFamily
+import androidx.compose.ui.text.platform.Font
+import androidx.compose.ui.text.platform.LoadedFont
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -43,8 +51,12 @@ import beatProgress
 import bpmInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nestctrl.generated.resources.DSEG14Classic_Regular
+import nestctrl.generated.resources.DSEG14_Classic
+import nestctrl.generated.resources.Res
 import nestdrop.deck.Deck
-import ui.components.fontDseg14
+import ui.components.Dseg14ClassicFontFamily
+import utils.className
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -56,6 +68,7 @@ fun beatProgressScreen(
     size: Dp = 200.dp,
     strokeWidth: Dp = 32.dp
 ) {
+    val fontDseg14 = Dseg14ClassicFontFamily()
 
     val beatProgress by beatProgress.collectAsState(0f)
 //    val beatProgress  = 0f // 0.25f
@@ -148,7 +161,7 @@ fun beatProgressScreen(
                     fontFamily = fontDseg14,
 //                modifier = Modifier.padding(8.dp, 0.dp)
                 )
-                val beatFrameText = frame.toString()
+                val beatFrameText = frame.roundToInt().toString()
                 Text(
                     text = "BEAT: ${currentBeat.toString().padStart(beatFrameText.length, '0')} / $beatFrameText",
                     fontFamily = fontDseg14,
