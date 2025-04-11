@@ -3,7 +3,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.plus
-import obs.LOOM
+import utils.LOOM
 
 @OptIn(ExperimentalCoroutinesApi::class)
 //val flowScope = CoroutineScope(

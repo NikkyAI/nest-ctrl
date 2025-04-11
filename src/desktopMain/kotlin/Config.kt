@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
 import nestdrop.deck.Deck
 import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
-import obs.LOOM
+import utils.LOOM
 import tags.PresetPlaylist
 import ui.screens.customSearches
 import utils.prettyPrint

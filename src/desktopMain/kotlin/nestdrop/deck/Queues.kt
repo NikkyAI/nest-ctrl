@@ -210,7 +210,7 @@ class Queues {
                     is OSCQueueUpdate.UpdateQueue -> update
                     else -> {
                         val currentState = cache[update.name] ?: run {
-                            val queue = allQueues.value[update.name] ?: error("could not load queue ${update.name}")
+                            val queue = allQueues.value[update.name] ?: error("could not load queue ${update.name} for $update")
                             OSCQueueUpdate.UpdateQueue(
                                 update.name,
                                 active = queue.active,

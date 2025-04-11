@@ -1,8 +1,15 @@
 package nestdrop
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import nestdropConfigFile
+import nl.adaptivity.xmlutil.XmlDeclMode
+import nl.adaptivity.xmlutil.core.XmlVersion
+import nl.adaptivity.xmlutil.serialization.UnknownChildHandler
+import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlChildrenName
+import nl.adaptivity.xmlutil.serialization.XmlConfig.Companion.DEFAULT_UNKNOWN_CHILD_HANDLER
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import xml.Container
@@ -13,6 +20,7 @@ import xml.QueueWindowsSerializer
 
 @Serializable
 data class NestdropSettings(
+    @XmlSerialName("MainWindow")
     val mainWindow: MainWindow,
     val queueWindows: QueueWindows,
     val favoriteList: FavoriteList,
@@ -310,7 +318,7 @@ data class NestdropSettings(
         @Serializable
         data class LibraryClosedSection(
             override val index: Int,
-            @XmlSerialName("Value")
+            @SerialName("Value")
             val value: String
         ) : Element
 
@@ -371,7 +379,7 @@ data class NestdropSettings(
             fun type() = QueueType.entries[typeIndex]
 
             @Serializable
-            @XmlSerialName("Preset")
+            @SerialName("Preset")
             data class Preset(
                 @SerialName("Name")
                 val name: String,
@@ -465,5 +473,51 @@ data class NestdropSettings(
     @Serializable
     data class AnimSpeedList(
         val unused: Int = 1
+    )
+}
+
+fun main(args: Array<String>) {
+    val logger = KotlinLogging.logger {}
+
+    val xml = XML {
+        recommended {
+            repairNamespaces = false
+            unknownChildHandler = UnknownChildHandler { input, inputKind, descriptor, name, candidates ->
+                logger.info { "unknown child handler" }
+                logger.info { "inputKind: $inputKind" }
+                logger.info { "descriptor: $descriptor" }
+                logger.info { "name: $name" }
+                logger.info { "candidates: $candidates" }
+
+                DEFAULT_UNKNOWN_CHILD_HANDLER.handleUnknownChildRecovering(input, inputKind, descriptor, name, candidates)
+            }
+            this.verifyElementOrder = false
+            this.isStrictAttributeNames = true
+            this.isStrictOtherAttributes = false
+            this.ignoreUnknownChildren()
+            pedantic = false
+            isStrictBoolean = false
+            policy
+//        autoPolymorphic = true
+        }
+
+        xmlDeclMode = XmlDeclMode.Charset
+//    this.defaultToGenericParser = true
+        xmlVersion = XmlVersion.XML10
+//    xmlDeclMode = XmlDeclMode.Charset
+//    this.repairNamespaces = true
+//    this.autoPolymorphic = true
+//    this.isInlineCollapsed
+//    this.xmlDeclMode
+    }
+
+    XML.decodeFromString(
+        NestdropSettings.serializer(),
+        nestdropConfigFile.readText().also {
+            logger.info { "parsing xml: $it" }
+        }
+//            .substringAfter(
+//                """<?xml version="1.0" encoding="utf-8"?>"""
+//            )
     )
 }

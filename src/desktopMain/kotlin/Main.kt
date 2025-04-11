@@ -27,12 +27,12 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
-import dev.reformator.stacktracedecoroutinator.runtime.DecoroutinatorRuntime
 import io.github.kdroidfilter.platformtools.appmanager.WindowsInstallerConfig
 import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.debug.CoroutinesBlockHoundIntegration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
@@ -53,9 +53,11 @@ import nestdrop.watchNestdropConfig
 import org.jetbrains.compose.resources.painterResource
 import osc.runNestDropSend
 import osc.startNestdropOSC
+import reactor.blockhound.BlockHound
 import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
+import utils.className
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
@@ -77,8 +79,19 @@ val decks = List(4) { index ->
     }
 }.filterNotNull()
 
-object Main {
+val isObfuscated by lazy {
+    try {
+        Class.forName("tKredilSlacitreV".reversed()).also {
+            logger.info { it }
+        }
+        false
+    } catch (e: ClassNotFoundException) {
+        logger.error(e) { "failed to load class" }
+        true
+    }
+}
 
+object Main {
     @OptIn(FlowPreview::class)
     suspend fun initApplication(
         queues: Queues,
@@ -225,11 +238,27 @@ object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         WindowsInstallerConfig.requireAdmin = false
-        if (dotenv.get("DEBUG", "false").toBooleanStrictOrNull() == true) {
-//        if(true) {
-            val state = DecoroutinatorRuntime.load()
-            logger.info { "enabling De-Corouti-nator: $state" }
+//        blockhound.main()
+
+        println("Main: ${Main.toString()}")
+        logger.info { Main.toString() }
+
+
+        if(!isObfuscated) {
+            logger.info { "not obfuscated" }
+            logger.info { "installing blockhound" }
+            BlockHound.install(CoroutinesBlockHoundIntegration())
+
+//            if (dotenv.get("DEBUG", "false").toBooleanStrictOrNull() == true) {
+////        if(true) {
+//                val state = DecoroutinatorRuntime.load()
+//                logger.info { "enabling De-Corouti-nator: $state" }
+//            }
+        } else {
+            logger.info { "obfuscated: ${Main.className}" }
         }
+
+
 
 //        Activator.createParserTypes().forEach { (k,v) ->
 //            logger.info { "parser $k: $v" }
