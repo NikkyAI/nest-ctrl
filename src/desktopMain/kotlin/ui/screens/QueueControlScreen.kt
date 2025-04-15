@@ -278,8 +278,10 @@ fun QueueControlScreen() {
             if (!queue.open) return@items
 
             val deck = decks[queue.deck - 1]
+            val deckEnabled = deck.id <= decksEnabled
 //            val color = colors[queue.deck - 1]
 //            val disabledColor = disabledColors[queue.deck - 1]
+
 
             Column(
                 modifier = Modifier
@@ -298,12 +300,12 @@ fun QueueControlScreen() {
 //                            .background(deck.color),
                             .padding(start = 4.dp, end = 4.dp, bottom = 2.dp),
 //                        strokeCap = StrokeCap.Square,
-                        color = if (autoPlayEnabled) {
+                        color = if (autoPlayEnabled && deckEnabled) {
                             deck.color
                         } else {
                             deck.disabledColor
                         },
-                        trackColor = if (autoPlayEnabled) {
+                        trackColor = if (autoPlayEnabled && deckEnabled) {
                             deck.disabledColor
                         } else {
                             Color.DarkGray
@@ -317,7 +319,7 @@ fun QueueControlScreen() {
                         .padding(4.dp)
                         .border(
                             width = 2.dp,
-                            color = if (queue.active) deck.color else deck.disabledColor,
+                            color = if (queue.active && deckEnabled) deck.color else deck.disabledColor,
                             shape = CutCornerShape(5.dp),
                         )
                         .padding(4.dp)

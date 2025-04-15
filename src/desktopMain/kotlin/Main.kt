@@ -189,10 +189,11 @@ object Main {
         } ?: error("failed to load queues (timeout)")
         logger.info { "queues are initialized" }
 
+        queues.startFlows()
+
         loadConfig()
         delay(500)
 
-        queues.startFlows()
         flowScope.launch {
             decks.forEach { deck ->
                 launch {

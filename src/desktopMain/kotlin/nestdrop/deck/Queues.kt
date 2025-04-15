@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.sample
@@ -97,6 +98,18 @@ class Queues {
 //    val allQueues = mutableStateMapOf<String, Queue<out Preset>>()
     private val allQueuesInternal = MutableStateFlow<Map<String, Queue<out Preset>>>(emptyMap())
     val allQueues = allQueuesInternal.asStateFlow()
+
+    fun spoutQueues() =    allQueues.map { queueMap ->
+        queueMap.values.filter { queue ->
+            queue.open &&
+//                    queue.deck == deckId &&
+                    queue.type == QueueType.SPRITE &&
+                    !queue.isFileExplorer &&
+                    queue.presets.all { it is nestdrop.Preset.SpoutSprite }
+        }.map {
+            it as Queue<Preset.SpoutSprite>
+        }
+    }
 
     val isInitialized = MutableStateFlow(false)
     private val logger = KotlinLogging.logger { }
@@ -192,8 +205,6 @@ class Queues {
         }
     }
 
-    val combinedUpdates = MutableStateFlow<Map<String, OSCQueueUpdate.UpdateQueue>>(emptyMap())
-
     @OptIn(FlowPreview::class)
     suspend fun startFlows() {
         logger.info { "starting coroutines for preset-queues" }
@@ -253,6 +264,7 @@ class Queues {
                     queue.updateQueue(update)
                 } ?: queue
             }
+            logger.info { "written to $allQueuesInternal" }
 
 //            val queueUpdate = queues[updatesMap.name]?.updateQueue(updatesMap)
 //            val presetQueueUpdate = presets[update.name]?.updateQueue(update)

@@ -226,9 +226,9 @@ suspend fun loadNestdropConfig(
 //            deck.imgSpriteQueues.value = imgSpriteQueues.filter { queue ->
 //                queue.open && queue.deck == deck.id && queue.type == QueueType.SPRITE
 //            }
-            deck.spoutSpriteQueues.value = spoutSpriteQueues.filter { queue ->
-                queue.open && queue.deck == deck.id && queue.type == QueueType.SPRITE
-            }
+//            deck.spoutSpriteQueues.value = spoutSpriteQueues.filter { queue ->
+//                queue.open && queue.deck == deck.id && queue.type == QueueType.SPRITE
+//            }
         }
 //        queues.presetQueues.value = presetQueues.associateBy { it.name }
 //        queues.allQueues.update { oldList ->

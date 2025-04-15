@@ -266,7 +266,7 @@ enum class Tabs(
         }
     ),
     SpoutSprites(
-        "Spout Sprites",
+        "SPT Sprites",
         {
             it.spriteState.spoutStates.map { it.values.firstOrNull()?.label ?: "-" }
         }

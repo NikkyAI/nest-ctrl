@@ -1,5 +1,6 @@
 package nestdrop.deck
 
+import QUEUES
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -37,6 +39,7 @@ import nestdrop.NestdropSpriteQueue
 import nestdrop.PresetIdState
 import nestdrop.PresetLocation
 import nestdrop.Queue
+import nestdrop.QueueType
 import nestdrop.imgFxMap
 import nestdrop.nestdropSetPreset
 import nestdrop.nestdropSetSprite
@@ -516,18 +519,18 @@ class Deck(
 
     val preset = Preset()
 
-    @Immutable
-    inner class SpriteQueues :
-        MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> by MutableStateFlow(emptyList()) {
-        suspend fun startFlows() {
-//            logger.info { "initializing $deckName sprite queues" }
-        }
-    }
+//    @Immutable
+//    inner class SpriteQueues :
+//        MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> by MutableStateFlow(emptyList()) {
+//        suspend fun startFlows() {
+////            logger.info { "initializing $deckName sprite queues" }
+//        }
+//    }
 
     //    @Deprecated("lookup queues from QUEUES.allQueues")
 //    val imgSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.ImageSprite>>> = MutableStateFlow(emptyList())
-    @Deprecated("lookup queues from QUEUES.allQueues")
-    val spoutSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.SpoutSprite>>> = MutableStateFlow(emptyList())
+//    @Deprecated("lookup queues from QUEUES.allQueues")
+//    val spoutSpriteQueues: MutableStateFlow<List<Queue<nestdrop.Preset.SpoutSprite>>> = MutableStateFlow(emptyList())
 
     @Serializable
     data class SpriteData(
@@ -662,7 +665,6 @@ class Deck(
                         if (state != mutableState) {
                             spoutStates.value = mutableState.toMap()
                         }
-
                     }
                 }
                 .launchIn(flowScope)
@@ -801,6 +803,8 @@ class Deck(
                     } else if (next != null) {
                         nestdropSetSprite(next.id, id, single = true)
                     }
+                    logger.info { "triggering spriteFX sync" }
+                    imgSpriteFx.sync()
                 }
                 .launchIn(flowScope)
 
@@ -828,6 +832,10 @@ class Deck(
         private val sync = MutableStateFlow(0)
         private val trigger = MutableStateFlow(0)
 
+        suspend fun sync() {
+            sync.value++
+        }
+
         suspend fun next() {
             if (id > enabled.value) {
                 return
@@ -844,13 +852,13 @@ class Deck(
 
         suspend fun setSpriteFx(index: Int, blendMode: Boolean) {
             val fx = if (blendMode) index + 50 else index
-            logger.info { "setting $deckName FX to $fx" }
+            logger.info { "setting $deckName Sprite FX to $fx" }
             val arg = fx / 99.0f
             nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpriteFx"), arg))
         }
 
         suspend fun setSpriteFxRaw(rawFx: Int) {
-            logger.info { "setting $deckName FX to $rawFx" }
+            logger.info { "setting $deckName Sprite FX to $rawFx" }
             val arg = rawFx / 99.0f
             nestdropSendChannel.send(OSCMessage(nestdropDeckAddress("sSpriteFx"), arg))
         }
@@ -881,11 +889,11 @@ class Deck(
 
             //TODO: remove
             //  handled via passing raw FX into SpriteKey
-            index
-                .combine(sync) { a, _ -> a }
-                .combine(blendMode) { index, blendMode ->
-                    setSpriteFx(index, blendMode)
-                }
+            combine(
+                index, blendMode, sync,
+            ) { index, blendMode, _ ->
+                setSpriteFx(index, blendMode)
+            }
 //                .filter { fx -> fx in (0..99) }
 //                .onEach { fx ->
 //                    logger.infoF { "setting $deckName FX to $fx" }
@@ -904,9 +912,11 @@ class Deck(
 
         suspend fun startFlows() {
             logger.info { "starting coroutines on $deckName spout-queue" }
+
+            val spoutQueues = QUEUES.spoutQueues().map { it.filter { it.deck == id } }
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
-                .combine(spoutSpriteQueues) { index, queues ->
+                .combine(spoutQueues) { index, queues ->
                     queues.getOrNull(index)
                 }
                 .onEach {

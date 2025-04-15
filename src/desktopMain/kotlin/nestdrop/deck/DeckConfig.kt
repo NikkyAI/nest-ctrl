@@ -1,6 +1,7 @@
 package nestdrop.deck
 
 import DeckConfig
+import QUEUES
 import imgSpritesMap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
@@ -8,7 +9,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
+import nestdrop.Preset
+import nestdrop.Queue
+import nestdrop.QueueType
 import tags.nestdropQueueSearches
 import tags.queueTagsInitialized
 import ui.screens.customSearches
@@ -51,11 +56,17 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
             logger.debug { "loading spoutQueue on $deckName" }
             val spoutSpriteQueuesValue = measureTimedValue {
                 withTimeoutOrNull(10.seconds) {
-                    spoutSpriteQueues.first {
+                    QUEUES.spoutQueues().map { it.filter { it.deck == id } }
+                    .first {
                         it
                             .also { logger.debug { "spoutSpritesQueue: $it" } }
                             .isNotEmpty()
                     }
+//                    spoutSpriteQueues.first {
+//                        it
+//                            .also { logger.debug { "spoutSpritesQueue: $it" } }
+//                            .isNotEmpty()
+//                    }
                 } ?: run {
                     logger.error { "failed to load spoutSpriteQueues on $deckName" }
                     emptyList()
