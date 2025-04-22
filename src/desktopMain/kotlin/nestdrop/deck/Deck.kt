@@ -50,8 +50,10 @@ import presetsFolder
 import presetsMap
 import queueFolder
 import tags.PresetPlaylist
+import tags.nestdropQueueSearches
 import tags.pickItemToGenerate
 import tags.presetTagsMapping
+import ui.screens.customSearches
 import utils.className
 import utils.runningHistory
 import utils.runningHistoryNotNull
@@ -355,7 +357,12 @@ class Deck(
     }
 
     @Immutable
-    inner class Search : MutableStateFlow<PresetPlaylist?> by MutableStateFlow(null) {
+    inner class Search {
+
+        val label = MutableStateFlow<String?>(null)
+//        val enabledFragments = MutableStateFlow<Set<String>>(emptySet())
+        private val currentMutable = MutableStateFlow<PresetPlaylist?>(null)
+        val current = currentMutable.asStateFlow()
 
         val autoChange = MutableStateFlow(false)
 
@@ -364,7 +371,7 @@ class Deck(
                 logger.info { "skip disabled $deckName" }
                 return
             }
-            search.value?.let { search ->
+            current.value?.let { search ->
 
                 val presets = presetsMap.value
                 val presetTags = presetTagsMapping.value
@@ -403,7 +410,36 @@ class Deck(
         }
 
         fun startFlows() {
-            search.filterNotNull()
+            combine(
+                customSearches,
+                nestdropQueueSearches,
+                label
+            ) { customSearches, queueSearches, label ->
+                customSearches.firstOrNull { it.label == label }
+                    ?: queueSearches.firstOrNull { it.label == label }
+            }
+                .onEach {
+                    currentMutable.value = it
+                }
+                .launchIn(flowScope)
+
+//            combine(
+//                customSearches,
+//                nestdropQueueSearches,
+//                enabledFragments
+//            ) { customSearches, queueSearches, enabledFragments ->
+//                val terms = customSearches.filter { it.label in enabledFragments }.flatMap { it.terms } + queueSearches.filter { it.label in enabledFragments }.flatMap { it.terms }
+//                PresetPlaylist(
+//                    label = "dynamic",
+//                    terms = terms
+//                )
+//            }
+//                .onEach {
+//                    currentMutable.value = it
+//                }
+//                .launchIn(flowScope)
+
+            current.filterNotNull()
                 .distinctUntilChanged()
                 .onEach { search ->
                     val presets = presetsMap.value
@@ -425,7 +461,7 @@ class Deck(
                     }
                     folder.listFiles()?.forEach { it.deleteRecursively() }
 
-                    filtered.mapValues { it.value.roundToInt() }.forEach { (location, weight) ->
+                    filtered.mapValues { it.value }.forEach { (location, weight) ->
                         val presetFile = presetsFolder.resolve(location.path)
                         val previewFile = presetsFolder.resolve(location.previewPath)
                         if (weight == 1) {
@@ -439,7 +475,8 @@ class Deck(
                             }
                         } else {
                             repeat(weight) { i ->
-                                val targetFolder = folder.resolve(location.path).parentFile!!
+                                val targetFolder = folder
+                                    .resolve(location.path).parentFile!!
                                     .resolve("${location.name}_$i")
                                 targetFolder.mkdirs()
                                 targetFolder.resolve(presetFile.name).also {
@@ -448,6 +485,22 @@ class Deck(
                                 targetFolder.resolve(previewFile.name).also {
                                     previewFile.copyTo(it)
                                 }
+                            }
+                        }
+                    }
+                    if(filtered.isEmpty()) {
+                        presets.values.filter {
+                            it.categoryPath.last() == "! Transition"
+                        }.forEach { location ->
+                            val presetFile = presetsFolder.resolve(location.path)
+                            val previewFile = presetsFolder.resolve(location.previewPath)
+                            val targetFolder = folder.resolve(location.path).parentFile!!
+                            targetFolder.mkdirs()
+                            targetFolder.resolve(presetFile.name).also {
+                                presetFile.copyTo(it)
+                            }
+                            targetFolder.resolve(previewFile.name).also {
+                                previewFile.copyTo(it)
                             }
                         }
                     }

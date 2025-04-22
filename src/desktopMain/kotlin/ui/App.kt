@@ -262,7 +262,7 @@ enum class Tabs(
     PresetPlaylist(
         "Preset Playlists",
         { deck ->
-            deck.search.map { s -> s?.label ?: "-" }
+            deck.search.label.map { s -> s ?: "-" }
         }
     ),
     SpoutSprites(

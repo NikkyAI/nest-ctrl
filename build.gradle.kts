@@ -96,6 +96,7 @@ kotlin {
             implementation("io.github.pdvrieze.xmlutil:serialization:_")
 //            implementation("com.ryanharter.kotlinx.serialization:kotlinx-serialization-xml:_")
             implementation("io.github.xn32:json5k:_")
+            implementation( "com.akuleshov7:ktoml-core:_")
 
             implementation("com.github.doyaaaaaken:kotlin-csv-jvm:_")
 

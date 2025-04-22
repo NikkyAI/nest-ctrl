@@ -42,9 +42,9 @@ fun PlaytlistSelectorScreen(
 
 //    val combinedSearches = customSearches + nestdropQueueSearches
 
-    val deckSearches = decks.associate { deck ->
-        val deckSearch by deck.search.collectAsState()
-        deck.id to deckSearch
+    val deckLabels = decks.associate { deck ->
+        val deckLabel by deck.search.label.collectAsState()
+        deck.id to deckLabel
     }
 
     verticalScroll {
@@ -52,7 +52,7 @@ fun PlaytlistSelectorScreen(
             customSearches.forEachIndexed { searchIndex, search ->
                 PlaylistSelectorRow(
                     decksEnabled = decksEnabled,
-                    deckSearches = deckSearches,
+                    deckLabels = deckLabels,
                     search = search,
                     searchIndex = searchIndex,
                     totalSize = customSearches.size + nestdropQueueSearches.size,
@@ -64,7 +64,7 @@ fun PlaytlistSelectorScreen(
             nestdropQueueSearches.forEachIndexed { searchIndex, search ->
                 PlaylistSelectorRow(
                     decksEnabled = decksEnabled,
-                    deckSearches = deckSearches,
+                    deckLabels = deckLabels,
                     search = search,
                     searchIndex = searchIndex,
                     totalSize = customSearches.size + nestdropQueueSearches.size
@@ -77,7 +77,7 @@ fun PlaytlistSelectorScreen(
 @Composable
 private fun PlaylistSelectorRow(
     decksEnabled: Int,
-    deckSearches: Map<Int, PresetPlaylist?>,
+    deckLabels: Map<Int, String?>,
     search: PresetPlaylist,
     searchIndex: Int,
     totalSize: Int,
@@ -100,9 +100,9 @@ private fun PlaylistSelectorRow(
         decks.forEach { deck ->
             if (deck.id > decksEnabled) return@forEach
 
-            val deckSearch = deckSearches.getValue(deck.id)
+            val deckLabel = deckLabels.getValue(deck.id)
 
-            val selected = (deckSearch == search)
+            val selected = (deckLabel == search.label)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -114,9 +114,9 @@ private fun PlaylistSelectorRow(
                     onClick = {
                         // TODO: only store name and lookup from map ?
                         if (selected) {
-                            deck.search.value = null
+                            deck.search.label.value = null
                         } else {
-                            deck.search.value = search
+                            deck.search.label.value = search.label
                         }
                     },
                     colors = RadioButtonDefaults.colors(
@@ -128,6 +128,24 @@ private fun PlaylistSelectorRow(
                     connectBottom = searchIndex < totalSize - 1,
 //                            modifier = Modifier.weight(0.2f)
                 )
+//                Checkbox(
+//                    checked = search.label in enabledFragments,
+//                    onCheckedChange = { checked ->
+//                        if (!checked) {
+//                            deck.search.enabledFragments.value -= search.label
+//                        } else {
+//                            deck.search.enabledFragments.value += search.label
+//                        }
+//                    },
+//                    colors = CheckboxDefaults.colors(
+//                        checkedColor = deck.color,
+//                        uncheckedColor = deck.dimmedColor
+//                    ),
+////                    height = heightDp,
+////                    connectTop = searchIndex > 0,
+////                    connectBottom = searchIndex < totalSize - 1,
+////                            modifier = Modifier.weight(0.2f)
+//                )
             }
         }
         Row(

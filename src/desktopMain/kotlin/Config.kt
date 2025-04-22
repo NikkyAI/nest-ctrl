@@ -1,4 +1,7 @@
 import androidx.compose.runtime.Immutable
+import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.TomlInputConfig
+import com.akuleshov7.ktoml.annotations.TomlMultiline
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.xn32.json5k.Json5
 import io.github.xn32.json5k.SerialComment
@@ -13,12 +16,18 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.plus
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNames
 import nestdrop.deck.Deck
 import nestdrop.deck.applyConfig
 import nestdrop.deck.configFlow
 import utils.LOOM
 import tags.PresetPlaylist
+import tags.Term
+import tags.TermDouble
 import ui.screens.customSearches
 import utils.prettyPrint
 import kotlin.time.Duration.Companion.seconds
@@ -47,8 +56,23 @@ data class Config(
     val deck4: DeckConfig = DeckConfig(
         triggerTime = 0.25f + 0.125f
     ),
-    val presetPlaylists: List<PresetPlaylist> = emptyList()
-)
+    @TomlMultiline
+    @SerialName("presetPlaylists")
+    @Deprecated("to be removed") val presetPlaylistsOld: List<PresetPlaylistDouble> = emptyList(),
+    val playlists: Map<String, List<Term>> = emptyMap()
+) {
+    val presetPlaylists by lazy {
+        playlists.entries.map {
+            PresetPlaylist(it.key, it.value)
+        }
+    }
+
+    @Serializable
+    data class PresetPlaylistDouble(
+        val label: String,
+        val terms: List<TermDouble>
+    )
+}
 
 @Immutable
 @Serializable
@@ -72,10 +96,13 @@ data class DeckConfig(
 ) {
     @Immutable
     @Serializable
-    data class SearchConfig(
+    data class SearchConfig @OptIn(ExperimentalSerializationApi::class) constructor(
         val autoChange: Boolean = false,
-        val name: String? = null,
+        @JsonNames("name", "label")
+        val label: String? = null,
+//        val enabledFragments: Set<String> = emptySet(),
     )
+
     @Immutable
     @Serializable
     data class PresetQueue(
@@ -118,6 +145,7 @@ data class DeckConfig(
         val autoChange: Boolean = false,
         val index: Int = -1,
         val name: String? = null,
+        @TomlMultiline
         val toggles: Set<String> = emptySet(),
     )
 
@@ -142,15 +170,28 @@ data class DeckConfig(
         val autoChange: Boolean = false,
         val blendMode: Boolean = false,
         val index: Int = -1,
+        @TomlMultiline
         val toggles: Set<Int> = emptySet(),
     )
 }
 
 val config = MutableStateFlow(Config())
 
-//val json = Json {
+private val json = Json {
+    allowComments = true
+    prettyPrint = true
+    allowTrailingComma = true
+    encodeDefaults = true
+    useAlternativeNames = true
+    isLenient = true
+//    this.explicitNulls = false
 //    namingStrategy = JsonNamingStrategy.SnakeCase
-//}
+}
+val toml = Toml(
+    inputConfig = TomlInputConfig(
+        allowEmptyToml = false
+    )
+)
 val json5 = Json5 {
     prettyPrint = true
     encodeDefaults = true
@@ -175,16 +216,36 @@ suspend fun Deck.updateConfig(deckConfig: DeckConfig) {
 @OptIn(FlowPreview::class)
 suspend fun loadConfig() {
     logger.info { "load config" }
-    if (configFile.exists()) {
+    val newConfigValue = if (configFile.exists()) {
         logger.info { "loading: $configFile" }
 //        configFile.readText()
-        config.value = json5.decodeFromString(
+        json.decodeFromString(
             Config.serializer(),
             configFile.readText(),
         )
+    } else if (configFileJson5.exists()) {
+        logger.info { "loading: $configFileJson5" }
+//        configFile.readText()
+        json.decodeFromString(
+            Config.serializer(),
+            configFileJson5.readText(),
+        )
     } else {
+        logger.info { "does not exist: $configFile $configFileJson5" }
+        null
+    }
 
-        logger.info { "does not exist: $configFile" }
+    if (newConfigValue != null) {
+        config.value = newConfigValue.let { c ->
+            if (c.playlists.isEmpty()) {
+                c.copy(
+                    playlists = c.presetPlaylistsOld.associate { it.label to it.terms.map { it.toTerm() } },
+                    presetPlaylistsOld = emptyList()
+                )
+            } else {
+                c
+            }
+        }
     }
 
     config
@@ -229,7 +290,7 @@ suspend fun loadConfig() {
 
     customSearches.onEach { searches ->
         updateConfig {
-            copy(presetPlaylists = searches)
+            copy(playlists = searches.associate { it.label to it.terms })
         }
     }.launchIn(configScope)
 }
@@ -237,6 +298,9 @@ suspend fun loadConfig() {
 fun saveConfig(config: Config) {
     configFile.parentFile.mkdirs()
     configFile.writeText(
-        json5.encodeToString(Config.serializer(), config)
+        json.encodeToString(Config.serializer(), config)
+    )
+    configFileToml.writeText(
+        toml.encodeToString(Config.serializer(), config)
     )
 }

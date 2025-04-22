@@ -143,7 +143,7 @@ private fun RowScope.PresetDisplay(
         val currentPreset by deck.preset.currentPreset.collectAsState()
         val presetName = currentPreset.name
         val presetLocation = presetsMap[presetName + ".milk"]
-        val playlistLabel by deck.search.map { s -> s?.label ?: "-" }.collectAsState("-")
+        val playlistLabel by deck.search.label.map { s -> s ?: "-" }.collectAsState("-")
         Row(
             modifier = Modifier
                 .fillMaxWidth()

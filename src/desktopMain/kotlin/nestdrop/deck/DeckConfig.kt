@@ -4,16 +4,12 @@ import DeckConfig
 import QUEUES
 import imgSpritesMap
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
-import tags.nestdropQueueSearches
-import tags.queueTagsInitialized
-import ui.screens.customSearches
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTimedValue
 
@@ -55,7 +51,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
                 withTimeoutOrNull(10.seconds) {
                     QUEUES.spoutQueues.map { queueMap ->
                         queueMap.values.filter { queue -> queue.open }
-                    }.map { it.filter { it.deck == id } }
+                    }.map { it.filter { queue -> queue.deck == id } }
                         .first {
                             it
                                 .also { logger.debug { "spoutSpritesQueue: $it" } }
@@ -86,7 +82,7 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
             }
             run {
                 logger.debug { "loading spout queue ${deckConfig.spoutQueue.name} from $spoutSpriteQueuesValue" }
-                val spoutQueueValue = spoutSpriteQueuesValue.firstOrNull() { it.name == deckConfig.spoutQueue.name }
+                val spoutQueueValue = spoutSpriteQueuesValue.firstOrNull { it.name == deckConfig.spoutQueue.name }
                     ?: spoutSpriteQueuesValue.firstOrNull { it.deck == this@applyConfig.id && it.name.contains("spout") }
                 this@applyConfig.spoutQueue.index.value = spoutSpriteQueuesValue.indexOf(spoutQueueValue)
                     .takeUnless { it == -1 }  // ?: deckConfig.spoutQueue.index.takeUnless { it == -1 }
@@ -111,38 +107,9 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
             }
         }
         run {
-            val customSearches = withTimeoutOrNull(5.seconds) {
-                measureTimedValue {
-                    while (customSearches.value.isEmpty()) {
-                        delay(100)
-                    }
-                    customSearches.value
-                }.apply {
-                    logger.info { "loaded customSearches on $deckName in $duration" }
-                }.value
-            } ?: run {
-                logger.error { "failed to load customSearches on $deckName" }
-                emptyList()
-            }
-
-            val nestdropQueueSearches = withTimeoutOrNull(5.seconds) {
-                measureTimedValue {
-                    while (!queueTagsInitialized.value) {
-                        delay(100)
-                    }
-                    nestdropQueueSearches.value
-                }.apply {
-                    logger.info { "loaded nestdropQueueSearches on $deckName in $duration" }
-                }.value
-            } ?: run {
-                logger.error { "failed to load nestdropQueueSearches on $deckName" }
-                emptyList()
-            }
-
-            val combinedSearches = customSearches + nestdropQueueSearches
-
             this@applyConfig.search.autoChange.value = search.autoChange
-            this@applyConfig.search.value = combinedSearches.firstOrNull { it.label == search.name }
+//            this@applyConfig.search.enabledFragments.value = search.enabledFragments
+            this@applyConfig.search.label.value = search.label
         }
 //        run {
 //            this@applyConfig.bpmSyncEnabled.value = bpmSync.enabled
@@ -330,12 +297,14 @@ val Deck.configFlow: Flow<DeckConfig>
                 )
             }
             .combine(
-                search.combine(
+                combine(
+                    search.label,
                     search.autoChange
-                ) { search, autoChange ->
+                ) { label, autoChange ->
                     DeckConfig.SearchConfig(
                         autoChange = autoChange,
-                        name = search?.label
+                        label = label,
+//                        enabledFragments = enabledFragments
                     )
                 }
             ) { config, searchConfig ->

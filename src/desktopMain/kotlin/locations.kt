@@ -9,8 +9,14 @@ val configFolder = dotenv["NESTCTRL_CONFIG_FOLDER"]?.parsePath() ?: userHome.res
 val tagsFolder = configFolder.resolve("tags").also {
     logger.info { "tags folder: $it" }
 }
-val configFile = configFolder.resolve("config.json5").also {
+val configFile = configFolder.resolve("config.json").also {
     logger.info { "config file: $it" }
+}
+val configFileJson5 = configFolder.resolve("config.json5").also {
+    logger.info { "config file json5: $it" }
+}
+val configFileToml = configFolder.resolve("config.toml").also {
+    logger.info { "config file toml: $it" }
 }
 val queueFolder = configFolder.resolve("queues").also {
     logger.info { "queue folder: $it" }

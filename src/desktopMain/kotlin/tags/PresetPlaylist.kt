@@ -1,32 +1,55 @@
 package tags
 
 import androidx.compose.runtime.Immutable
+import com.akuleshov7.ktoml.annotations.TomlInlineTable
+import com.akuleshov7.ktoml.annotations.TomlLiteral
+import com.akuleshov7.ktoml.annotations.TomlMultiline
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlin.math.roundToInt
 
 @Immutable
 @Serializable
+//@TomlInlineTable
 data class PresetPlaylist(
-    val label: String = "",
+    @TomlLiteral
+    val label: String,
     val terms: List<Term>
 ) {
-    fun score(tags: Set<Tag>): Double {
+    fun score(tags: Set<Tag>): Int {
         return terms.sumOf { term ->
             if (term.matches(tags)) {
                 term.boost
             } else {
-                0.0
+                0
             }
         }
     }
 }
 
 @Serializable
-data class Term(
+data class TermDouble(
     val boost: Double,
     val matcher: TagMatcher,
 ) {
+    fun toTerm() = Term(
+        boost = boost.roundToInt(),
+        include = matcher.include,
+        exclude = matcher.exclude,
+    )
+}
+@Serializable
+data class Term(
+    val boost: Int,
+    @TomlMultiline
+    val include: Set<Tag> = emptySet(),
+    @TomlMultiline
+    val exclude: Set<Tag> = emptySet(),
+) {
+    val matcher by lazy {
+        TagMatcher(include = include, exclude = exclude)
+    }
     fun matches(tags: Set<Tag>): Boolean {
         return matcher.matches(tags)
     }
@@ -61,7 +84,7 @@ data class TagMatcher (
     }
 }
 
-fun <T> pickItemToGenerate(options: Map<T, Double>): T {
+fun <T> pickItemToGenerate(options: Map<T, Int>): T {
     require(options.isNotEmpty())
     val randomNumber = Math.random() * options.values.sumOf { it }
 

@@ -263,16 +263,16 @@ fun editSearchesScreen() {
                                         ),
                                         modifier = Modifier.onKeyEvent { event ->
                                             if (event.key == Key.Enter) {
-                                                if (newBoostValue.toDoubleOrNull() != null) {
+                                                if (newBoostValue.toIntOrNull() != null) {
 
                                                     val searchesMutable = searchesCollected.toMutableList()
                                                     val mutableBoosts = search.terms.toMutableList()
                                                     mutableBoosts.add(
                                                         Term(
-                                                            matcher = TagMatcher(
-                                                                emptySet(), // emptySet()
-                                                            ),
-                                                            boost = (newBoostValue.toDoubleOrNull() ?: 10.0)
+//                                                            matcher = TagMatcher(
+//                                                                emptySet(), // emptySet()
+//                                                            ),
+                                                            boost = (newBoostValue.toIntOrNull() ?: 1)
                                                         )
                                                     )
 
@@ -298,10 +298,10 @@ fun editSearchesScreen() {
                                             val mutableBoosts = search.terms.toMutableList()
                                             mutableBoosts.add(
                                                 Term(
-                                                    matcher = TagMatcher(
-                                                        include = emptySet(), // exclude = emptySet()
-                                                    ),
-                                                    boost = (newBoostValue.toDoubleOrNull() ?: 10.0)
+//                                                    matcher = TagMatcher(
+//                                                        include = emptySet(), // exclude = emptySet()
+//                                                    ),
+                                                    boost = (newBoostValue.toIntOrNull() ?: 1)
                                                 )
                                             )
 
@@ -319,7 +319,7 @@ fun editSearchesScreen() {
                                 }
 
                                 search.terms.forEachIndexed() { termIndex, term ->
-                                    val matcher = term.matcher
+//                                    val matcher = term.matcher
                                     val boost = term.boost
                                     ExpandableSection(
                                         key = "searches.$searchIndex.terms.$termIndex.expanded",
@@ -335,10 +335,10 @@ fun editSearchesScreen() {
                                             if (expanded) {
 
 //                                                Text("Include: ${matcher.include.size}, Exclude: ${matcher.exclude.size} -> ${boost}")
-                                                Text("Include: ${matcher.include.size} -> ${boost}")
+                                                Text("Include: ${term.include.size} -> ${boost}")
                                             } else {
 //                                                Text("Include: ${matcher.include}, Exclude: ${matcher.exclude} -> ${boost}")
-                                                Text("Include: ${matcher.include} -> ${boost}")
+                                                Text("Include: ${term.include} -> ${boost}")
                                             }
                                             if (expanded) {
 
@@ -354,15 +354,14 @@ fun editSearchesScreen() {
                                                     ),
                                                     modifier = Modifier.onKeyEvent { event ->
                                                         if (event.key == Key.Enter) {
-                                                            if (boostField.toDoubleOrNull()
+                                                            if (boostField.toIntOrNull()
                                                                     ?.let { it != boost } == true
                                                             ) {
 
                                                                 val searchesMutable = searchesCollected.toMutableList()
                                                                 val mutableBoosts = search.terms.toMutableList()
-                                                                mutableBoosts[termIndex] = Term(
-                                                                    matcher = matcher,
-                                                                    boost = (boostField.toDoubleOrNull() ?: boost)
+                                                                mutableBoosts[termIndex] = term.copy(
+                                                                    boost = (boostField.toIntOrNull() ?: boost)
                                                                 )
                                                                 val newSearch = search.copy(
                                                                     terms = mutableBoosts.toList()
@@ -382,9 +381,8 @@ fun editSearchesScreen() {
                                                     onClick = {
                                                         val searchesMutable = searchesCollected.toMutableList()
                                                         val mutableBoosts = search.terms.toMutableList()
-                                                        mutableBoosts[termIndex] = Term(
-                                                            matcher = matcher,
-                                                            boost = (boostField.toDoubleOrNull() ?: boost)
+                                                        mutableBoosts[termIndex] = term.copy(
+                                                            boost = (boostField.toIntOrNull() ?: boost)
                                                         )
                                                         val newSearch = search.copy(
                                                             terms = mutableBoosts.toList()
@@ -393,7 +391,7 @@ fun editSearchesScreen() {
                                                         editSearchSelected.value = searchIndex to newSearch
                                                         customSearches.value = searchesMutable.toList()
                                                     },
-                                                    enabled = boostField.toDoubleOrNull()?.let { it != boost } == true
+                                                    enabled = boostField.toIntOrNull()?.let { it != boost } == true
                                                 ) {
                                                     Icon(Icons.Filled.Check, "confirm")
                                                 }
@@ -425,13 +423,13 @@ fun editSearchesScreen() {
 //                                            canExpand = matcher.include.isNotEmpty(),
                                             headerContent = { expand ->
                                                 if (!expand) {
-                                                    if (matcher.include.isNotEmpty()) {
-                                                        Text("Include ${matcher.include}")
+                                                    if (term.include.isNotEmpty()) {
+                                                        Text("Include ${term.include}")
                                                     } else {
                                                         Text("Include")
                                                     }
                                                 } else {
-                                                    Text("Include ${matcher.include.size}")
+                                                    Text("Include ${term.include.size}")
                                                 }
                                                 Spacer(modifier = Modifier.weight(0.5f))
 
@@ -459,16 +457,13 @@ fun editSearchesScreen() {
                                                 DropDownPopupIconButton(
                                                     icon = { Icon(Icons.Filled.Add, "add") },
                                                     items = availableTags,
-                                                    itemEnabled = { item -> (item !in matcher.include /*&& item !in matcher.exclude*/) },
+                                                    itemEnabled = { item -> (item !in term.include /*&& item !in matcher.exclude*/) },
                                                     onItemClick = { item ->
                                                         val searchesMutable = searchesCollected.toMutableList()
 
                                                         val mutableBoosts = search.terms.toMutableList()
-                                                        mutableBoosts[termIndex] = Term(
-                                                            matcher = matcher.copy(
-                                                                include = matcher.include + item
-                                                            ),
-                                                            boost = boost
+                                                        mutableBoosts[termIndex] = term.copy(
+                                                            include = term.include + item,
                                                         )
                                                         val newSearch = search.copy(
                                                             terms = mutableBoosts.toList()
@@ -489,7 +484,7 @@ fun editSearchesScreen() {
 //                                    default = true,
                                             modifier = Modifier
                                         ) {
-                                            matcher.include.forEachIndexed { tagIndex, tag ->
+                                            term.include.forEachIndexed { tagIndex, tag ->
                                                 Row(
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
@@ -499,11 +494,8 @@ fun editSearchesScreen() {
                                                         val searchesMutable = searchesCollected.toMutableList()
 
                                                         val mutableBoosts = search.terms.toMutableList()
-                                                        mutableBoosts[termIndex] = Term(
-                                                            matcher = matcher.copy(
-                                                                include = matcher.include - tag
-                                                            ),
-                                                            boost = boost
+                                                        mutableBoosts[termIndex] = term.copy(
+                                                            include = term.include - tag,
                                                         )
 
                                                         val newSearch = search.copy(

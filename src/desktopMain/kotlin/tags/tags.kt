@@ -203,10 +203,8 @@ suspend fun startTagsFileWatcher(queues: Queues) {
                             label = "Queue ${tag.name}",
                             terms = listOf(
                                 Term(
-                                    boost = 10.0,
-                                    matcher = TagMatcher(
-                                        include = setOf(tag)
-                                    )
+                                    boost = 1,
+                                    include = setOf(tag)
                                 )
                             )
                         )
