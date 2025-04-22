@@ -155,7 +155,7 @@ data class Tag(
 suspend fun startTagsFileWatcher(queues: Queues) {
     tagsFolder.mkdirs()
 
-    combine(presetsMap, queues.allQueues, customTagsMapping) { presetsMap, queues, customTagsMapping ->
+    combine(presetsMap, queues.presetQueues, customTagsMapping) { presetsMap, queues, customTagsMapping ->
         presetTagsMapping.value = presetsMap.mapValues { (_, entry) ->
 //            val categoryTag = entry.categoryPath.let { Tag(it, listOf("nestdrop")) }
 
@@ -166,16 +166,13 @@ suspend fun startTagsFileWatcher(queues: Queues) {
             val categoryTags = setOf(categoryTag)
 
             val queueTags = queues.values
-                .filter { it.type == QueueType.PRESET }
-//                .map { it as Queue<Preset.Milkdrop> }
                 .filter {
-//                    System.err.println(it.presets)
-                it.presets.any { it.name.endsWith(".milk") && it.name == entry.nameWithExtension }
-            }.map { Tag(it.name, listOf("queue")) }.toSet()
+                    it.presets.any { it.name.endsWith(".milk") && it.name == entry.nameWithExtension }
+                }.map { Tag(it.name, listOf("queue")) }.toSet()
 
             val customTags = customTagsMapping.filterValues { tagEntries ->
                 entry.name in tagEntries
-            }.keys // .map { (it.namespace + it.name).joinToString(":") }
+            }.keys
 //            val customCategories = customTagsKeys.filter { it.namespace.size > 1 }
 //                .map {
 //                    val name = it.namespace.last()

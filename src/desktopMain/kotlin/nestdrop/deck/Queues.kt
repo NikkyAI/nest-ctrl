@@ -75,12 +75,12 @@ sealed interface OSCQueueUpdate {
 
 
 class Queues {
-//    private val presetQueuesInternal = MutableStateFlow<Map<String, Queue<Preset.Milkdrop>>>(emptyMap())
-//    val presetQueues = presetQueuesInternal.asStateFlow()
-//    private val spriteQueuesInternal = MutableStateFlow<Map<String, Queue<Preset.ImageSprite>>>(emptyMap())
-//    val spriteQueues = spriteQueuesInternal.asStateFlow()
-//    private val spoutQueuesInternal = MutableStateFlow<Map<String, Queue<Preset.SpoutSprite>>>(emptyMap())
-//    val spoutQueues = spoutQueuesInternal.asStateFlow()
+    private val presetQueuesInternal = MutableStateFlow<Map<String, Queue<Preset.Milkdrop>>>(emptyMap())
+    val presetQueues = presetQueuesInternal.asStateFlow()
+    private val imgSpriteQueuesInternal = MutableStateFlow<Map<String, Queue<Preset.ImageSprite>>>(emptyMap())
+    val spriteQueues = imgSpriteQueuesInternal.asStateFlow()
+    private val spoutQueuesInternal = MutableStateFlow<Map<String, Queue<Preset.SpoutSprite>>>(emptyMap())
+    val spoutQueues = spoutQueuesInternal.asStateFlow()
 
 //    val allQueues = combine(
 //        presetQueues,
@@ -99,26 +99,14 @@ class Queues {
     private val allQueuesInternal = MutableStateFlow<Map<String, Queue<out Preset>>>(emptyMap())
     val allQueues = allQueuesInternal.asStateFlow()
 
-    fun spoutQueues() =    allQueues.map { queueMap ->
-        queueMap.values.filter { queue ->
-            queue.open &&
-//                    queue.deck == deckId &&
-                    queue.type == QueueType.SPRITE &&
-                    !queue.isFileExplorer &&
-                    queue.presets.all { it is nestdrop.Preset.SpoutSprite }
-        }.map {
-            it as Queue<Preset.SpoutSprite>
-        }
-    }
-
     val isInitialized = MutableStateFlow(false)
     private val logger = KotlinLogging.logger { }
 
 //    private val deckSwitches = List(20) { MutableStateFlow(0) }
 
-    //    private val presetQueuesFromConfig = MutableStateFlow<Map<String, Queue<Preset.Milkdrop>>>(emptyMap())
-//    private val imgSpriteQueuesFromConfig = MutableStateFlow<Map<String, Queue<Preset.ImageSprite>>>(emptyMap())
-//    private val spoutSpriteQueuesFromConfig = MutableStateFlow<Map<String, Queue<Preset.SpoutSprite>>>(emptyMap())
+    private val presetQueuesFromConfig = MutableStateFlow<Map<String, Queue<Preset.Milkdrop>>>(emptyMap())
+    private val imgSpriteQueuesFromConfig = MutableStateFlow<Map<String, Queue<Preset.ImageSprite>>>(emptyMap())
+    private val spoutSpriteQueuesFromConfig = MutableStateFlow<Map<String, Queue<Preset.SpoutSprite>>>(emptyMap())
     private val queuesFromConfig = MutableStateFlow<Map<String, Queue<out Preset>>>(emptyMap())
 
     fun updateQueues(
@@ -127,16 +115,15 @@ class Queues {
         spoutSpriteQueues: List<Queue<Preset.SpoutSprite>>,
     ) {
         imgSpriteQueues.forEach {
-            logger.info { "update IMG Queue from XML: $it" }
+            logger.info { "update IMG Queue: $it" }
         }
         spoutSpriteQueues.forEach {
-            logger.info { "update SPT Queue from XML: $it" }
+            logger.info { "update SPT Queue: $it" }
         }
-        queuesFromConfig.value =
-            (presetQueues + imgSpriteQueues + spoutSpriteQueues).associateBy { it.name.replace(" ", "_") }
-//        presetQueuesFromConfig.value = presetQueues.associateBy { it.name }
-//        imgSpriteQueuesFromConfig.value = imgSpriteQueues.associateBy { it.name }
-//        spoutSpriteQueuesFromConfig.value = spoutSpriteQueues.associateBy { it.name }
+        queuesFromConfig.value = (presetQueues + imgSpriteQueues + spoutSpriteQueues).associateBy { it.name.replace(" ", "_") }
+        presetQueuesFromConfig.value = presetQueues.associateBy { it.name }
+        imgSpriteQueuesFromConfig.value = imgSpriteQueues.associateBy { it.name }
+        spoutSpriteQueuesFromConfig.value = spoutSpriteQueues.associateBy { it.name }
     }
 
     val updateQueueMessages = Channel<OSCQueueUpdate>()
@@ -252,19 +239,40 @@ class Queues {
 
         combine(
             queuesFromConfig,
-//            presetQueuesFromConfig,
-//            imgSpriteQueuesFromConfig,
-//            spoutSpriteQueuesFromConfig,
+            presetQueuesFromConfig,
+            imgSpriteQueuesFromConfig,
+            spoutSpriteQueuesFromConfig,
 //            updateQueueMessages.consumeAsFlow(),
             updatesFlow.sample(100.milliseconds),
-        ) { queues, /*imgSprites, spoutSprites,*/ updatesMap ->
+        ) { queues, presetQueues, imgQueues, spoutQueues, updatesMap ->
             logger.info { "applying updates ${updatesMap.entries.joinToString(",", "{", "}") { "${it.key}: ${it.value}" }}" }
             allQueuesInternal.value = queues.mapValues { (name, queue) ->
                 updatesMap[name]?.let { update ->
                     queue.updateQueue(update)
                 } ?: queue
             }
-            logger.info { "written to $allQueuesInternal" }
+            logger.info { "written to allQueuesInternal" }
+
+            presetQueuesInternal.value = presetQueues.mapValues { (name, queue) ->
+                updatesMap[name]?.let { update ->
+                    queue.updateQueue(update)
+                } ?: queue
+            }
+            logger.info { "written to presetQueuesInternal" }
+
+            imgSpriteQueuesInternal.value = imgQueues.mapValues { (name, queue) ->
+                updatesMap[name]?.let { update ->
+                    queue.updateQueue(update)
+                } ?: queue
+            }
+            logger.info { "written to imgSpriteQueuesInternal" }
+
+            spoutQueuesInternal.value = spoutQueues.mapValues { (name, queue) ->
+                updatesMap[name]?.let { update ->
+                    queue.updateQueue(update)
+                } ?: queue
+            }
+            logger.info { "written to spoutQueues" }
 
 //            val queueUpdate = queues[updatesMap.name]?.updateQueue(updatesMap)
 //            val presetQueueUpdate = presets[update.name]?.updateQueue(update)

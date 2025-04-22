@@ -31,6 +31,7 @@ class NestdropSpriteQueue(
     private val nestdropSendChannel: Channel<OSCPacket>,
     private val spoutStateMap: StateFlow<Map<String, Deck.SpriteKey>>,
     private val queue: StateFlow<Queue<out Preset>?>,
+    private val matchFx: Boolean = true,
 ) {
     companion object {
         private val logger = KotlinLogging.logger { }
@@ -83,7 +84,7 @@ class NestdropSpriteQueue(
                             presetId(
                                 queue = queue,
                                 index = queue.presets.indexOfFirst { preset ->
-                                    preset.name == key.name && when(preset) {
+                                    preset.name == key.name && if(!matchFx) true else when(preset) {
                                         is Preset.Sprite -> {
                                             preset.effects == key.fx
                                         }

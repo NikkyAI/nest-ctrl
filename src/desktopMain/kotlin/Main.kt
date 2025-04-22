@@ -35,8 +35,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.debug.CoroutinesBlockHoundIntegration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -51,6 +53,8 @@ import nestdrop.loadNestdropConfig
 import nestdrop.setupSpriteFX
 import nestdrop.watchNestdropConfig
 import org.jetbrains.compose.resources.painterResource
+import osc.nestdropListenAddress
+import osc.nestdropSendAddress
 import osc.runNestDropSend
 import osc.startNestdropOSC
 import reactor.blockhound.BlockHound
@@ -58,6 +62,8 @@ import tags.startTagsFileWatcher
 import ui.App
 import ui.components.verticalScroll
 import utils.className
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
@@ -175,6 +181,26 @@ object Main {
                 .onEach { nestdropSettings ->
                     logger.info { "loading nestdrop config" }
                     loadNestdropConfig(nestdropSettings, queues, decks)
+                }
+                .launchIn(flowScope)
+
+            nestdropSettingsState.map { it.mainWindow.settingsGeneral.oscPort }
+                .distinctUntilChanged()
+                .onEach { oscPort ->
+                    nestdropSendAddress.value = InetSocketAddress(
+                        InetAddress.getLoopbackAddress(),
+                        oscPort
+                    )
+                }
+                .launchIn(flowScope)
+
+            nestdropSettingsState.map { it.mainWindow.settingsGeneral.oscOutputPort }
+                .distinctUntilChanged()
+                .onEach { oscOutputPort ->
+                    nestdropListenAddress.value = InetSocketAddress(
+                        InetAddress.getLoopbackAddress(),
+                        oscOutputPort
+                    )
                 }
                 .launchIn(flowScope)
         }

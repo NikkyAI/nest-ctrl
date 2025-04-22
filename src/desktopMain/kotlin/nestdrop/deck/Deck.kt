@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -39,7 +38,6 @@ import nestdrop.NestdropSpriteQueue
 import nestdrop.PresetIdState
 import nestdrop.PresetLocation
 import nestdrop.Queue
-import nestdrop.QueueType
 import nestdrop.imgFxMap
 import nestdrop.nestdropSetPreset
 import nestdrop.nestdropSetSprite
@@ -298,7 +296,7 @@ class Deck(
                         (lastBeat < triggerAt && currentBeat >= triggerAt) || (lastBeat > beatFrame && currentBeat >= triggerAt)
 
                     if (shouldTrigger) {
-                        logger.debug { "$deckName triggered at $currentBeat $triggerAt" }
+//                        logger.debug { "$deckName triggered at $currentBeat $triggerAt" }
                         switchingLocked.emit(true)
                         flowScope.launch {
                             val transitionTime = ndTime.transitionTime.value.toDouble().seconds
@@ -913,7 +911,9 @@ class Deck(
         suspend fun startFlows() {
             logger.info { "starting coroutines on $deckName spout-queue" }
 
-            val spoutQueues = QUEUES.spoutQueues().map { it.filter { it.deck == id } }
+            val spoutQueues = QUEUES.spoutQueues.map { queueMap ->
+                queueMap.values.filter { queue -> queue.open }
+            }.map { it.filter { it.deck == id } }
             index
 //                .combine(resyncToTouchOSC) { a, _ -> a }
                 .combine(spoutQueues) { index, queues ->
@@ -944,14 +944,14 @@ class Deck(
 
 //        val spriteTargetKey = MutableStateFlow<SpriteKey?>(null)
 
-        private val nestdropSpout = NestdropSpriteQueue(
+        private val spoutState = NestdropSpriteQueue(
             nestdropSendChannel,
             spriteState.spoutStates,
             spoutQueue
         )
 
         suspend fun setSpout(index: Int) {
-            nestdropSpout.send(
+            spoutState.send(
                 PresetIdState.Data(
                     index = index,
 //                    queue = queue, // as Queue<nestdrop.Preset>,
@@ -961,12 +961,12 @@ class Deck(
         }
 
         suspend fun clearSpout() {
-            nestdropSpout.send(PresetIdState.Unset)
+            spoutState.send(PresetIdState.Unset)
         }
 
         suspend fun startFlows() {
             logger.info { "starting coroutines on $deckName spout" }
-            nestdropSpout.startFlows()
+            spoutState.startFlows()
         }
 
         private suspend fun setSpoutFx(rawFx: Int) {

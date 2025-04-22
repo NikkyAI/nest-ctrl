@@ -114,7 +114,7 @@ data class NestdropSettings(
             @SerialName("OscPort")
             val oscPort: Int = 8000,
             @SerialName("OscOutputPort")
-            val oscOutputPort: String,
+            val oscOutputPort: Int,
             @SerialName("OscOutputIp")
             val oscOutputIp: String, // = "127.0.0.1",
             @SerialName("AutoChangeInstant")

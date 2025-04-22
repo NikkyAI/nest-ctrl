@@ -11,9 +11,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
-import nestdrop.Preset
-import nestdrop.Queue
-import nestdrop.QueueType
 import tags.nestdropQueueSearches
 import tags.queueTagsInitialized
 import ui.screens.customSearches
@@ -56,12 +53,14 @@ suspend fun Deck.applyConfig(deckConfig: DeckConfig) = measureTimedValue {
             logger.debug { "loading spoutQueue on $deckName" }
             val spoutSpriteQueuesValue = measureTimedValue {
                 withTimeoutOrNull(10.seconds) {
-                    QUEUES.spoutQueues().map { it.filter { it.deck == id } }
-                    .first {
-                        it
-                            .also { logger.debug { "spoutSpritesQueue: $it" } }
-                            .isNotEmpty()
-                    }
+                    QUEUES.spoutQueues.map { queueMap ->
+                        queueMap.values.filter { queue -> queue.open }
+                    }.map { it.filter { it.deck == id } }
+                        .first {
+                            it
+                                .also { logger.debug { "spoutSpritesQueue: $it" } }
+                                .isNotEmpty()
+                        }
 //                    spoutSpriteQueues.first {
 //                        it
 //                            .also { logger.debug { "spoutSpritesQueue: $it" } }
