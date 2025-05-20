@@ -2,13 +2,9 @@
 -keep @kotlin.coroutines.jvm.internal.DebugMetadata class * { *; }
 -keep @dev.reformator.stacktracedecoroutinator.provider.DecoroutinatorTransformed class * { *; }
 
-
-
 # from: https://github.com/java-native-access/jna/issues/1187#issuecomment-626251894
 -keep class com.sun.jna.** { *; }
 -keep class * implements com.sun.jna.** { *; }
-
-
 
 # from: https://github.com/JetBrains/compose-multiplatform/issues/4883#issuecomment-2156012785
 -keep class androidx.compose.runtime.** { *; }
@@ -20,9 +16,7 @@
 -dontwarn androidx.compose.material.**
 
 # Kotlinx coroutines rules seems to be outdated with the latest version of Kotlin and Proguard
--keep class kotlinx.coroutines.** { *; }
-
-
+### -keep class kotlinx.coroutines.** { *; }
 
 # from: https://github.com/Kotlin/kotlinx.serialization/issues/2719#issuecomment-2189193638
 -keepclassmembers public class **$$serializer {
@@ -32,16 +26,9 @@
 # attempting to fix json5k
 -keep class io.github.xn32.json5k.** { *; }
 
-# -keepattributes *Annotation*
-
-# -keepclassmembers public class **$$serializer$annotationImpl$** {
-#     private ** value;
-#     private ** namespace;
-#     private ** prefix;
-# }
-#
-#
-# -keep @nl.adaptivity.xmlutil.serialization.XmlSerialName public class *
+# Ktor
+-keep class io.ktor.client.engine.java.** { *; }
+-keep class io.ktor.serialization.kotlinx.json.** { *; }
 
 ## remove some stupid warnings for things we do not use
 -dontwarn jakarta.**

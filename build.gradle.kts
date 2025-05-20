@@ -94,7 +94,6 @@ kotlin {
 //            api("dev.atsushieno:libremidi-javacpp-platform:_")
 
             implementation("io.github.pdvrieze.xmlutil:serialization:_")
-//            implementation("com.ryanharter.kotlinx.serialization:kotlinx-serialization-xml:_")
             implementation("io.github.xn32:json5k:_")
             implementation( "com.akuleshov7:ktoml-core:_")
 
@@ -181,10 +180,10 @@ compose.desktop {
     application {
         buildTypes.release {
             proguard {
+                // version = "7.7.0"
                 // isEnabled = false
-                version = "7.7.0"
-//                optimize = false
-//                obfuscate = false
+                // optimize = false
+                // obfuscate = false
 
                 configurationFiles.from(
                     project.file("compose-desktop.pro")
