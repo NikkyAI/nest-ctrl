@@ -58,6 +58,7 @@ import utils.className
 import utils.runningHistory
 import utils.runningHistoryNotNull
 import kotlin.math.roundToInt
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -318,6 +319,7 @@ class Deck(
 
     val presetSwitching = PresetSwitching()
 
+    private val random = Random(42)
 
     suspend fun startFlows() {
         logger.info { "starting coroutines for $deckName" }
@@ -360,7 +362,8 @@ class Deck(
     inner class Search {
 
         val label = MutableStateFlow<String?>(null)
-//        val enabledFragments = MutableStateFlow<Set<String>>(emptySet())
+
+        //        val enabledFragments = MutableStateFlow<Set<String>>(emptySet())
         private val currentMutable = MutableStateFlow<PresetPlaylist?>(null)
         val current = currentMutable.asStateFlow()
 
@@ -450,34 +453,89 @@ class Deck(
                         val score = search.score(tags)
 //                val preset = presets[key]
                         if (score > 0.0) {
-                            preset to (score)
+                            preset to score
                         } else {
                             null
                         }
-                    }.toMap()
+                    }//.toMap()
 
-                    val folder = queueFolder.resolve("deck_$id").also {
+                    queueFolder.resolve("deck_$id").also {
                         it.mkdirs()
-                    }
-                    folder.listFiles()?.forEach { it.deleteRecursively() }
+                    }.let { folder ->
 
-                    filtered.mapValues { it.value }.forEach { (location, weight) ->
-                        val presetFile = presetsFolder.resolve(location.path)
-                        val previewFile = presetsFolder.resolve(location.previewPath)
-                        if (weight == 1) {
-                            val targetFolder = folder.resolve(location.path).parentFile!!
-                            targetFolder.mkdirs()
-                            targetFolder.resolve(presetFile.name).also {
-                                presetFile.copyTo(it)
+                        folder.listFiles()?.forEach { it.deleteRecursively() }
+
+                        filtered
+                            .toList()
+                            .ifEmpty {
+                                logger.warn { "$deckName search resulted in empty result, falling back to default presets to avoid bugs" }
+                                presets.values.filter {
+                                    it.categoryPath.last() == "! Transition"
+                                }.map { it to 1 }
+                            }.forEach { (location, weight) ->
+                            val presetFile = presetsFolder.resolve(location.path)
+                            val previewFile = presetsFolder.resolve(location.previewPath)
+                            if (weight == 1) {
+                                val targetFolder = folder.resolve(location.path).parentFile!!
+                                targetFolder.mkdirs()
+                                targetFolder.resolve(presetFile.name).also {
+                                    presetFile.copyTo(it)
+                                }
+                                targetFolder.resolve(previewFile.name).also {
+                                    previewFile.copyTo(it)
+                                }
+                            } else {
+                                repeat(weight) { i ->
+                                    val targetFolder = folder
+                                        .resolve(location.path).parentFile!!
+                                        .resolve("${location.name}_$i")
+                                    targetFolder.mkdirs()
+                                    targetFolder.resolve(presetFile.name).also {
+                                        presetFile.copyTo(it)
+                                    }
+                                    targetFolder.resolve(previewFile.name).also {
+                                        previewFile.copyTo(it)
+                                    }
+                                }
                             }
-                            targetFolder.resolve(previewFile.name).also {
-                                previewFile.copyTo(it)
+                        }
+                        nestdropPortSend(
+                            OSCMessage("/Queue/<${folder.name}>/Refresh", 1)
+                        )
+                    }
+
+                    queueFolder.resolve("deck_${id}_randomized").also {
+                        it.mkdirs()
+                    }.let { folder ->
+                        folder.listFiles()?.forEach { it.deleteRecursively() }
+
+                        val randomizedPresets = filtered
+                            .toList()
+                            .flatMap { (location, weight) ->
+                                List(weight) { location }
                             }
-                        } else {
-                            repeat(weight) { i ->
-                                val targetFolder = folder
-                                    .resolve(location.path).parentFile!!
-                                    .resolve("${location.name}_$i")
+                            .ifEmpty {
+                                logger.warn { "$deckName search resulted in empty result, falling back to default presets to avoid bugs" }
+                                presets.values.filter {
+                                    it.categoryPath.last() == "! Transition"
+                                }
+                            }
+                            .shuffled(random)
+
+                        val prefixLength = when(randomizedPresets.size) {
+                            in 0..9 -> 1
+                            in 10..99 -> 2
+                            in 100..999 -> 3
+                            in 1000..9999 -> 4
+                            else -> 5
+                        }
+                        randomizedPresets
+                            .forEachIndexed { i, location ->
+                                val presetFile = presetsFolder.resolve(location.path)
+                                val previewFile = presetsFolder.resolve(location.previewPath)
+                                val prefix = i.toString().padStart(prefixLength, '0')
+                                val targetFolder = folder.resolve("$prefix - ${location.name}")
+
                                 targetFolder.mkdirs()
                                 targetFolder.resolve(presetFile.name).also {
                                     presetFile.copyTo(it)
@@ -486,27 +544,11 @@ class Deck(
                                     previewFile.copyTo(it)
                                 }
                             }
-                        }
+
+                        nestdropPortSend(
+                            OSCMessage("/Queue/<${folder.name}>/Refresh", 1)
+                        )
                     }
-                    if(filtered.isEmpty()) {
-                        presets.values.filter {
-                            it.categoryPath.last() == "! Transition"
-                        }.forEach { location ->
-                            val presetFile = presetsFolder.resolve(location.path)
-                            val previewFile = presetsFolder.resolve(location.previewPath)
-                            val targetFolder = folder.resolve(location.path).parentFile!!
-                            targetFolder.mkdirs()
-                            targetFolder.resolve(presetFile.name).also {
-                                presetFile.copyTo(it)
-                            }
-                            targetFolder.resolve(previewFile.name).also {
-                                previewFile.copyTo(it)
-                            }
-                        }
-                    }
-                    nestdropPortSend(
-                        OSCMessage("/Queue/<${folder.name}>/Refresh", 1)
-                    )
                 }
                 .flowOn(Dispatchers.IO)
                 .launchIn(flowScope)
